@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { desc, eq } from 'drizzle-orm'
 import { db } from '@/db/client'
-import { customers, orders } from '@/db/schema'
+import { customers, orders, adminUsers } from '@/db/schema'
 import { OrderLookup } from '@/components/account/OrderLookup'
 import { SocialLoginButtons } from '@/components/account/SocialLoginButtons'
 import { getCustomerSession } from '@/lib/customer-session'
@@ -88,7 +88,7 @@ async function DashboardView({ customerId }: { customerId: string }) {
 
   if (!customer) return <LoggedOutView />
 
-  const [recentOrders, referralCode, allOrders] = await Promise.all([
+  const [recentOrders, referralCode, allOrders, adminMatch] = await Promise.all([
     db
       .select()
       .from(orders)
@@ -100,7 +100,14 @@ async function DashboardView({ customerId }: { customerId: string }) {
       .select({ id: orders.id })
       .from(orders)
       .where(eq(orders.customerId, customerId)),
+    db
+      .select({ role: adminUsers.role })
+      .from(adminUsers)
+      .where(eq(adminUsers.email, customer.email))
+      .limit(1),
   ])
+
+  const adminRole = adminMatch[0]?.role ?? null
 
   const totalOrders = allOrders.length
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
@@ -126,6 +133,25 @@ async function DashboardView({ customerId }: { customerId: string }) {
           </button>
         </form>
       </header>
+
+      {adminRole && (
+        <div className="mb-8 bg-ink text-cream rounded-lg p-5 flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-widest opacity-70 mb-1">
+              Staff Mode · {adminRole}
+            </p>
+            <p className="text-sm">
+              你的 Email 也是後台管理員。後台需要另外用 Email + 密碼登入。
+            </p>
+          </div>
+          <Link
+            href="/admin"
+            className="bg-cream text-ink px-4 py-2 rounded-md text-sm hover:bg-accent hover:text-cream transition-colors whitespace-nowrap"
+          >
+            進入後台 →
+          </Link>
+        </div>
+      )}
 
       <div className="grid sm:grid-cols-3 gap-4 mb-10">
         <DashCard
