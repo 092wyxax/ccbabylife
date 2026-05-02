@@ -1,8 +1,6 @@
 import type { Metadata } from 'next'
 import { Noto_Sans_TC, Noto_Serif_TC } from 'next/font/google'
 import './globals.css'
-import { Header } from '@/components/shared/Header'
-import { Footer } from '@/components/shared/Footer'
 
 const notoSans = Noto_Sans_TC({
   variable: '--font-noto-sans',
@@ -31,11 +29,7 @@ export default function RootLayout({
       lang="zh-Hant"
       className={`${notoSans.variable} ${notoSerif.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-cream text-ink">
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-      </body>
+      <body className="min-h-full bg-cream text-ink">{children}</body>
     </html>
   )
 }

@@ -125,7 +125,9 @@ export default async function ProductDetailPage({ params }: Props) {
 
           {product.useExperience && (
             <section className="mt-8 p-6 bg-cream-100 rounded-md border border-line">
-              <h2 className="font-serif text-lg mb-3">我家娃使用心得</h2>
+              <h2 className="font-serif text-lg mb-3">
+                {product.minAgeMonths != null ? '我家娃使用心得' : '使用心得'}
+              </h2>
               <p className="text-sm leading-relaxed text-ink/90 whitespace-pre-wrap">
                 {product.useExperience}
               </p>

@@ -51,8 +51,19 @@ pnpm db:generate      # 產 Drizzle migration
 pnpm db:migrate       # 套用 migration 到 DB
 pnpm db:check         # 驗證 schema 與 migration 一致
 pnpm db:studio        # 開 Drizzle Studio
-pnpm db:seed          # 灌入預設組織
+pnpm db:seed          # 灌入預設組織 + 8 件 sample 商品
+pnpm admin:create     # 建立後台帳號（需傳參，見下方）
 ```
+
+## 建立第一個後台帳號
+
+```bash
+pnpm admin:create you@example.com 'YourPassword123' '你的名字' owner
+```
+
+第三個參數 role 可選 `owner` / `admin` / `partner`（預設 owner）。
+
+之後到 `http://localhost:3000/admin/login` 用這組 email + 密碼登入。
 
 ## 開發紀律
 
