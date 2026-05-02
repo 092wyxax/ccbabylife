@@ -5,11 +5,15 @@ import { ProductGrid } from '@/components/shop/ProductGrid'
 import { NewsletterForm } from '@/components/shared/NewsletterForm'
 import { imageUrl } from '@/lib/image'
 
-const AGE_GROUPS = [
-  { label: '0–6 個月', emoji: '👶', href: '/recommend' },
-  { label: '6–12 個月', emoji: '🍼', href: '/recommend' },
-  { label: '1–2 歲', emoji: '🧸', href: '/recommend' },
-  { label: '寵物', emoji: '🐶', href: '/shop?category=pet-supplies' },
+const QUICK_CATEGORIES = [
+  { label: '0–6 個月', en: 'Newborn', href: '/recommend' },
+  { label: '6–12 個月', en: 'Baby', href: '/recommend' },
+  { label: '1–2 歲', en: 'Toddler', href: '/recommend' },
+  { label: '2 歲以上', en: 'Kids', href: '/recommend' },
+  { label: '彌月送禮', en: 'Gift Guide', href: '/gift-guide' },
+  { label: '日常消耗品', en: 'Daily Essentials', href: '/shop?category=baby-essentials' },
+  { label: '寵物用品', en: 'For Pets', href: '/shop?category=pet-supplies' },
+  { label: '新到貨', en: 'Just In', href: '/shop' },
 ]
 
 const VALUE_PROPS = [
@@ -93,23 +97,38 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="border-b border-line bg-cream-100">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10">
-          <p className="text-xs uppercase tracking-widest text-ink-soft mb-4 text-center">
-            從寶寶月齡開始挑
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {AGE_GROUPS.map((g) => (
-              <Link
-                key={g.label}
-                href={g.href}
-                className="bg-white border border-line rounded-lg p-4 text-center hover:border-ink transition-colors"
-              >
-                <div className="text-3xl mb-1">{g.emoji}</div>
-                <p className="text-sm font-medium">{g.label}</p>
-              </Link>
+      <section className="border-b border-line">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-12">
+          <header className="flex items-baseline justify-between mb-8">
+            <div>
+              <p className="text-xs uppercase tracking-widest text-ink-soft mb-1">
+                Browse
+              </p>
+              <h2 className="font-serif text-xl sm:text-2xl">依需求快速逛</h2>
+            </div>
+            <Link href="/shop" className="text-sm text-ink-soft hover:text-accent">
+              全部 →
+            </Link>
+          </header>
+
+          <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px bg-line border border-line rounded-lg overflow-hidden">
+            {QUICK_CATEGORIES.map((c, i) => (
+              <li key={c.label}>
+                <Link
+                  href={c.href}
+                  className="group block bg-cream hover:bg-cream-100 transition-colors h-full p-5 sm:p-6"
+                >
+                  <p className="font-serif text-2xl text-accent/40 group-hover:text-accent transition-colors mb-2">
+                    {String(i + 1).padStart(2, '0')}
+                  </p>
+                  <p className="font-medium text-base mb-1">{c.label}</p>
+                  <p className="text-[10px] tracking-[0.15em] uppercase text-ink-soft">
+                    {c.en}
+                  </p>
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </section>
 
