@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { getPostBySlug } from '@/server/services/JournalService'
 import { imageUrl } from '@/lib/image'
 import { renderMarkdown } from '@/lib/markdown'
+import { articleLd, breadcrumbLd, jsonLdScript } from '@/lib/jsonld'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -23,8 +24,29 @@ export default async function JournalDetailPage({ params }: Props) {
   const post = await getPostBySlug(slug)
   if (!post) notFound()
 
+  const ldArticle = articleLd({
+    slug: post.slug,
+    title: post.title,
+    excerpt: post.excerpt,
+    publishedAt: post.publishedAt,
+    heroImageUrl: post.heroImage ? imageUrl(post.heroImage) : null,
+  })
+  const crumbs = breadcrumbLd([
+    { name: '首頁', href: '/' },
+    { name: '部落格', href: '/journal' },
+    { name: post.title, href: `/journal/${post.slug}` },
+  ])
+
   return (
     <article className="mx-auto max-w-3xl px-4 sm:px-6 py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(ldArticle) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(crumbs) }}
+      />
       <nav className="text-xs text-ink-soft mb-6">
         <Link href="/journal" className="hover:text-ink">娃媽真心話</Link>
       </nav>

@@ -4,6 +4,11 @@ import { getProductBySlug } from '@/server/services/ProductService'
 import { formatTwd, formatJpy, formatAgeRange } from '@/lib/format'
 import { imageUrl } from '@/lib/image'
 import { AddToCartButton } from '@/components/shop/AddToCartButton'
+import {
+  productLd,
+  breadcrumbLd,
+  jsonLdScript,
+} from '@/lib/jsonld'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -28,8 +33,34 @@ export default async function ProductDetailPage({ params }: Props) {
   const ageLabel = formatAgeRange(product.minAgeMonths, product.maxAgeMonths)
   const isPreorder = product.stockType === 'preorder'
 
+  const inStock =
+    product.stockType === 'in_stock' && product.stockQuantity > 0
+  const ldData = productLd({
+    slug: product.slug,
+    nameZh: product.nameZh,
+    nameJp: product.nameJp,
+    description: product.description,
+    priceTwd: product.priceTwd,
+    brand: brand?.nameZh ?? null,
+    imageUrls: images.map((i) => imageUrl(i.cfImageId)),
+    inStock,
+  })
+  const crumbs = breadcrumbLd([
+    { name: '首頁', href: '/' },
+    { name: '所有選物', href: '/shop' },
+    { name: product.nameZh, href: `/shop/${product.slug}` },
+  ])
+
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(ldData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(crumbs) }}
+      />
       <nav className="text-xs text-ink-soft mb-8">
         <Link href="/shop" className="hover:text-ink">所有選物</Link>
         {category && (

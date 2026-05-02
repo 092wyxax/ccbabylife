@@ -43,14 +43,22 @@ export default async function MyOrdersPage() {
             登入身份：{customer.name ?? customer.email}
           </p>
         </div>
-        <form action={logoutAccountAction}>
-          <button
-            type="submit"
-            className="text-xs text-ink-soft hover:text-danger underline"
+        <div className="flex flex-col items-end gap-2">
+          <Link
+            href="/account/settings"
+            className="text-xs text-ink-soft hover:text-accent underline"
           >
-            登出
-          </button>
-        </form>
+            帳號設定
+          </Link>
+          <form action={logoutAccountAction}>
+            <button
+              type="submit"
+              className="text-xs text-ink-soft hover:text-danger underline"
+            >
+              登出
+            </button>
+          </form>
+        </div>
       </header>
 
       {myOrders.length === 0 ? (

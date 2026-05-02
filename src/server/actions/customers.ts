@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { requireAdmin } from '@/server/services/AdminAuthService'
 import { updateCustomer } from '@/server/services/CustomerService'
+import { recordAudit } from '@/server/services/AuditService'
 
 export type CustomerActionState = { error?: string; success?: string }
 
@@ -49,11 +50,22 @@ export async function setBlacklistAction(
   _prev: CustomerActionState,
   formData: FormData
 ): Promise<CustomerActionState> {
-  await requireAdmin()
+  const admin = await requireAdmin()
   const isBlacklisted = formData.get('isBlacklisted') === 'true'
   blacklistSchema.parse({ isBlacklisted })
 
   await updateCustomer(customerId, { isBlacklisted })
+
+  await recordAudit({
+    actorType: 'admin',
+    actorId: admin.id,
+    actorLabel: admin.name,
+    action: isBlacklisted ? 'customer.blacklist.add' : 'customer.blacklist.remove',
+    entityType: 'customer',
+    entityId: customerId,
+    data: { isBlacklisted },
+  })
+
   revalidatePath('/admin/customers')
   revalidatePath(`/admin/customers/${customerId}`)
   return {
@@ -72,7 +84,7 @@ export async function adjustStoreCreditAction(
   _prev: CustomerActionState,
   formData: FormData
 ): Promise<CustomerActionState> {
-  await requireAdmin()
+  const admin = await requireAdmin()
   const parsed = creditSchema.safeParse({
     delta: formData.get('delta'),
     reason: formData.get('reason') ?? '',
@@ -83,6 +95,21 @@ export async function adjustStoreCreditAction(
 
   const next = Math.max(0, parsed.data.currentCredit + parsed.data.delta)
   await updateCustomer(customerId, { storeCredit: next })
+
+  await recordAudit({
+    actorType: 'admin',
+    actorId: admin.id,
+    actorLabel: admin.name,
+    action: 'customer.store_credit.adjust',
+    entityType: 'customer',
+    entityId: customerId,
+    data: {
+      delta: parsed.data.delta,
+      before: parsed.data.currentCredit,
+      after: next,
+      reason: parsed.data.reason || null,
+    },
+  })
 
   revalidatePath('/admin/customers')
   revalidatePath(`/admin/customers/${customerId}`)

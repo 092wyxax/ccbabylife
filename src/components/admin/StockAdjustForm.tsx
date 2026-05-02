@@ -24,7 +24,13 @@ export function StockAdjustForm({ productId, currentQuantity }: Props) {
         type="number"
         min={0}
         defaultValue={currentQuantity}
-        className="w-20 border border-line rounded-md px-2 py-1 text-sm text-right"
+        className="w-16 border border-line rounded-md px-2 py-1 text-sm text-right"
+      />
+      <input
+        name="reason"
+        type="text"
+        placeholder="原因"
+        className="w-28 border border-line rounded-md px-2 py-1 text-xs text-ink-soft"
       />
       <button
         type="submit"

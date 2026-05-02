@@ -9,7 +9,9 @@ import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import {
   setCustomerSession,
   clearCustomerSession,
+  getCustomerSession,
 } from '@/lib/customer-session'
+import { revalidatePath } from 'next/cache'
 
 const lookupSchema = z.object({
   orderNumber: z.string().min(1, '請填訂單編號'),
@@ -68,4 +70,41 @@ export async function lookupOrderAction(
 export async function logoutAccountAction(): Promise<void> {
   await clearCustomerSession()
   redirect('/account')
+}
+
+const prefsSchema = z.object({
+  line: z.coerce.boolean(),
+  email: z.coerce.boolean(),
+})
+
+export type PrefsState = { error?: string; success?: string }
+
+export async function updateNotificationPrefsAction(
+  _prev: PrefsState,
+  formData: FormData
+): Promise<PrefsState> {
+  const session = await getCustomerSession()
+  if (!session) return { error: '請先登入' }
+
+  const parsed = prefsSchema.safeParse({
+    line: formData.get('line') === 'on',
+    email: formData.get('email') === 'on',
+  })
+  if (!parsed.success) return { error: '輸入錯誤' }
+
+  await db
+    .update(customers)
+    .set({
+      notificationPrefs: parsed.data,
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(customers.id, session.customerId),
+        eq(customers.orgId, DEFAULT_ORG_ID)
+      )
+    )
+
+  revalidatePath('/account/settings')
+  return { success: '已更新通知偏好' }
 }

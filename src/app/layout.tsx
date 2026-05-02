@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Noto_Sans_TC, Noto_Serif_TC } from 'next/font/google'
 import './globals.css'
+import { organizationLd, websiteLd, jsonLdScript } from '@/lib/jsonld'
 
 const notoSans = Noto_Sans_TC({
   variable: '--font-noto-sans',
@@ -29,7 +30,17 @@ export default function RootLayout({
       lang="zh-Hant"
       className={`${notoSans.variable} ${notoSerif.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-cream text-ink">{children}</body>
+      <body className="min-h-full bg-cream text-ink">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(organizationLd()) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(websiteLd()) }}
+        />
+        {children}
+      </body>
     </html>
   )
 }

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { requireAdmin } from '@/server/services/AdminAuthService'
 import { changeStatus } from '@/server/services/OrderService'
+import { recordAudit } from '@/server/services/AuditService'
 import { orderStatusEnum } from '@/db/schema'
 import { InvalidStatusTransitionError } from '@/lib/order-state-machine'
 
@@ -36,6 +37,19 @@ export async function changeOrderStatusAction(
       admin,
       parsed.data.reason || undefined
     )
+    await recordAudit({
+      actorType: 'admin',
+      actorId: admin.id,
+      actorLabel: admin.name,
+      action: 'order.status.change',
+      entityType: 'order',
+      entityId: orderId,
+      data: {
+        from: result.from,
+        to: result.to,
+        reason: parsed.data.reason || null,
+      },
+    })
     revalidatePath('/admin/orders')
     revalidatePath(`/admin/orders/${orderId}`)
     revalidatePath(`/track/${orderId}`)
