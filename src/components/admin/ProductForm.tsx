@@ -9,13 +9,13 @@ interface Props {
   brands: Brand[]
   categories: Category[]
   product?: Product
-  imageUrl?: string | null
+  imageUrls?: string[]
   action: (prevState: ProductFormState, formData: FormData) => Promise<ProductFormState>
 }
 
 const initialState: ProductFormState = {}
 
-export function ProductForm({ mode, brands, categories, product, imageUrl, action }: Props) {
+export function ProductForm({ mode, brands, categories, product, imageUrls, action }: Props) {
   const [state, formAction, pending] = useActionState(action, initialState)
   const errs = state.fieldErrors ?? {}
 
@@ -156,14 +156,14 @@ export function ProductForm({ mode, brands, categories, product, imageUrl, actio
         />
       </Section>
 
-      <Section title="圖片">
-        <Field
-          label="圖片 URL"
-          name="imageUrl"
-          type="url"
-          defaultValue={imageUrl ?? ''}
-          hint="目前直接貼 URL（Unsplash / Imgur 等）。Phase 1a Week 3 會接 Cloudflare Images 上傳。"
-          error={errs.imageUrl}
+      <Section title="商品圖片">
+        <Textarea
+          label="圖片 URL（每行一張，第一張為主圖）"
+          name="imageUrls"
+          rows={4}
+          defaultValue={imageUrls?.join('\n') ?? ''}
+          hint="一行一張 URL；第一張顯示在商品卡與詳情頁主圖。Phase 1a Week 3 會接 Cloudflare Images 上傳。"
+          error={errs.imageUrls}
         />
       </Section>
 

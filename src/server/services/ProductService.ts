@@ -21,8 +21,34 @@ export interface ProductListItem {
 
 export async function listActiveProducts(opts?: {
   limit?: number
+  categorySlug?: string
+  stockType?: 'preorder' | 'in_stock'
 }): Promise<ProductListItem[]> {
   const limit = opts?.limit ?? 60
+
+  const conditions = [
+    eq(products.orgId, DEFAULT_ORG_ID),
+    eq(products.status, 'active'),
+  ]
+
+  if (opts?.categorySlug) {
+    const cat = await db
+      .select()
+      .from(categories)
+      .where(
+        and(
+          eq(categories.orgId, DEFAULT_ORG_ID),
+          eq(categories.slug, opts.categorySlug)
+        )
+      )
+      .limit(1)
+    if (cat[0]) conditions.push(eq(products.categoryId, cat[0].id))
+    else return []
+  }
+
+  if (opts?.stockType) {
+    conditions.push(eq(products.stockType, opts.stockType))
+  }
 
   const rows = await db
     .select({
@@ -37,12 +63,7 @@ export async function listActiveProducts(opts?: {
         eq(productImages.isPrimary, true)
       )
     )
-    .where(
-      and(
-        eq(products.orgId, DEFAULT_ORG_ID),
-        eq(products.status, 'active')
-      )
-    )
+    .where(and(...conditions))
     .orderBy(desc(products.salesCount), desc(products.createdAt))
     .limit(limit)
 
@@ -156,18 +177,22 @@ export async function archiveProduct(id: string): Promise<Product> {
   return updateProduct(id, { status: 'archived' })
 }
 
-export async function setProductImage(productId: string, imageUrl: string) {
+export async function setProductImages(productId: string, imageUrls: string[]) {
   await db
     .delete(productImages)
     .where(eq(productImages.productId, productId))
 
-  await db.insert(productImages).values({
-    orgId: DEFAULT_ORG_ID,
-    productId,
-    cfImageId: imageUrl,
-    isPrimary: true,
-    sortOrder: 0,
-  })
+  if (imageUrls.length === 0) return
+
+  await db.insert(productImages).values(
+    imageUrls.map((url, index) => ({
+      orgId: DEFAULT_ORG_ID,
+      productId,
+      cfImageId: url,
+      isPrimary: index === 0,
+      sortOrder: index,
+    }))
+  )
 }
 
 function enforceLegalGuard(input: Partial<ProductInput>) {

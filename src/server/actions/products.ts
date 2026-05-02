@@ -8,7 +8,7 @@ import {
   createProduct,
   updateProduct,
   archiveProduct,
-  setProductImage,
+  setProductImages,
 } from '@/server/services/ProductService'
 import { productStockTypeEnum, productStatusEnum } from '@/db/schema'
 
@@ -32,8 +32,16 @@ const productInputSchema = z.object({
   sourceUrl: z.string().url().optional().or(z.literal('')),
   legalCheckPassed: z.coerce.boolean(),
   legalNotes: z.string().optional().or(z.literal('')),
-  imageUrl: z.string().url().optional().or(z.literal('')),
+  imageUrls: z.string().optional().or(z.literal('')),
 })
+
+function parseImageUrls(input: string | undefined): string[] {
+  if (!input) return []
+  return input
+    .split(/\r?\n/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0)
+}
 
 export type ProductFormState = {
   error?: string
@@ -93,8 +101,9 @@ export async function createProductAction(
     const fields = normalize(parsed.data)
     const product = await createProduct(fields)
     productId = product.id
-    if (parsed.data.imageUrl) {
-      await setProductImage(productId, parsed.data.imageUrl)
+    const urls = parseImageUrls(parsed.data.imageUrls)
+    if (urls.length > 0) {
+      await setProductImages(productId, urls)
     }
   } catch (e) {
     return { error: e instanceof Error ? e.message : String(e) }
@@ -126,9 +135,8 @@ export async function updateProductAction(
   try {
     const fields = normalize(parsed.data)
     await updateProduct(productId, fields)
-    if (parsed.data.imageUrl) {
-      await setProductImage(productId, parsed.data.imageUrl)
-    }
+    const urls = parseImageUrls(parsed.data.imageUrls)
+    await setProductImages(productId, urls)
   } catch (e) {
     return { error: e instanceof Error ? e.message : String(e) }
   }

@@ -35,7 +35,7 @@ export default async function EditProductPage({ params }: Props) {
     .from(productImages)
     .where(and(eq(productImages.productId, id), eq(productImages.orgId, DEFAULT_ORG_ID)))
     .orderBy(asc(productImages.sortOrder))
-  const primaryImageUrl = images.find((i) => i.isPrimary)?.cfImageId ?? images[0]?.cfImageId ?? null
+  const imageUrls = images.map((i) => i.cfImageId)
 
   // Bind id into the action so the form receives a (state, formData) shaped action
   const boundUpdate = async (
@@ -90,7 +90,7 @@ export default async function EditProductPage({ params }: Props) {
         product={product}
         brands={brands}
         categories={categories}
-        imageUrl={primaryImageUrl}
+        imageUrls={imageUrls}
         action={boundUpdate}
       />
     </div>
