@@ -15,6 +15,13 @@
       "when": 1777720482349,
       "tag": "0001_blushing_vertigo",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1777726111406,
+      "tag": "0002_stiff_toro",
+      "breakpoints": true
     }
   ]
 }
