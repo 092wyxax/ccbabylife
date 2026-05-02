@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { eq, and, asc } from 'drizzle-orm'
 import { db } from '@/db/client'
-import { productImages } from '@/db/schema'
+import { productImages, type Product } from '@/db/schema'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import {
   getProductById,
@@ -59,7 +59,7 @@ export default async function EditProductPage({ params }: Props) {
         <span>{product.nameZh}</span>
       </nav>
 
-      <div className="flex items-start justify-between mb-8 pb-4 border-b border-line">
+      <div className="flex items-start justify-between mb-4 pb-4 border-b border-line">
         <div>
           <h1 className="font-serif text-2xl mb-1">{product.nameZh}</h1>
           <p className="text-ink-soft text-sm">
@@ -85,6 +85,8 @@ export default async function EditProductPage({ params }: Props) {
         )}
       </div>
 
+      <StatusBanner status={product.status} hasImages={imageUrls.length > 0} hasDescription={Boolean(product.description)} />
+
       <ProductForm
         mode="edit"
         product={product}
@@ -93,6 +95,48 @@ export default async function EditProductPage({ params }: Props) {
         imageUrls={imageUrls}
         action={boundUpdate}
       />
+    </div>
+  )
+}
+
+function StatusBanner({
+  status,
+  hasImages,
+  hasDescription,
+}: {
+  status: Product['status']
+  hasImages: boolean
+  hasDescription: boolean
+}) {
+  if (status === 'active') {
+    const incomplete: string[] = []
+    if (!hasImages) incomplete.push('沒有圖片')
+    if (!hasDescription) incomplete.push('沒有商品說明')
+    if (incomplete.length > 0) {
+      return (
+        <div className="mb-6 bg-warning/15 border border-warning/40 text-ink p-4 rounded-md text-sm">
+          <strong>已上架，但 {incomplete.join('、')}</strong>。客戶看得到此商品，但體驗不佳，建議補齊。
+        </div>
+      )
+    }
+    return (
+      <div className="mb-6 bg-success/15 border border-success/40 text-ink p-4 rounded-md text-sm">
+        <strong>上架中</strong>：客戶可在前台 <Link href="/shop" target="_blank" className="underline">/shop</Link> 看到此商品。
+      </div>
+    )
+  }
+
+  if (status === 'draft') {
+    return (
+      <div className="mb-6 bg-line border border-ink/10 text-ink p-4 rounded-md text-sm">
+        <strong>草稿狀態</strong>：客戶在前台<strong>看不到</strong>此商品。確認資料無誤後，請把下方「狀態」改為「上架中」並儲存。
+      </div>
+    )
+  }
+
+  return (
+    <div className="mb-6 bg-ink/10 border border-ink/20 text-ink-soft p-4 rounded-md text-sm">
+      <strong>已封存</strong>：此商品不顯示於前台，也不出現在後台列表的預設視圖。
     </div>
   )
 }

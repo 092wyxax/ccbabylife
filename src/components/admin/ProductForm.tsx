@@ -28,11 +28,18 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
       )}
 
       <Section title="基本資訊">
-        <Field label="中文品名 *" name="nameZh" defaultValue={product?.nameZh} error={errs.nameZh} />
+        <Field
+          label="中文品名"
+          name="nameZh"
+          required
+          defaultValue={product?.nameZh}
+          error={errs.nameZh}
+        />
         <Field label="日文品名" name="nameJp" defaultValue={product?.nameJp ?? ''} error={errs.nameJp} />
         <Field
-          label="網址 slug *"
+          label="網址 slug"
           name="slug"
+          required
           defaultValue={product?.slug}
           hint="只能用小寫英數與短橫線，例如 pigeon-gauze-towel-30"
           error={errs.slug}
@@ -64,9 +71,11 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
       <Section title="價格與重量">
         <Row>
           <Field
-            label="日幣售價 *"
+            label="日幣售價"
             name="priceJpy"
             type="number"
+            required
+            min={0}
             defaultValue={product?.priceJpy?.toString()}
             error={errs.priceJpy}
           />
@@ -74,23 +83,28 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
             label="日幣成本"
             name="costJpy"
             type="number"
+            min={0}
             defaultValue={product?.costJpy?.toString() ?? ''}
             error={errs.costJpy}
           />
         </Row>
         <Row>
           <Field
-            label="台幣售價 *"
+            label="台幣售價"
             name="priceTwd"
             type="number"
+            required
+            min={0}
             defaultValue={product?.priceTwd?.toString()}
             hint="目前手動輸入，Phase 1c 後會以 PRICING_FORMULA.md 自動計算"
             error={errs.priceTwd}
           />
           <Field
-            label="重量 (g) *"
+            label="重量 (g)"
             name="weightG"
             type="number"
+            required
+            min={1}
             defaultValue={product?.weightG?.toString()}
             error={errs.weightG}
           />
@@ -118,8 +132,9 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
         </Row>
         <Row>
           <Select
-            label="商品類型 *"
+            label="商品類型"
             name="stockType"
+            required
             defaultValue={product?.stockType ?? 'preorder'}
             options={[
               { value: 'preorder', label: '預購' },
@@ -200,8 +215,9 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
 
       <Section title="上架狀態">
         <Select
-          label="狀態 *"
+          label="狀態"
           name="status"
+          required
           defaultValue={product?.status ?? 'draft'}
           options={[
             { value: 'draft', label: '草稿（不對外）' },
@@ -209,7 +225,7 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
             { value: 'archived', label: '已封存' },
           ]}
           error={errs.status}
-          hint="改成「上架中」必須先勾上方法規檢核。"
+          hint="改成「上架中」必須先勾上方法規檢核。建立後預設為草稿，前台不會顯示，請記得改為上架中。"
         />
       </Section>
 
@@ -248,20 +264,25 @@ interface FieldProps {
   defaultValue?: string
   hint?: string
   error?: string
+  required?: boolean
+  min?: number
 }
 
-function Field({ label, name, type = 'text', defaultValue, hint, error }: FieldProps) {
+function Field({ label, name, type = 'text', defaultValue, hint, error, required, min }: FieldProps) {
   return (
     <div>
       <label htmlFor={name} className="block text-sm mb-1.5">
         {label}
+        {required && <span className="text-danger ml-0.5">*</span>}
       </label>
       <input
         id={name}
         name={name}
         type={type}
         defaultValue={defaultValue}
-        className="w-full border border-line rounded-md px-3 py-2 focus:outline-none focus:border-ink"
+        required={required}
+        min={min}
+        className="w-full border border-line rounded-md px-3 py-2 focus:outline-none focus:border-ink invalid:border-danger/40"
       />
       {hint && !error && <p className="text-xs text-ink-soft mt-1">{hint}</p>}
       {error && <p className="text-xs text-danger mt-1">{error}</p>}
@@ -269,18 +290,28 @@ function Field({ label, name, type = 'text', defaultValue, hint, error }: FieldP
   )
 }
 
-function Textarea({ label, name, rows = 3, defaultValue, hint, error }: FieldProps & { rows?: number }) {
+function Textarea({
+  label,
+  name,
+  rows = 3,
+  defaultValue,
+  hint,
+  error,
+  required,
+}: FieldProps & { rows?: number }) {
   return (
     <div>
       <label htmlFor={name} className="block text-sm mb-1.5">
         {label}
+        {required && <span className="text-danger ml-0.5">*</span>}
       </label>
       <textarea
         id={name}
         name={name}
         rows={rows}
         defaultValue={defaultValue}
-        className="w-full border border-line rounded-md px-3 py-2 focus:outline-none focus:border-ink leading-relaxed"
+        required={required}
+        className="w-full border border-line rounded-md px-3 py-2 focus:outline-none focus:border-ink leading-relaxed invalid:border-danger/40"
       />
       {hint && !error && <p className="text-xs text-ink-soft mt-1">{hint}</p>}
       {error && <p className="text-xs text-danger mt-1">{error}</p>}
@@ -295,6 +326,7 @@ function Select({
   options,
   hint,
   error,
+  required,
 }: {
   label: string
   name: string
@@ -302,16 +334,19 @@ function Select({
   options: Array<{ value: string; label: string }>
   hint?: string
   error?: string
+  required?: boolean
 }) {
   return (
     <div>
       <label htmlFor={name} className="block text-sm mb-1.5">
         {label}
+        {required && <span className="text-danger ml-0.5">*</span>}
       </label>
       <select
         id={name}
         name={name}
         defaultValue={defaultValue}
+        required={required}
         className="w-full border border-line rounded-md px-3 py-2 bg-white focus:outline-none focus:border-ink"
       >
         {options.map((opt) => (
