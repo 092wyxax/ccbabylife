@@ -59,12 +59,20 @@ export default async function AdminProductsPage({ searchParams }: Props) {
           <h1 className="font-serif text-2xl mb-1">商品管理</h1>
           <p className="text-ink-soft text-sm">共 {result.total} 件</p>
         </div>
-        <Link
-          href="/admin/products/new"
-          className="bg-ink text-cream px-4 py-2 rounded-md text-sm hover:bg-accent transition-colors"
-        >
-          + 新增商品
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/products/import"
+            className="border border-line px-4 py-2 rounded-md text-sm hover:border-ink transition-colors"
+          >
+            CSV 匯入
+          </Link>
+          <Link
+            href="/admin/products/new"
+            className="bg-ink text-cream px-4 py-2 rounded-md text-sm hover:bg-accent transition-colors"
+          >
+            + 新增商品
+          </Link>
+        </div>
       </header>
 
       <SearchBox

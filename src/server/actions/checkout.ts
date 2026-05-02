@@ -2,12 +2,15 @@
 
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { cookies } from 'next/headers'
 import { z } from 'zod'
 import { and, eq } from 'drizzle-orm'
 import { db } from '@/db/client'
 import { customers, orders, orderItems, products } from '@/db/schema'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { shippingFee } from '@/lib/pricing'
+import { findCustomerByReferralCode } from '@/server/services/ReferralService'
+import { REFERRAL_COOKIE } from '@/lib/referral'
 import type { CartItem } from '@/types/cart'
 
 const cartItemSchema = z.object({
@@ -107,6 +110,11 @@ export async function checkoutAction(
   const computedShip = ship < 0 ? 0 : ship // > 5kg requires manual quote — for shell, set 0 and flag in notes
   const total = subtotal + computedShip
 
+  // Resolve referral cookie → referredBy customer
+  const cookieStore = await cookies()
+  const refCode = cookieStore.get(REFERRAL_COOKIE)?.value
+  const referrer = refCode ? await findCustomerByReferralCode(refCode) : null
+
   let orderId: string
   try {
     orderId = await db.transaction(async (tx) => {
@@ -176,6 +184,7 @@ export async function checkoutAction(
           babyAgeMonths: parsed.data.babyAgeMonths ?? null,
           isPreorder: lineItems.some((l) => l.product.stockType === 'preorder'),
           notes: ship < 0 ? '> 5kg：運費需個案估算，已暫設 0，待人工確認' : null,
+          referredBy: referrer && referrer.id !== customerId ? referrer.id : null,
         })
         .returning()
 

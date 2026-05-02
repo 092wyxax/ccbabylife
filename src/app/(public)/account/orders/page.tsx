@@ -8,6 +8,7 @@ import { getCustomerSession } from '@/lib/customer-session'
 import { logoutAccountAction } from '@/server/actions/account'
 import { STATUS_LABEL, statusBadgeClass } from '@/lib/order-progress'
 import { formatTwd } from '@/lib/format'
+import { ensureReferralCode } from '@/server/services/ReferralService'
 
 export const metadata = {
   title: '我的訂單 | 日系選物店',
@@ -30,6 +31,11 @@ export default async function MyOrdersPage() {
     .from(orders)
     .where(eq(orders.customerId, session.customerId))
     .orderBy(desc(orders.createdAt))
+
+  const referralCode = await ensureReferralCode(customer.id)
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+  const referralUrl = `${siteUrl}/api/referral/${referralCode}`
 
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 py-12">
@@ -99,6 +105,19 @@ export default async function MyOrdersPage() {
       <p className="mt-8 text-xs text-ink-soft">
         共 {myOrders.length} 筆訂單。需要協助請私訊 LINE 客服。
       </p>
+
+      <section className="mt-12 p-5 bg-cream-100 border border-line rounded-lg text-sm">
+        <h2 className="font-serif text-lg mb-2">推薦朋友</h2>
+        <p className="text-ink-soft text-xs leading-relaxed mb-3">
+          把這條連結傳給朋友，朋友首單成立後妳會獲得購物金（金額之後公告）。
+        </p>
+        <div className="bg-white border border-line rounded-md p-3 text-xs font-mono break-all select-all">
+          {referralUrl}
+        </div>
+        <p className="text-xs text-ink-soft mt-2">
+          推薦碼：<span className="font-mono">{referralCode}</span>
+        </p>
+      </section>
     </div>
   )
 }

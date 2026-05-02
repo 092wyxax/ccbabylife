@@ -1,0 +1,59 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { nextCutoffDate } from '@/lib/cutoff'
+
+interface Props {
+  variant?: 'banner' | 'inline'
+}
+
+export function CutoffCountdown({ variant = 'banner' }: Props) {
+  const [now, setNow] = useState<Date | null>(null)
+
+  useEffect(() => {
+    setNow(new Date())
+    const id = setInterval(() => setNow(new Date()), 60_000)
+    return () => clearInterval(id)
+  }, [])
+
+  if (!now) return null
+
+  const cutoff = nextCutoffDate(now)
+  const diffMs = cutoff.getTime() - now.getTime()
+  const totalMin = Math.max(0, Math.floor(diffMs / 60_000))
+  const days = Math.floor(totalMin / (24 * 60))
+  const hours = Math.floor((totalMin % (24 * 60)) / 60)
+  const minutes = totalMin % 60
+
+  const text =
+    days > 0
+      ? `${days} 天 ${hours} 小時`
+      : hours > 0
+      ? `${hours} 小時 ${minutes} 分鐘`
+      : `${minutes} 分鐘`
+
+  const isUrgent = days === 0 && hours < 12
+
+  if (variant === 'inline') {
+    return (
+      <span
+        className={
+          'text-xs ' + (isUrgent ? 'text-warning font-medium' : 'text-ink-soft')
+        }
+      >
+        本週截單剩 {text}
+      </span>
+    )
+  }
+
+  return (
+    <div
+      className={
+        'text-center text-sm py-2 px-4 ' +
+        (isUrgent ? 'bg-warning text-ink' : 'bg-ink text-cream')
+      }
+    >
+      本週預購批次截單還剩 <strong>{text}</strong>{isUrgent && ' · 趕快下單' }
+    </div>
+  )
+}

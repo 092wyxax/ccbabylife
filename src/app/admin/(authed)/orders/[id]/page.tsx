@@ -40,6 +40,14 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               className="underline hover:text-accent"
             >
               客戶端追蹤頁
+            </Link>{' '}
+            ·{' '}
+            <Link
+              href={`/admin/orders/${order.id}/invoice`}
+              target="_blank"
+              className="underline hover:text-accent"
+            >
+              出貨單
             </Link>
           </p>
         </div>

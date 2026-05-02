@@ -43,6 +43,20 @@
       "when": 1777734843144,
       "tag": "0005_wet_the_executioner",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1777735865694,
+      "tag": "0006_wealthy_black_cat",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1777735949653,
+      "tag": "0007_shallow_otto_octavius",
+      "breakpoints": true
     }
   ]
 }
