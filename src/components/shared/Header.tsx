@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { CartIndicator } from './CartIndicator'
 
 const NAV_ITEMS = [
   { href: '/shop', label: '選物' },
@@ -25,14 +26,8 @@ export function Header() {
             </Link>
           ))}
         </nav>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/cart"
-            className="text-sm text-ink-soft hover:text-ink"
-            aria-label="購物車"
-          >
-            購物車
-          </Link>
+        <div className="flex items-center gap-5">
+          <CartIndicator />
           <Link
             href="/account"
             className="text-sm bg-ink text-cream px-3 py-1.5 rounded-full hover:bg-accent transition-colors"

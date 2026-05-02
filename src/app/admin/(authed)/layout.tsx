@@ -8,6 +8,7 @@ const NAV: Array<{ href: string; label: string; roles?: AdminRole[] }> = [
   { href: '/admin', label: '儀表板' },
   { href: '/admin/orders', label: '訂單' },
   { href: '/admin/products', label: '商品' },
+  { href: '/admin/journal', label: '部落格', roles: ['owner', 'admin'] },
   { href: '/admin/customers', label: '客戶', roles: ['owner', 'admin'] },
   { href: '/admin/inventory', label: '庫存' },
   { href: '/admin/purchases', label: '採購', roles: ['owner', 'partner'] },

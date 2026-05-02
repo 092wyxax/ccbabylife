@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { getProductBySlug } from '@/server/services/ProductService'
 import { formatTwd, formatJpy, formatAgeRange } from '@/lib/format'
 import { imageUrl } from '@/lib/image'
+import { AddToCartButton } from '@/components/shop/AddToCartButton'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -107,13 +108,20 @@ export default async function ProductDetailPage({ params }: Props) {
             )}
           </div>
 
-          <button
-            type="button"
-            className="w-full bg-ink text-cream py-4 rounded-full hover:bg-accent transition-colors mb-4"
-            disabled
-          >
-            加入購物車（Phase 1b 開放）
-          </button>
+          <div className="mb-4">
+            <AddToCartButton
+              item={{
+                productId: product.id,
+                slug: product.slug,
+                nameZh: product.nameZh,
+                priceTwd: product.priceTwd,
+                weightG: product.weightG,
+                imagePath: images[0]?.cfImageId ?? null,
+                stockType: product.stockType,
+              }}
+              outOfStock={product.stockType === 'in_stock' && product.stockQuantity <= 0}
+            />
+          </div>
 
           {product.description && (
             <section className="mt-10 pt-8 border-t border-line">

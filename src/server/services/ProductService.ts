@@ -80,6 +80,46 @@ export interface ProductDetail {
   images: ProductImage[]
 }
 
+export interface GiftBudgetTier {
+  label: string
+  maxTwd: number | null
+}
+
+export const GIFT_TIERS: Array<{ key: string; label: string; minTwd: number; maxTwd: number | null }> = [
+  { key: 'under500', label: 'NT$500 以下', minTwd: 0, maxTwd: 500 },
+  { key: '500to1000', label: 'NT$500–1,000', minTwd: 500, maxTwd: 1000 },
+  { key: '1000to3000', label: 'NT$1,000–3,000', minTwd: 1000, maxTwd: 3000 },
+  { key: 'over3000', label: 'NT$3,000 以上', minTwd: 3000, maxTwd: null },
+]
+
+export async function listGiftProducts(opts: {
+  minTwd?: number
+  maxTwd?: number | null
+}): Promise<ProductListItem[]> {
+  const conds = [
+    eq(products.orgId, DEFAULT_ORG_ID),
+    eq(products.status, 'active'),
+    isNotNull(products.minAgeMonths),
+  ]
+  if (opts.minTwd != null) conds.push(gte(products.priceTwd, opts.minTwd))
+  if (opts.maxTwd != null) conds.push(lte(products.priceTwd, opts.maxTwd))
+
+  const rows = await db
+    .select({ product: products, image: productImages })
+    .from(products)
+    .leftJoin(
+      productImages,
+      and(
+        eq(productImages.productId, products.id),
+        eq(productImages.isPrimary, true)
+      )
+    )
+    .where(and(...conds))
+    .orderBy(asc(products.priceTwd))
+
+  return rows.map((r) => ({ product: r.product, primaryImage: r.image }))
+}
+
 export interface AgeBuckets {
   fits: ProductListItem[]
   soon: ProductListItem[]
