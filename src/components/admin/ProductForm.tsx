@@ -5,18 +5,55 @@ import type { Product, Brand, Category } from '@/db/schema'
 import type { ProductFormState } from '@/server/actions/products'
 import { imageUrl } from '@/lib/image'
 
+export type ProductFormDefaults = Partial<
+  Pick<
+    Product,
+    | 'slug'
+    | 'nameZh'
+    | 'nameJp'
+    | 'brandId'
+    | 'categoryId'
+    | 'description'
+    | 'useExperience'
+    | 'minAgeMonths'
+    | 'maxAgeMonths'
+    | 'priceJpy'
+    | 'priceTwd'
+    | 'costJpy'
+    | 'weightG'
+    | 'stockType'
+    | 'stockQuantity'
+    | 'status'
+    | 'sourceUrl'
+    | 'legalCheckPassed'
+    | 'legalNotes'
+  >
+>
+
 interface Props {
   mode: 'create' | 'edit'
   brands: Brand[]
   categories: Category[]
   product?: Product
+  defaults?: ProductFormDefaults
   imageUrls?: string[]
   action: (prevState: ProductFormState, formData: FormData) => Promise<ProductFormState>
 }
 
 const initialState: ProductFormState = {}
 
-export function ProductForm({ mode, brands, categories, product, imageUrls, action }: Props) {
+export function ProductForm({
+  mode,
+  brands,
+  categories,
+  product,
+  defaults,
+  imageUrls,
+  action,
+}: Props) {
+  // For edit mode use product values; for create mode allow optional defaults
+  // (e.g. AI-prefilled values from a Japanese URL).
+  const initial: ProductFormDefaults = product ?? defaults ?? {}
   const [state, formAction, pending] = useActionState(action, initialState)
   const errs = state.fieldErrors ?? {}
 
@@ -33,15 +70,15 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
           label="中文品名"
           name="nameZh"
           required
-          defaultValue={product?.nameZh}
+          defaultValue={initial.nameZh}
           error={errs.nameZh}
         />
-        <Field label="日文品名" name="nameJp" defaultValue={product?.nameJp ?? ''} error={errs.nameJp} />
+        <Field label="日文品名" name="nameJp" defaultValue={initial.nameJp ?? ''} error={errs.nameJp} />
         <Field
           label="網址 slug"
           name="slug"
           required
-          defaultValue={product?.slug}
+          defaultValue={initial.slug}
           hint="只能用小寫英數與短橫線，例如 pigeon-gauze-towel-30"
           error={errs.slug}
         />
@@ -49,7 +86,7 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
           <Select
             label="品牌"
             name="brandId"
-            defaultValue={product?.brandId ?? ''}
+            defaultValue={initial.brandId ?? ''}
             options={[
               { value: '', label: '— 不指定 —' },
               ...brands.map((b) => ({ value: b.id, label: b.nameZh })),
@@ -59,7 +96,7 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
           <Select
             label="分類"
             name="categoryId"
-            defaultValue={product?.categoryId ?? ''}
+            defaultValue={initial.categoryId ?? ''}
             options={[
               { value: '', label: '— 不指定 —' },
               ...categories.map((c) => ({ value: c.id, label: c.name })),
@@ -77,7 +114,7 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
             type="number"
             required
             min={0}
-            defaultValue={product?.priceJpy?.toString()}
+            defaultValue={initial.priceJpy?.toString()}
             error={errs.priceJpy}
           />
           <Field
@@ -85,7 +122,7 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
             name="costJpy"
             type="number"
             min={0}
-            defaultValue={product?.costJpy?.toString() ?? ''}
+            defaultValue={initial.costJpy?.toString() ?? ''}
             error={errs.costJpy}
           />
         </Row>
@@ -96,7 +133,7 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
             type="number"
             required
             min={0}
-            defaultValue={product?.priceTwd?.toString()}
+            defaultValue={initial.priceTwd?.toString()}
             hint="目前手動輸入，Phase 1c 後會以 PRICING_FORMULA.md 自動計算"
             error={errs.priceTwd}
           />
@@ -106,7 +143,7 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
             type="number"
             required
             min={1}
-            defaultValue={product?.weightG?.toString()}
+            defaultValue={initial.weightG?.toString()}
             error={errs.weightG}
           />
         </Row>
@@ -118,7 +155,7 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
             label="最小月齡"
             name="minAgeMonths"
             type="number"
-            defaultValue={product?.minAgeMonths?.toString() ?? ''}
+            defaultValue={initial.minAgeMonths?.toString() ?? ''}
             hint="僅母嬰商品需要；寵物用品 / 一般商品請留空"
             error={errs.minAgeMonths}
           />
@@ -126,7 +163,7 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
             label="最大月齡"
             name="maxAgeMonths"
             type="number"
-            defaultValue={product?.maxAgeMonths?.toString() ?? ''}
+            defaultValue={initial.maxAgeMonths?.toString() ?? ''}
             hint="僅母嬰商品需要；寵物用品 / 一般商品請留空"
             error={errs.maxAgeMonths}
           />
@@ -136,7 +173,7 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
             label="商品類型"
             name="stockType"
             required
-            defaultValue={product?.stockType ?? 'preorder'}
+            defaultValue={initial.stockType ?? 'preorder'}
             options={[
               { value: 'preorder', label: '預購' },
               { value: 'in_stock', label: '現貨' },
@@ -147,7 +184,7 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
             label="庫存數量"
             name="stockQuantity"
             type="number"
-            defaultValue={product?.stockQuantity?.toString() ?? '0'}
+            defaultValue={initial.stockQuantity?.toString() ?? '0'}
             hint="預購商品可填 0"
             error={errs.stockQuantity}
           />
@@ -159,14 +196,14 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
           label="商品說明"
           name="description"
           rows={4}
-          defaultValue={product?.description ?? ''}
+          defaultValue={initial.description ?? ''}
           error={errs.description}
         />
         <Textarea
           label="使用心得"
           name="useExperience"
           rows={5}
-          defaultValue={product?.useExperience ?? ''}
+          defaultValue={initial.useExperience ?? ''}
           hint="差異化武器：誠實寫缺點 + 適合誰 + 不適合誰。母嬰商品建議以娃媽角度撰寫；寵物 / 一般商品以實際使用者角度。"
           error={errs.useExperience}
         />
@@ -181,7 +218,7 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
           <input
             type="checkbox"
             name="legalCheckPassed"
-            defaultChecked={product?.legalCheckPassed ?? false}
+            defaultChecked={initial.legalCheckPassed ?? false}
             className="mt-1"
           />
           <span className="text-sm">
@@ -194,7 +231,7 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
         <Field
           label="法規備註"
           name="legalNotes"
-          defaultValue={product?.legalNotes ?? ''}
+          defaultValue={initial.legalNotes ?? ''}
           hint="例：純棉、無染料、無 BSMI 必要"
           error={errs.legalNotes}
         />
@@ -202,7 +239,7 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
           label="日本來源 URL"
           name="sourceUrl"
           type="url"
-          defaultValue={product?.sourceUrl ?? ''}
+          defaultValue={initial.sourceUrl ?? ''}
           error={errs.sourceUrl}
         />
       </Section>
@@ -212,7 +249,7 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
           label="狀態"
           name="status"
           required
-          defaultValue={product?.status ?? 'draft'}
+          defaultValue={initial.status ?? 'draft'}
           options={[
             { value: 'draft', label: '草稿（不對外）' },
             { value: 'active', label: '上架中（前台可見）' },
