@@ -2,7 +2,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { eq, and, asc } from 'drizzle-orm'
 import { db } from '@/db/client'
-import { productImages, type Product } from '@/db/schema'
+import { productImages, productVariants, type Product } from '@/db/schema'
+import { VariantsPanel } from '@/components/admin/VariantsPanel'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import {
   getProductById,
@@ -36,6 +37,12 @@ export default async function EditProductPage({ params }: Props) {
     .where(and(eq(productImages.productId, id), eq(productImages.orgId, DEFAULT_ORG_ID)))
     .orderBy(asc(productImages.sortOrder))
   const imageUrls = images.map((i) => i.cfImageId)
+
+  const variants = await db
+    .select()
+    .from(productVariants)
+    .where(and(eq(productVariants.productId, id), eq(productVariants.orgId, DEFAULT_ORG_ID)))
+    .orderBy(asc(productVariants.createdAt))
 
   // Bind id into the action so the form receives a (state, formData) shaped action
   const boundUpdate = async (
@@ -95,6 +102,10 @@ export default async function EditProductPage({ params }: Props) {
         imageUrls={imageUrls}
         action={boundUpdate}
       />
+
+      <div className="mt-12 pt-8 border-t border-line">
+        <VariantsPanel productId={product.id} variants={variants} />
+      </div>
     </div>
   )
 }

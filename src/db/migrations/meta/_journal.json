@@ -36,6 +36,13 @@
       "when": 1777729477346,
       "tag": "0004_bright_prowler",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1777734843144,
+      "tag": "0005_wet_the_executioner",
+      "breakpoints": true
     }
   ]
 }

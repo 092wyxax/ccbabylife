@@ -23,10 +23,15 @@ export default function AdminMarketingPage() {
           <p className="text-xs text-ink-soft">需 LINE Messaging API channel 已設定</p>
         </div>
 
-        <div className="bg-cream-100 border border-line rounded-lg p-5 opacity-70 cursor-not-allowed">
-          <h2 className="font-medium mb-1">優惠券（後續 Phase）</h2>
-          <p className="text-xs text-ink-soft">建立優惠碼、使用紀錄</p>
-        </div>
+        <Link
+          href="/admin/marketing/coupons"
+          className="bg-white border border-line rounded-lg p-5 hover:border-ink transition-colors"
+        >
+          <h2 className="font-medium mb-1">優惠券</h2>
+          <p className="text-xs text-ink-soft leading-relaxed">
+            建立固定金額或百分比優惠碼，設定低消與使用上限。
+          </p>
+        </Link>
 
         <div className="bg-cream-100 border border-line rounded-lg p-5 opacity-70 cursor-not-allowed">
           <h2 className="font-medium mb-1">Email 群發（Phase 1b 後）</h2>

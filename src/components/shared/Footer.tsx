@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { NewsletterForm } from './NewsletterForm'
 
 export function Footer() {
   return (
@@ -6,10 +7,14 @@ export function Footer() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6 py-12 grid gap-8 sm:grid-cols-3 text-sm">
         <div>
           <h3 className="font-serif text-lg mb-3">日系選物店</h3>
-          <p className="text-ink-soft leading-relaxed">
+          <p className="text-ink-soft leading-relaxed mb-4">
             1 歲娃媽親身試用、嚴選日系好物。<br />
             預購制：每週日截單，10–14 天到貨。
           </p>
+          <p className="text-xs text-ink-soft mb-2 uppercase tracking-widest">
+            訂閱選物通知
+          </p>
+          <NewsletterForm source="footer" />
         </div>
 
         <div>

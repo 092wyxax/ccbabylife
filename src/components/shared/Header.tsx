@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { CartIndicator } from './CartIndicator'
+import { MobileNav } from './MobileNav'
 import { getCustomerSession } from '@/lib/customer-session'
 
 const NAV_ITEMS = [
@@ -28,23 +29,31 @@ export async function Header() {
             </Link>
           ))}
         </nav>
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-3 sm:gap-5">
           <CartIndicator />
           {session ? (
             <Link
               href="/account/orders"
-              className="text-sm bg-ink text-cream px-3 py-1.5 rounded-full hover:bg-accent transition-colors"
+              className="hidden sm:inline-flex text-sm bg-ink text-cream px-3 py-1.5 rounded-full hover:bg-accent transition-colors"
             >
               我的訂單
             </Link>
           ) : (
             <Link
               href="/account"
-              className="text-sm bg-ink text-cream px-3 py-1.5 rounded-full hover:bg-accent transition-colors"
+              className="hidden sm:inline-flex text-sm bg-ink text-cream px-3 py-1.5 rounded-full hover:bg-accent transition-colors"
             >
               登入
             </Link>
           )}
+          <MobileNav
+            items={[
+              ...NAV_ITEMS,
+              session
+                ? { href: '/account/orders', label: '我的訂單' }
+                : { href: '/account', label: '登入' },
+            ]}
+          />
         </div>
       </div>
     </header>

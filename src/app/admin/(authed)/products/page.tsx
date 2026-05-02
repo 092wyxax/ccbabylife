@@ -7,6 +7,7 @@ import { listProductsForAdmin } from '@/server/services/ProductService'
 import { formatTwd, formatJpy } from '@/lib/format'
 import { parsePage } from '@/lib/pagination'
 import { Pagination, SearchBox } from '@/components/admin/Pagination'
+import { ProductBulkBar } from '@/components/admin/ProductBulkBar'
 
 interface Props {
   searchParams: Promise<{
@@ -118,10 +119,12 @@ export default async function AdminProductsPage({ searchParams }: Props) {
         </div>
       ) : (
         <>
+          <ProductBulkBar productIds={result.rows.map((r) => r.product.id)} />
           <div className="bg-white border border-line rounded-lg overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-cream-100 text-ink-soft">
                 <tr>
+                  <th className="px-2 py-3 w-8"></th>
                   <th className="text-left px-4 py-3 font-normal">品名</th>
                   <th className="text-left px-4 py-3 font-normal">品牌</th>
                   <th className="text-right px-4 py-3 font-normal">日幣成本</th>
@@ -134,6 +137,13 @@ export default async function AdminProductsPage({ searchParams }: Props) {
               <tbody>
                 {result.rows.map(({ product, brand }) => (
                   <tr key={product.id} className="border-t border-line hover:bg-cream-50">
+                    <td className="px-2 py-3 text-center">
+                      <input
+                        type="checkbox"
+                        name="bulk-product-id"
+                        value={product.id}
+                      />
+                    </td>
                     <td className="px-4 py-3">
                       <Link href={`/admin/products/${product.id}`} className="hover:text-accent">
                         {product.nameZh}
