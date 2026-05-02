@@ -177,18 +177,23 @@ export async function archiveProduct(id: string): Promise<Product> {
   return updateProduct(id, { status: 'archived' })
 }
 
-export async function setProductImages(productId: string, imageUrls: string[]) {
+/**
+ * Replace the full image set for a product. Each entry can be either a
+ * Supabase Storage path or a legacy http(s) URL (sample seed data).
+ * The first entry becomes the primary image.
+ */
+export async function setProductImages(productId: string, imagePaths: string[]) {
   await db
     .delete(productImages)
     .where(eq(productImages.productId, productId))
 
-  if (imageUrls.length === 0) return
+  if (imagePaths.length === 0) return
 
   await db.insert(productImages).values(
-    imageUrls.map((url, index) => ({
+    imagePaths.map((path, index) => ({
       orgId: DEFAULT_ORG_ID,
       productId,
-      cfImageId: url,
+      cfImageId: path,
       isPrimary: index === 0,
       sortOrder: index,
     }))

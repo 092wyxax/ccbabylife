@@ -15,7 +15,8 @@
     "db:check": "drizzle-kit check",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx src/db/seed.ts",
-    "admin:create": "tsx scripts/create-admin.ts"
+    "admin:create": "tsx scripts/create-admin.ts",
+    "storage:setup": "tsx scripts/setup-storage.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.74",

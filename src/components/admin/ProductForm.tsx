@@ -1,8 +1,9 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import type { Product, Brand, Category } from '@/db/schema'
 import type { ProductFormState } from '@/server/actions/products'
+import { imageUrl } from '@/lib/image'
 
 interface Props {
   mode: 'create' | 'edit'
@@ -172,14 +173,7 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
       </Section>
 
       <Section title="商品圖片">
-        <Textarea
-          label="圖片 URL（每行一張，第一張為主圖）"
-          name="imageUrls"
-          rows={4}
-          defaultValue={imageUrls?.join('\n') ?? ''}
-          hint="一行一張 URL；第一張顯示在商品卡與詳情頁主圖。Phase 1a Week 3 會接 Cloudflare Images 上傳。"
-          error={errs.imageUrls}
-        />
+        <ImagesField existingImages={imageUrls ?? []} />
       </Section>
 
       <Section title="法規檢核（重要）">
@@ -239,6 +233,94 @@ export function ProductForm({ mode, brands, categories, product, imageUrls, acti
         </button>
       </div>
     </form>
+  )
+}
+
+function ImagesField({ existingImages }: { existingImages: string[] }) {
+  const [kept, setKept] = useState<string[]>(existingImages)
+  const [newPreviews, setNewPreviews] = useState<Array<{ name: string; url: string }>>([])
+
+  const handleFiles = (files: FileList | null) => {
+    if (!files) return
+    const previews = Array.from(files).map((f) => ({
+      name: f.name,
+      url: URL.createObjectURL(f),
+    }))
+    setNewPreviews((prev) => [...prev, ...previews])
+  }
+
+  return (
+    <div className="space-y-4">
+      {kept.length > 0 && (
+        <div>
+          <p className="text-sm mb-2">目前圖片（順序即顯示順序，第一張為主圖）</p>
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+            {kept.map((path, idx) => (
+              <div key={path} className="relative group">
+                <input type="hidden" name="keepImagePath" value={path} />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={imageUrl(path)}
+                  alt=""
+                  className="aspect-square w-full object-cover rounded-md border border-line bg-cream-100"
+                />
+                {idx === 0 && (
+                  <span className="absolute top-1 left-1 bg-ink text-cream text-[10px] px-1.5 py-0.5 rounded">
+                    主圖
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setKept((prev) => prev.filter((p) => p !== path))}
+                  className="absolute top-1 right-1 bg-danger/90 text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  移除
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div>
+        <label htmlFor="newImageFiles" className="block text-sm mb-2">
+          {kept.length > 0 ? '新增圖片（會附加到現有圖片後）' : '上傳商品圖片'}
+        </label>
+        <input
+          id="newImageFiles"
+          name="newImageFiles"
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={(e) => handleFiles(e.target.files)}
+          className="block w-full text-sm text-ink-soft file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-ink file:text-cream hover:file:bg-accent file:cursor-pointer cursor-pointer"
+        />
+        <p className="text-xs text-ink-soft mt-1">
+          支援 jpg / png / webp / gif，每張 5MB 以內。可一次選多張。
+        </p>
+      </div>
+
+      {newPreviews.length > 0 && (
+        <div>
+          <p className="text-sm mb-2">即將上傳的圖片（送出後才真正儲存）</p>
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+            {newPreviews.map((p) => (
+              <div key={p.url} className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={p.url}
+                  alt={p.name}
+                  className="aspect-square w-full object-cover rounded-md border border-accent/40"
+                />
+                <span className="absolute top-1 left-1 bg-accent text-cream text-[10px] px-1.5 py-0.5 rounded">
+                  新
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 

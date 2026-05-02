@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getProductBySlug } from '@/server/services/ProductService'
 import { formatTwd, formatJpy, formatAgeRange } from '@/lib/format'
+import { imageUrl } from '@/lib/image'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -44,7 +45,7 @@ export default async function ProductDetailPage({ params }: Props) {
             {images[0] ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={images[0].cfImageId.startsWith('http') ? images[0].cfImageId : `https://imagedelivery.net/${images[0].cfImageId}/public`}
+                src={imageUrl(images[0].cfImageId)}
                 alt={images[0].altText ?? product.nameZh}
                 className="w-full h-full object-cover"
               />
@@ -63,7 +64,7 @@ export default async function ProductDetailPage({ params }: Props) {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={img.cfImageId.startsWith('http') ? img.cfImageId : `https://imagedelivery.net/${img.cfImageId}/public`}
+                    src={imageUrl(img.cfImageId)}
                     alt={img.altText ?? product.nameZh}
                     className="w-full h-full object-cover"
                   />

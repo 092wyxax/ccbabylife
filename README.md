@@ -53,6 +53,7 @@ pnpm db:check         # 驗證 schema 與 migration 一致
 pnpm db:studio        # 開 Drizzle Studio
 pnpm db:seed          # 灌入預設組織 + 8 件 sample 商品
 pnpm admin:create     # 建立後台帳號（需傳參，見下方）
+pnpm storage:setup    # 建立 product-images Supabase Storage bucket
 ```
 
 ## 建立第一個後台帳號

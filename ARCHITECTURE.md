@@ -139,8 +139,8 @@ Vercel AI SDK v4（統一介面）
 
 ─── CDN/儲存 ─────────────────────────────
 Cloudflare DNS + WAF
-Cloudflare Images（商品圖、自動優化）
-Supabase Storage（用戶上傳、私密檔）
+Supabase Storage（商品圖 + 用戶上傳；內建 CDN + image transform）
+🆕 v1.2：移除 Cloudflare Images（30 SKU 規模用不到 100k 張，徒增帳號與整合複雜度）
 
 ─── 自動化／背景任務 ─────────────────────
 🆕 v1.1：簡化為單一 runtime
@@ -172,6 +172,7 @@ Vitest（單元測試）
 | Webpack | Turbopack 已成 Next.js 預設 |
 | 🆕 Supabase Edge Functions | 與 CF Workers 角色重疊，併入 Workers 簡化部署與日誌 |
 | 🆕 next-auth | 後台用 Supabase Auth、前台 LINE Login 自簽 JWT，不需要中介層 |
+| 🆕 Cloudflare Images（v1.2 移除） | 30 SKU 規模用不到 100k 張；Supabase Storage 內建 CDN + transform 已夠 |
 
 ---
 

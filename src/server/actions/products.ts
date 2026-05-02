@@ -10,6 +10,7 @@ import {
   archiveProduct,
   setProductImages,
 } from '@/server/services/ProductService'
+import { uploadProductImage, deleteProductImage } from '@/lib/supabase/storage'
 import { productStockTypeEnum, productStatusEnum } from '@/db/schema'
 
 const productInputSchema = z.object({
@@ -32,15 +33,16 @@ const productInputSchema = z.object({
   sourceUrl: z.string().url().optional().or(z.literal('')),
   legalCheckPassed: z.coerce.boolean(),
   legalNotes: z.string().optional().or(z.literal('')),
-  imageUrls: z.string().optional().or(z.literal('')),
 })
 
-function parseImageUrls(input: string | undefined): string[] {
-  if (!input) return []
-  return input
-    .split(/\r?\n/)
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0)
+function getKeptImagePaths(formData: FormData): string[] {
+  return formData.getAll('keepImagePath').map(String).filter(Boolean)
+}
+
+function getNewImageFiles(formData: FormData): File[] {
+  return formData
+    .getAll('newImageFiles')
+    .filter((v): v is File => v instanceof File && v.size > 0)
 }
 
 export type ProductFormState = {
@@ -49,8 +51,19 @@ export type ProductFormState = {
 }
 
 function parseFormData(formData: FormData) {
-  const obj = Object.fromEntries(formData.entries()) as Record<string, string>
-  // checkbox: present means true, missing means false
+  const fields = [
+    'slug', 'nameZh', 'nameJp', 'brandId', 'categoryId',
+    'description', 'useExperience',
+    'minAgeMonths', 'maxAgeMonths',
+    'priceJpy', 'priceTwd', 'costJpy', 'weightG',
+    'stockType', 'stockQuantity', 'status',
+    'sourceUrl', 'legalNotes',
+  ]
+  const obj: Record<string, string> = {}
+  for (const f of fields) {
+    const v = formData.get(f)
+    if (typeof v === 'string') obj[f] = v
+  }
   obj.legalCheckPassed = formData.get('legalCheckPassed') ? 'true' : 'false'
   return obj
 }
@@ -96,14 +109,18 @@ export async function createProductAction(
     return { error: '輸入驗證失敗，請檢查紅色提示', fieldErrors }
   }
 
+  const newFiles = getNewImageFiles(formData)
+
   let productId: string
   try {
     const fields = normalize(parsed.data)
     const product = await createProduct(fields)
     productId = product.id
-    const urls = parseImageUrls(parsed.data.imageUrls)
-    if (urls.length > 0) {
-      await setProductImages(productId, urls)
+    const uploadedPaths = await Promise.all(
+      newFiles.map((f) => uploadProductImage(productId, f))
+    )
+    if (uploadedPaths.length > 0) {
+      await setProductImages(productId, uploadedPaths)
     }
   } catch (e) {
     return { error: e instanceof Error ? e.message : String(e) }
@@ -132,11 +149,33 @@ export async function updateProductAction(
     return { error: '輸入驗證失敗，請檢查紅色提示', fieldErrors }
   }
 
+  const keptPaths = getKeptImagePaths(formData)
+  const newFiles = getNewImageFiles(formData)
+
   try {
     const fields = normalize(parsed.data)
     await updateProduct(productId, fields)
-    const urls = parseImageUrls(parsed.data.imageUrls)
-    await setProductImages(productId, urls)
+
+    const uploadedPaths = await Promise.all(
+      newFiles.map((f) => uploadProductImage(productId, f))
+    )
+
+    // Delete files that the user removed (only Supabase Storage paths,
+    // not legacy http URLs).
+    const { db } = await import('@/db/client')
+    const { productImages } = await import('@/db/schema')
+    const { eq } = await import('drizzle-orm')
+    const existing = await db
+      .select()
+      .from(productImages)
+      .where(eq(productImages.productId, productId))
+
+    const removed = existing.filter(
+      (img) => !keptPaths.includes(img.cfImageId)
+    )
+    await Promise.all(removed.map((img) => deleteProductImage(img.cfImageId)))
+
+    await setProductImages(productId, [...keptPaths, ...uploadedPaths])
   } catch (e) {
     return { error: e instanceof Error ? e.message : String(e) }
   }

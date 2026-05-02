@@ -1,4 +1,5 @@
 import { ProductCard } from './ProductCard'
+import { imageUrl } from '@/lib/image'
 import type { Product, ProductImage } from '@/db/schema'
 
 interface ProductGridProps {
@@ -23,16 +24,9 @@ export function ProductGrid({ products }: ProductGridProps) {
         <ProductCard
           key={product.id}
           product={product}
-          imageUrl={primaryImage?.cfImageId ? cfImageUrl(primaryImage.cfImageId) : null}
+          imageUrl={primaryImage?.cfImageId ? imageUrl(primaryImage.cfImageId) : null}
         />
       ))}
     </div>
   )
-}
-
-function cfImageUrl(cfImageId: string): string {
-  // TODO(integration): 等 Cloudflare Images 串接後改成真正的 delivery URL。
-  // 目前 sample seed 直接放 placeholder URL 在 cfImageId 欄位。
-  if (cfImageId.startsWith('http')) return cfImageId
-  return `https://imagedelivery.net/${cfImageId}/public`
 }
