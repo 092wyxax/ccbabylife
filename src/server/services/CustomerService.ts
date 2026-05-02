@@ -1,5 +1,5 @@
 import 'server-only'
-import { and, asc, desc, eq, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, ilike, or, sql } from 'drizzle-orm'
 import { db } from '@/db/client'
 import {
   customers,
@@ -8,6 +8,7 @@ import {
   type Order,
 } from '@/db/schema'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
+import { paged, type Paged, type PageParams } from '@/lib/pagination'
 
 export interface CustomerListRow {
   customer: Customer
@@ -15,26 +16,50 @@ export interface CustomerListRow {
   totalSpent: number
 }
 
-export async function listCustomers(): Promise<CustomerListRow[]> {
-  const rows = await db
-    .select({
-      customer: customers,
-      orderCount: sql<number>`(
-        SELECT count(*)::int FROM ${orders}
-        WHERE ${orders.customerId} = ${customers.id}
-          AND ${orders.status} NOT IN ('cancelled')
-      )`,
-      totalSpent: sql<number>`COALESCE((
-        SELECT sum(${orders.total})::int FROM ${orders}
-        WHERE ${orders.customerId} = ${customers.id}
-          AND ${orders.status} NOT IN ('cancelled', 'refunded', 'pending_payment')
-      ), 0)`,
-    })
-    .from(customers)
-    .where(eq(customers.orgId, DEFAULT_ORG_ID))
-    .orderBy(desc(customers.createdAt))
+export async function listCustomers(
+  opts: { search?: string; page: PageParams }
+): Promise<Paged<CustomerListRow>> {
+  const conds = [eq(customers.orgId, DEFAULT_ORG_ID)]
+  if (opts.search) {
+    const q = `%${opts.search}%`
+    conds.push(
+      or(
+        ilike(customers.name, q),
+        ilike(customers.email, q),
+        ilike(customers.phone, q)
+      )!
+    )
+  }
 
-  return rows
+  const where = and(...conds)
+
+  const [rows, totalRow] = await Promise.all([
+    db
+      .select({
+        customer: customers,
+        orderCount: sql<number>`(
+          SELECT count(*)::int FROM ${orders}
+          WHERE ${orders.customerId} = ${customers.id}
+            AND ${orders.status} NOT IN ('cancelled')
+        )`,
+        totalSpent: sql<number>`COALESCE((
+          SELECT sum(${orders.total})::int FROM ${orders}
+          WHERE ${orders.customerId} = ${customers.id}
+            AND ${orders.status} NOT IN ('cancelled', 'refunded', 'pending_payment')
+        ), 0)`,
+      })
+      .from(customers)
+      .where(where)
+      .orderBy(desc(customers.createdAt))
+      .limit(opts.page.pageSize)
+      .offset(opts.page.offset),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(customers)
+      .where(where),
+  ])
+
+  return paged(rows, totalRow[0]?.count ?? 0, opts.page)
 }
 
 export interface CustomerDetail {

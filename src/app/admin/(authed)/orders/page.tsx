@@ -1,87 +1,148 @@
-import { desc, eq } from 'drizzle-orm'
 import Link from 'next/link'
-import { db } from '@/db/client'
-import { orders, customers } from '@/db/schema'
-import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
+import { listOrdersForAdmin } from '@/server/services/OrderService'
+import { STATUS_LABEL, statusBadgeClass } from '@/lib/order-progress'
 import { formatTwd } from '@/lib/format'
+import { parsePage } from '@/lib/pagination'
+import { Pagination, SearchBox } from '@/components/admin/Pagination'
+import { orderStatusEnum, type OrderStatus } from '@/db/schema'
 
-const STATUS_LABELS: Record<string, string> = {
-  pending_payment: '待付款',
-  paid: '已付款',
-  sourcing_jp: '日本下單中',
-  received_jp: '日本到貨',
-  shipping_intl: '國際集運',
-  arrived_tw: '台灣到港',
-  shipped: '已出貨',
-  completed: '已完成',
-  cancelled: '已取消',
-  refunded: '已退款',
+interface Props {
+  searchParams: Promise<{ q?: string; status?: string; page?: string }>
 }
 
-export default async function AdminOrdersPage() {
-  const rows = await db
-    .select({ order: orders, customer: customers })
-    .from(orders)
-    .leftJoin(customers, eq(customers.id, orders.customerId))
-    .where(eq(orders.orgId, DEFAULT_ORG_ID))
-    .orderBy(desc(orders.createdAt))
-    .limit(100)
+export default async function AdminOrdersPage({ searchParams }: Props) {
+  const params = await searchParams
+  const status =
+    params.status && (orderStatusEnum as readonly string[]).includes(params.status)
+      ? (params.status as OrderStatus)
+      : undefined
+
+  const page = parsePage(params.page)
+  const result = await listOrdersForAdmin({
+    search: params.q,
+    status,
+    page,
+  })
+
+  const buildHref = (p: number) => {
+    const usp = new URLSearchParams()
+    if (params.q) usp.set('q', params.q)
+    if (params.status) usp.set('status', params.status)
+    if (p > 1) usp.set('page', String(p))
+    const qs = usp.toString()
+    return qs ? `/admin/orders?${qs}` : '/admin/orders'
+  }
 
   return (
     <div className="p-8 max-w-7xl">
       <header className="mb-6">
         <h1 className="font-serif text-2xl mb-1">訂單管理</h1>
-        <p className="text-ink-soft text-sm">共 {rows.length} 筆</p>
+        <p className="text-ink-soft text-sm">共 {result.total} 筆</p>
       </header>
 
-      {rows.length === 0 ? (
+      <div className="flex flex-wrap items-start gap-4 mb-4">
+        <SearchBox
+          defaultValue={params.q}
+          placeholder="訂單編號 / Email / 客戶姓名"
+          hiddenFields={{ status: params.status }}
+        />
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-4 pb-4 border-b border-line">
+        <StatusChip current={params.status} value={undefined} label="全部狀態" />
+        {orderStatusEnum.map((s) => (
+          <StatusChip
+            key={s}
+            current={params.status}
+            value={s}
+            label={STATUS_LABEL[s]}
+          />
+        ))}
+      </div>
+
+      {result.rows.length === 0 ? (
         <div className="bg-white border border-line rounded-lg p-12 text-center">
-          <p className="text-ink-soft mb-2">目前沒有訂單。</p>
-          <p className="text-xs text-ink-soft">
-            Phase 1b 開放結帳後，客戶下單會出現在這。前台先逛 →{' '}
-            <Link href="/shop" target="_blank" className="underline hover:text-accent">
-              /shop
-            </Link>
+          <p className="text-ink-soft">
+            {params.q || params.status ? '沒有符合條件的訂單。' : '目前沒有訂單。'}
           </p>
         </div>
       ) : (
-        <div className="bg-white border border-line rounded-lg overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-cream-100 text-ink-soft">
-              <tr>
-                <th className="text-left px-4 py-3 font-normal">訂單編號</th>
-                <th className="text-left px-4 py-3 font-normal">客戶</th>
-                <th className="text-left px-4 py-3 font-normal">狀態</th>
-                <th className="text-right px-4 py-3 font-normal">金額</th>
-                <th className="text-left px-4 py-3 font-normal">建立日期</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map(({ order, customer }) => (
-                <tr key={order.id} className="border-t border-line hover:bg-cream-50">
-                  <td className="px-4 py-3 font-mono text-xs">
-                    <Link href={`/admin/orders/${order.id}`} className="hover:text-accent">
-                      {order.orderNumber}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3">{customer?.name ?? customer?.email ?? '—'}</td>
-                  <td className="px-4 py-3">
-                    <span className="text-xs bg-line px-2 py-0.5 rounded-full">
-                      {STATUS_LABELS[order.status] ?? order.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right font-medium">
-                    {formatTwd(order.total)}
-                  </td>
-                  <td className="px-4 py-3 text-ink-soft">
-                    {new Date(order.createdAt).toLocaleDateString('zh-TW')}
-                  </td>
+        <>
+          <div className="bg-white border border-line rounded-lg overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-cream-100 text-ink-soft">
+                <tr>
+                  <th className="text-left px-4 py-3 font-normal">訂單編號</th>
+                  <th className="text-left px-4 py-3 font-normal">客戶</th>
+                  <th className="text-left px-4 py-3 font-normal">狀態</th>
+                  <th className="text-right px-4 py-3 font-normal">金額</th>
+                  <th className="text-left px-4 py-3 font-normal">建立日期</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {result.rows.map(({ order, customer }) => (
+                  <tr key={order.id} className="border-t border-line hover:bg-cream-50">
+                    <td className="px-4 py-3 font-mono text-xs">
+                      <Link href={`/admin/orders/${order.id}`} className="hover:text-accent">
+                        {order.orderNumber}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3">
+                      {customer?.name ?? customer?.email ?? '—'}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${statusBadgeClass(order.status)}`}>
+                        {STATUS_LABEL[order.status]}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right font-medium">
+                      {formatTwd(order.total)}
+                    </td>
+                    <td className="px-4 py-3 text-ink-soft text-xs">
+                      {new Date(order.createdAt).toLocaleDateString('zh-TW')}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <Pagination
+            page={result.page}
+            totalPages={result.totalPages}
+            total={result.total}
+            href={buildHref}
+          />
+        </>
       )}
     </div>
+  )
+}
+
+function StatusChip({
+  current,
+  value,
+  label,
+}: {
+  current: string | undefined
+  value: string | undefined
+  label: string
+}) {
+  const active = value ? current === value : !current
+  const href = value
+    ? `/admin/orders?status=${encodeURIComponent(value)}`
+    : '/admin/orders'
+  return (
+    <Link
+      href={href}
+      className={
+        'text-xs px-3 py-1 rounded-full border transition-colors ' +
+        (active
+          ? 'bg-ink text-cream border-ink'
+          : 'border-line text-ink-soft hover:border-ink hover:text-ink')
+      }
+    >
+      {label}
+    </Link>
   )
 }

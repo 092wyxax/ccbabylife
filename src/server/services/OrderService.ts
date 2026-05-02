@@ -1,6 +1,7 @@
 import 'server-only'
-import { and, asc, eq } from 'drizzle-orm'
+import { and, asc, desc, eq, ilike, or, sql } from 'drizzle-orm'
 import { db } from '@/db/client'
+import { paged, type Paged, type PageParams } from '@/lib/pagination'
 import {
   orders,
   orderItems,
@@ -57,6 +58,51 @@ export async function changeStatus(
 
 export function listValidNextStatuses(from: OrderStatus): OrderStatus[] {
   return TRANSITIONS[from]
+}
+
+export interface OrderListRow {
+  order: Order
+  customer: Customer | null
+}
+
+export async function listOrdersForAdmin(opts: {
+  search?: string
+  status?: OrderStatus
+  page: PageParams
+}): Promise<Paged<OrderListRow>> {
+  const conds = [eq(orders.orgId, DEFAULT_ORG_ID)]
+  if (opts.status) conds.push(eq(orders.status, opts.status))
+  if (opts.search) {
+    const q = `%${opts.search}%`
+    conds.push(
+      or(
+        ilike(orders.orderNumber, q),
+        ilike(orders.recipientEmail, q),
+        ilike(customers.name, q),
+        ilike(customers.email, q)
+      )!
+    )
+  }
+
+  const where = and(...conds)
+
+  const [rows, totalRow] = await Promise.all([
+    db
+      .select({ order: orders, customer: customers })
+      .from(orders)
+      .leftJoin(customers, eq(customers.id, orders.customerId))
+      .where(where)
+      .orderBy(desc(orders.createdAt))
+      .limit(opts.page.pageSize)
+      .offset(opts.page.offset),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(orders)
+      .leftJoin(customers, eq(customers.id, orders.customerId))
+      .where(where),
+  ])
+
+  return paged(rows, totalRow[0]?.count ?? 0, opts.page)
 }
 
 export interface OrderDetail {

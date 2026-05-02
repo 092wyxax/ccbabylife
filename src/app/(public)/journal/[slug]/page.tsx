@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getPostBySlug } from '@/server/services/JournalService'
 import { imageUrl } from '@/lib/image'
+import { renderMarkdown } from '@/lib/markdown'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -57,11 +58,10 @@ export default async function JournalDetailPage({ params }: Props) {
         </div>
       )}
 
-      <div className="prose prose-stone max-w-none">
-        <p className="whitespace-pre-wrap leading-loose text-ink/90">
-          {post.body}
-        </p>
-      </div>
+      <div
+        className="prose prose-stone max-w-none journal-body"
+        dangerouslySetInnerHTML={{ __html: renderMarkdown(post.body) }}
+      />
 
       <div className="mt-16 pt-8 border-t border-line text-sm text-ink-soft">
         <Link href="/journal" className="hover:text-accent">

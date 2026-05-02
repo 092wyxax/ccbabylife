@@ -49,12 +49,12 @@ export function PostForm({ mode, post, action }: Props) {
         error={errs.excerpt}
       />
       <Textarea
-        label="內文（純文字 / 換行保留）"
+        label="內文（Markdown）"
         name="body"
         rows={14}
         required
         defaultValue={post?.body ?? ''}
-        hint="目前以純文字顯示。日後可加 markdown 渲染。"
+        hint="支援 Markdown：## 標題、**粗體**、*斜體*、- 條列、> 引用、[連結](url)、![alt](image url) 等"
         error={errs.body}
       />
 

@@ -1,6 +1,7 @@
 import 'server-only'
-import { and, asc, desc, eq, isNotNull, lte, gte, gt, or, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, ilike, isNotNull, lte, gte, gt, or, sql } from 'drizzle-orm'
 import { db } from '@/db/client'
+import { paged, type Paged, type PageParams } from '@/lib/pagination'
 import {
   products,
   productImages,
@@ -218,6 +219,53 @@ export async function getProductBySlug(slug: string): Promise<ProductDetail | nu
     category: row.category,
     images,
   }
+}
+
+export interface ProductAdminListRow {
+  product: Product
+  brand: Brand | null
+}
+
+export async function listProductsForAdmin(opts: {
+  search?: string
+  status?: Product['status']
+  stockType?: Product['stockType']
+  brandId?: string
+  page: PageParams
+}): Promise<Paged<ProductAdminListRow>> {
+  const conds = [eq(products.orgId, DEFAULT_ORG_ID)]
+  if (opts.status) conds.push(eq(products.status, opts.status))
+  if (opts.stockType) conds.push(eq(products.stockType, opts.stockType))
+  if (opts.brandId) conds.push(eq(products.brandId, opts.brandId))
+  if (opts.search) {
+    const q = `%${opts.search}%`
+    conds.push(
+      or(
+        ilike(products.nameZh, q),
+        ilike(products.nameJp, q),
+        ilike(products.slug, q)
+      )!
+    )
+  }
+
+  const where = and(...conds)
+
+  const [rows, totalRow] = await Promise.all([
+    db
+      .select({ product: products, brand: brands })
+      .from(products)
+      .leftJoin(brands, eq(brands.id, products.brandId))
+      .where(where)
+      .orderBy(desc(products.createdAt))
+      .limit(opts.page.pageSize)
+      .offset(opts.page.offset),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(products)
+      .where(where),
+  ])
+
+  return paged(rows, totalRow[0]?.count ?? 0, opts.page)
 }
 
 export async function getProductById(id: string): Promise<Product | null> {

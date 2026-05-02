@@ -28,3 +28,53 @@ html, body {
   background: var(--color-accent-soft);
   color: var(--color-ink);
 }
+
+.journal-body {
+  line-height: 1.85;
+  color: var(--color-ink);
+}
+.journal-body p { margin: 0 0 1.25em; }
+.journal-body h2 {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  margin: 2.5em 0 1em;
+  font-weight: 500;
+}
+.journal-body h3 {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  margin: 2em 0 0.8em;
+  font-weight: 500;
+}
+.journal-body ul, .journal-body ol {
+  margin: 0 0 1.25em 1.5em;
+}
+.journal-body ul { list-style: disc; }
+.journal-body ol { list-style: decimal; }
+.journal-body li { margin-bottom: 0.4em; }
+.journal-body blockquote {
+  border-left: 3px solid var(--color-line);
+  padding-left: 1em;
+  color: var(--color-ink-soft);
+  font-style: italic;
+  margin: 1.5em 0;
+}
+.journal-body a {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+.journal-body code {
+  background: var(--color-cream-100);
+  padding: 0.15em 0.4em;
+  border-radius: 0.25em;
+  font-size: 0.9em;
+}
+.journal-body img {
+  border-radius: 0.5rem;
+  margin: 1.5em 0;
+}
+.journal-body hr {
+  border: none;
+  border-top: 1px solid var(--color-line);
+  margin: 3em 0;
+}
