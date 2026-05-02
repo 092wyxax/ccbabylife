@@ -119,14 +119,12 @@ export function CartContents() {
           約 10–14 天到貨。
         </p>
 
-        <button
-          type="button"
-          disabled
-          className="w-full bg-ink/40 text-cream py-3 rounded-md cursor-not-allowed"
-          title="Phase 1b 開放"
+        <Link
+          href="/checkout"
+          className="block w-full text-center bg-ink text-cream py-3 rounded-md hover:bg-accent transition-colors"
         >
-          前往結帳（Phase 1b 開放）
-        </button>
+          前往結帳
+        </Link>
 
         <Link
           href="/shop"
