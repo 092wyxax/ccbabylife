@@ -32,16 +32,16 @@ export default async function HomePage() {
               逛逛這週選物
             </Link>
             <Link
-              href="/calculator"
-              className="border border-line px-5 py-3 rounded-full hover:border-ink transition-colors"
-            >
-              貼日本連結報價
-            </Link>
-            <Link
               href="/recommend"
               className="border border-line px-5 py-3 rounded-full hover:border-ink transition-colors"
             >
               月齡推薦器
+            </Link>
+            <Link
+              href="/about"
+              className="border border-line px-5 py-3 rounded-full hover:border-ink transition-colors"
+            >
+              關於我們
             </Link>
           </div>
         </div>

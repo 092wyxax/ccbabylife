@@ -20,7 +20,6 @@ export function Footer() {
             <li><Link href="/shop" className="hover:text-accent">所有商品</Link></li>
             <li><Link href="/recommend" className="hover:text-accent">月齡推薦器</Link></li>
             <li><Link href="/gift-guide" className="hover:text-accent">彌月禮指南</Link></li>
-            <li><Link href="/calculator" className="hover:text-accent">報價計算機</Link></li>
           </ul>
         </div>
 

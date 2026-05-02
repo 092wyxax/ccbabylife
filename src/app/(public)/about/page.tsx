@@ -62,17 +62,12 @@ export default function AboutPage() {
       </section>
 
       <section className="mt-12 bg-cream-100 border border-line rounded-lg p-6 text-sm leading-relaxed">
-        <p className="font-medium mb-2">透明定價</p>
-        <p className="text-ink-soft mb-3">
-          所有商品的台幣售價計算公式對外公開，包含匯率、國際運費、服務費、利潤率。
-          沒有隱藏費用、沒有平台抽成、沒有突然漲價。
+        <p className="font-medium mb-2">嚴選，不接客製代購</p>
+        <p className="text-ink-soft">
+          我們是一家精選 30 件 SKU 起步的小選物店，不接客戶指定代購。
+          這讓我們能把時間花在真正試用、寫真實心得、確認法規與品質上。
+          想看我們挑了什麼，請逛 <Link href="/shop" className="underline hover:text-accent">/shop</Link>。
         </p>
-        <Link
-          href="/calculator"
-          className="text-accent hover:underline text-sm"
-        >
-          報價計算機 →
-        </Link>
       </section>
 
       <section className="mt-12 text-sm text-ink-soft">
