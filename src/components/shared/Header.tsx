@@ -2,6 +2,7 @@ import Link from 'next/link'
 
 const NAV_ITEMS = [
   { href: '/shop', label: '選物' },
+  { href: '/recommend', label: '月齡推薦' },
   { href: '/journal', label: '部落格' },
   { href: '/about', label: '關於我們' },
 ]

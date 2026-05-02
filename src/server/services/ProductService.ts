@@ -1,5 +1,5 @@
 import 'server-only'
-import { and, asc, desc, eq } from 'drizzle-orm'
+import { and, asc, desc, eq, isNotNull, lte, gte, gt, or, sql } from 'drizzle-orm'
 import { db } from '@/db/client'
 import {
   products,
@@ -78,6 +78,71 @@ export interface ProductDetail {
   brand: Brand | null
   category: Category | null
   images: ProductImage[]
+}
+
+export interface AgeBuckets {
+  fits: ProductListItem[]
+  soon: ProductListItem[]
+}
+
+/**
+ * 給月齡推薦器使用：把上架中且有設定月齡的商品，依使用者寶寶月齡分群。
+ * - fits：當下適用（minAge ≤ age ≤ maxAge）
+ * - soon：未來 3 個月內會用到（age < minAge ≤ age + 3）
+ * 寵物商品與沒設月齡的商品不會出現。
+ */
+export async function listProductsByAge(ageMonths: number): Promise<AgeBuckets> {
+  const baseConds = [
+    eq(products.orgId, DEFAULT_ORG_ID),
+    eq(products.status, 'active'),
+    isNotNull(products.minAgeMonths),
+  ]
+
+  const fitsConds = [
+    ...baseConds,
+    lte(products.minAgeMonths, ageMonths),
+    or(
+      gte(products.maxAgeMonths, ageMonths),
+      sql`${products.maxAgeMonths} IS NULL`
+    )!,
+  ]
+
+  const soonConds = [
+    ...baseConds,
+    gt(products.minAgeMonths, ageMonths),
+    lte(products.minAgeMonths, ageMonths + 3),
+  ]
+
+  const fitsRows = await db
+    .select({ product: products, image: productImages })
+    .from(products)
+    .leftJoin(
+      productImages,
+      and(
+        eq(productImages.productId, products.id),
+        eq(productImages.isPrimary, true)
+      )
+    )
+    .where(and(...fitsConds))
+    .orderBy(asc(products.minAgeMonths), desc(products.salesCount))
+
+  const soonRows = await db
+    .select({ product: products, image: productImages })
+    .from(products)
+    .leftJoin(
+      productImages,
+      and(
+        eq(productImages.productId, products.id),
+        eq(productImages.isPrimary, true)
+      )
+    )
+    .where(and(...soonConds))
+    .orderBy(asc(products.minAgeMonths), desc(products.salesCount))
+
+  return {
+    fits: fitsRows.map((r) => ({ product: r.product, primaryImage: r.image })),
+    soon: soonRows.map((r) => ({ product: r.product, primaryImage: r.image })),
+  }
 }
 
 export async function getProductBySlug(slug: string): Promise<ProductDetail | null> {

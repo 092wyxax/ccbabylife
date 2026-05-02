@@ -128,6 +128,7 @@ export async function createProductAction(
 
   revalidatePath('/admin/products')
   revalidatePath('/shop')
+  revalidatePath(`/shop/${parsed.data.slug}`)
   redirect(`/admin/products/${productId}`)
 }
 
@@ -183,6 +184,7 @@ export async function updateProductAction(
   revalidatePath('/admin/products')
   revalidatePath(`/admin/products/${productId}`)
   revalidatePath('/shop')
+  revalidatePath(`/shop/${parsed.data.slug}`)
   return {}
 }
 
