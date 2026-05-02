@@ -153,7 +153,7 @@ async function DashboardView({ customerId }: { customerId: string }) {
         </div>
       )}
 
-      <div className="grid sm:grid-cols-3 gap-4 mb-10">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
         <DashCard
           href="/account/orders"
           title="我的訂單"
@@ -161,10 +161,22 @@ async function DashboardView({ customerId }: { customerId: string }) {
           desc="查看所有訂單與進度"
         />
         <DashCard
+          href="/account/addresses"
+          title="常用地址"
+          value="📦"
+          desc="收件地址管理（家、辦公室）"
+        />
+        <DashCard
+          href="/account/coupons"
+          title="優惠券"
+          value="🎟"
+          desc="可使用的優惠碼"
+        />
+        <DashCard
           href="/account/settings"
           title="帳號設定"
-          value="LINE / Email"
-          desc="調整通知偏好與基本資料"
+          value="⚙"
+          desc="通知偏好與基本資料"
         />
         <DashCard
           href="#referral"

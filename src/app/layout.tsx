@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Noto_Sans_TC, Noto_Serif_TC } from 'next/font/google'
 import './globals.css'
 import { organizationLd, websiteLd, jsonLdScript } from '@/lib/jsonld'
+import { Toaster } from '@/components/shared/Toaster'
 
 const notoSans = Noto_Sans_TC({
   variable: '--font-noto-sans',
@@ -40,6 +41,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: jsonLdScript(websiteLd()) }}
         />
         {children}
+        <Toaster />
       </body>
     </html>
   )

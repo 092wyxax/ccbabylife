@@ -4,6 +4,13 @@ import { getProductBySlug } from '@/server/services/ProductService'
 import { formatTwd, formatJpy, formatAgeRange } from '@/lib/format'
 import { imageUrl } from '@/lib/image'
 import { AddToCartButton } from '@/components/shop/AddToCartButton'
+import { RestockForm } from '@/components/shop/RestockForm'
+import { ReviewForm } from '@/components/shop/ReviewForm'
+import {
+  listApprovedReviewsForProduct,
+  getProductReviewSummary,
+} from '@/server/services/ReviewService'
+import { getCustomerSession } from '@/lib/customer-session'
 import {
   productLd,
   breadcrumbLd,
@@ -32,6 +39,12 @@ export default async function ProductDetailPage({ params }: Props) {
   const { product, brand, category, images } = detail
   const ageLabel = formatAgeRange(product.minAgeMonths, product.maxAgeMonths)
   const isPreorder = product.stockType === 'preorder'
+
+  const [reviews, reviewSummary, customerSession] = await Promise.all([
+    listApprovedReviewsForProduct(product.id),
+    getProductReviewSummary(product.id),
+    getCustomerSession(),
+  ])
 
   const inStock =
     product.stockType === 'in_stock' && product.stockQuantity > 0
@@ -109,7 +122,12 @@ export default async function ProductDetailPage({ params }: Props) {
         <div>
           {brand && (
             <p className="text-xs uppercase tracking-widest text-ink-soft mb-2">
-              {brand.nameZh}
+              <Link
+                href={`/brand/${brand.slug}`}
+                className="hover:text-accent"
+              >
+                {brand.nameZh}
+              </Link>
             </p>
           )}
           <h1 className="font-serif text-3xl mb-2">{product.nameZh}</h1>
@@ -139,7 +157,7 @@ export default async function ProductDetailPage({ params }: Props) {
             )}
           </div>
 
-          <div className="mb-4">
+          <div className="mb-4 space-y-3">
             <AddToCartButton
               item={{
                 productId: product.id,
@@ -150,8 +168,14 @@ export default async function ProductDetailPage({ params }: Props) {
                 imagePath: images[0]?.cfImageId ?? null,
                 stockType: product.stockType,
               }}
-              outOfStock={product.stockType === 'in_stock' && product.stockQuantity <= 0}
+              outOfStock={!inStock && product.stockType === 'in_stock'}
             />
+            {!inStock && product.stockType === 'in_stock' && (
+              <div className="bg-cream-100 border border-line rounded-lg p-4">
+                <p className="text-sm font-medium mb-2">補貨通知</p>
+                <RestockForm productId={product.id} />
+              </div>
+            )}
           </div>
 
           {product.description && (
@@ -180,6 +204,54 @@ export default async function ProductDetailPage({ params }: Props) {
           </p>
         </div>
       </div>
+
+      <section className="mt-16 pt-8 border-t border-line">
+        <header className="flex items-baseline justify-between mb-6">
+          <h2 className="font-serif text-2xl">客戶心得</h2>
+          {reviewSummary.count > 0 && (
+            <p className="text-sm text-ink-soft">
+              {'★'.repeat(Math.round(reviewSummary.average))}
+              {'☆'.repeat(5 - Math.round(reviewSummary.average))}
+              {' '}
+              <span className="ml-1">{reviewSummary.average.toFixed(1)} / 5 · {reviewSummary.count} 則</span>
+            </p>
+          )}
+        </header>
+
+        {reviews.length === 0 ? (
+          <p className="text-sm text-ink-soft py-6 text-center bg-cream-100 rounded-lg">
+            還沒有客戶心得。
+          </p>
+        ) : (
+          <ul className="space-y-6 mb-12">
+            {reviews.map((r) => (
+              <li key={r.id} className="bg-white border border-line rounded-lg p-5">
+                <header className="flex items-baseline justify-between mb-2">
+                  <p className="text-sm">
+                    {'★'.repeat(r.rating)}
+                    {'☆'.repeat(5 - r.rating)}
+                    {r.title && <span className="ml-3 font-medium">{r.title}</span>}
+                  </p>
+                  <span className="text-xs text-ink-soft">
+                    {new Date(r.createdAt).toLocaleDateString('zh-TW')}
+                    {r.isVerifiedBuyer && (
+                      <span className="ml-2 bg-success/15 text-ink px-2 py-0.5 rounded-full">
+                        已購買
+                      </span>
+                    )}
+                  </span>
+                </header>
+                <p className="text-sm leading-relaxed text-ink/90 whitespace-pre-wrap">{r.body}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <div className="bg-cream-100 border border-line rounded-lg p-6">
+          <h3 className="font-serif text-lg mb-3">寫下你的心得</h3>
+          <ReviewForm productId={product.id} isLoggedIn={!!customerSession} />
+        </div>
+      </section>
     </div>
   )
 }

@@ -12,6 +12,7 @@ import {
   getCustomerSession,
 } from '@/lib/customer-session'
 import { revalidatePath } from 'next/cache'
+import { rateLimit, getClientIp } from '@/lib/rate-limit'
 
 const lookupSchema = z.object({
   orderNumber: z.string().min(1, '請填訂單編號'),
@@ -24,6 +25,12 @@ export async function lookupOrderAction(
   _prev: LookupState,
   formData: FormData
 ): Promise<LookupState> {
+  const ip = await getClientIp()
+  const limit = rateLimit(`order-lookup:${ip}`, 5, 10 * 60 * 1000)
+  if (!limit.ok) {
+    return { error: '嘗試太頻繁，請稍後再試' }
+  }
+
   const parsed = lookupSchema.safeParse({
     orderNumber: formData.get('orderNumber'),
     email: formData.get('email'),

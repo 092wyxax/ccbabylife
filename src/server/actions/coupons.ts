@@ -10,6 +10,7 @@ import {
   validateCoupon,
 } from '@/server/services/CouponService'
 import { couponTypeEnum } from '@/db/schema/coupons'
+import { rateLimit, getClientIp } from '@/lib/rate-limit'
 
 export type CouponActionState = { error?: string; success?: string }
 
@@ -82,6 +83,12 @@ export async function checkCouponAction(
   _prev: CouponCheckState,
   formData: FormData
 ): Promise<CouponCheckState> {
+  const ip = await getClientIp()
+  const limit = rateLimit(`coupon-check:${ip}`, 20, 60 * 60 * 1000)
+  if (!limit.ok) {
+    return { error: '查詢太頻繁，請稍後再試' }
+  }
+
   const parsed = checkSchema.safeParse({
     code: formData.get('code'),
     subtotalTwd: formData.get('subtotalTwd'),

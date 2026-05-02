@@ -6,6 +6,7 @@ import { and, eq } from 'drizzle-orm'
 import { db } from '@/db/client'
 import { newsletterSubscribers } from '@/db/schema'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
+import { rateLimit, getClientIp } from '@/lib/rate-limit'
 
 const subscribeSchema = z.object({
   email: z.string().email('請填正確 email'),
@@ -18,6 +19,14 @@ export async function subscribeNewsletterAction(
   _prev: SubscribeState,
   formData: FormData
 ): Promise<SubscribeState> {
+  const ip = await getClientIp()
+  const limit = rateLimit(`newsletter:${ip}`, 5, 10 * 60 * 1000)
+  if (!limit.ok) {
+    return {
+      error: `操作太頻繁，請等 ${Math.ceil(limit.retryAfterMs / 60000)} 分鐘`,
+    }
+  }
+
   const parsed = subscribeSchema.safeParse({
     email: formData.get('email'),
     source: formData.get('source') ?? 'footer',
