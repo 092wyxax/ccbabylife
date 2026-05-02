@@ -26,11 +26,19 @@ export default async function AdminInventoryPage() {
 
   return (
     <div className="p-8 max-w-7xl">
-      <header className="mb-6">
-        <h1 className="font-serif text-2xl mb-1">庫存管理</h1>
-        <p className="text-ink-soft text-sm">
-          現貨商品共 {total} 件 · 低於 {LOW_STOCK_THRESHOLD} 件視為低庫存
-        </p>
+      <header className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="font-serif text-2xl mb-1">庫存管理</h1>
+          <p className="text-ink-soft text-sm">
+            現貨商品共 {total} 件 · 低於 {LOW_STOCK_THRESHOLD} 件視為低庫存
+          </p>
+        </div>
+        <Link
+          href="/admin/inventory/picklist"
+          className="border border-line px-4 py-2 rounded-md text-sm hover:border-ink transition-colors"
+        >
+          產生揀貨單
+        </Link>
       </header>
 
       {total === 0 ? (

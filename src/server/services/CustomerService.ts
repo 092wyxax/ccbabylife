@@ -91,6 +91,24 @@ export async function getCustomerDetail(id: string): Promise<CustomerDetail | nu
   return { customer, orders: orderRows, totalSpent }
 }
 
+export async function updateCustomer(
+  id: string,
+  patch: Partial<
+    Pick<
+      Customer,
+      'name' | 'phone' | 'isBlacklisted' | 'storeCredit' | 'tags' | 'babyBirthDate' | 'babyGender' | 'notificationPrefs'
+    >
+  >
+): Promise<Customer> {
+  const [row] = await db
+    .update(customers)
+    .set({ ...patch, updatedAt: new Date() })
+    .where(and(eq(customers.id, id), eq(customers.orgId, DEFAULT_ORG_ID)))
+    .returning()
+  if (!row) throw new Error(`Customer not found: ${id}`)
+  return row
+}
+
 export function babyAgeMonths(birthDate: string | null): number | null {
   if (!birthDate) return null
   const born = new Date(birthDate)

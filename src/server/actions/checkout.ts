@@ -125,6 +125,9 @@ export async function checkoutAction(
 
       let customerId: string
       if (existing[0]) {
+        if (existing[0].isBlacklisted) {
+          throw new Error('此 Email 帳號目前無法下單，請聯繫 LINE 客服')
+        }
         customerId = existing[0].id
         await tx
           .update(customers)

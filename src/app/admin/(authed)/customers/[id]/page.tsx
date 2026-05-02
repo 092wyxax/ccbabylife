@@ -6,6 +6,12 @@ import {
 } from '@/server/services/CustomerService'
 import { STATUS_LABEL, statusBadgeClass } from '@/lib/order-progress'
 import { formatTwd } from '@/lib/format'
+import {
+  ProfileEditPanel,
+  BlacklistTogglePanel,
+  StoreCreditPanel,
+  TagsPanel,
+} from '@/components/admin/CustomerEditPanels'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -99,46 +105,46 @@ export default async function AdminCustomerDetailPage({ params }: Props) {
         </div>
 
         <aside className="space-y-6">
-          <section className="bg-white border border-line rounded-lg p-5 text-sm space-y-2">
-            <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-2">
-              基本資料
+          <section className="bg-white border border-line rounded-lg p-5">
+            <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-3">
+              基本資料 + 寶寶
             </h2>
-            <Row label="姓名" value={customer.name ?? '—'} />
-            <Row label="電話" value={customer.phone ?? '—'} />
-            <Row label="LINE" value={customer.lineUserId ? '已綁定' : '未綁定'} />
+            <ProfileEditPanel customer={customer} />
+            <p className="text-xs text-ink-soft mt-3 pt-3 border-t border-line">
+              目前月齡：{ageM != null ? `${ageM} 個月` : '—'} · LINE：
+              {customer.lineUserId ? '已綁定' : '未綁定'}
+            </p>
           </section>
 
-          <section className="bg-white border border-line rounded-lg p-5 text-sm space-y-2">
-            <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-2">
-              寶寶資料
-            </h2>
-            <Row
-              label="出生日期"
-              value={customer.babyBirthDate ?? '未提供'}
-            />
-            <Row
-              label="目前月齡"
-              value={ageM != null ? `${ageM} 個月` : '—'}
-            />
-            <Row label="性別" value={customer.babyGender ?? '未提供'} />
-          </section>
-
-          <section className="bg-white border border-line rounded-lg p-5 text-sm space-y-2">
-            <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-2">
+          <section className="bg-white border border-line rounded-lg p-5">
+            <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-3">
               金額
             </h2>
             <Row label="LTV（已完成訂單）" value={formatTwd(totalSpent)} bold />
-            <Row label="購物金餘額" value={formatTwd(customer.storeCredit)} />
           </section>
 
-          <section className="bg-cream-100 border border-line rounded-lg p-4 text-xs text-ink-soft leading-relaxed">
-            <p className="font-medium text-ink mb-1">後續開發</p>
-            <ul className="list-disc list-inside space-y-0.5">
-              <li>編輯黑名單 / 標籤</li>
-              <li>調整購物金</li>
-              <li>客服 LINE 訊息歷史</li>
-              <li>個人化推薦記錄</li>
-            </ul>
+          <section className="bg-white border border-line rounded-lg p-5">
+            <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-3">
+              購物金
+            </h2>
+            <StoreCreditPanel customer={customer} />
+          </section>
+
+          <section className="bg-white border border-line rounded-lg p-5">
+            <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-3">
+              標籤
+            </h2>
+            <TagsPanel customer={customer} />
+          </section>
+
+          <section className="bg-white border border-line rounded-lg p-5">
+            <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-3">
+              黑名單
+            </h2>
+            <BlacklistTogglePanel customer={customer} />
+            <p className="text-xs text-ink-soft mt-3 leading-relaxed">
+              黑名單客戶在前台 checkout 時會被擋下；歷史訂單照保留。
+            </p>
           </section>
         </aside>
       </div>
