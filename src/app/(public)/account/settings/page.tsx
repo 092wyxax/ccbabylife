@@ -26,7 +26,7 @@ export default async function AccountSettingsPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 sm:px-6 py-12">
       <nav className="text-xs text-ink-soft mb-4">
-        <Link href="/account/orders" className="hover:text-ink">我的訂單</Link>
+        <Link href="/account" className="hover:text-ink">會員中心</Link>
         <span className="mx-2">/</span>
         <span>帳號設定</span>
       </nav>

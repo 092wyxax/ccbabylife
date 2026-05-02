@@ -31,27 +31,16 @@ export async function Header() {
         </nav>
         <div className="flex items-center gap-3 sm:gap-5">
           <CartIndicator />
-          {session ? (
-            <Link
-              href="/account/orders"
-              className="hidden sm:inline-flex text-sm bg-ink text-cream px-3 py-1.5 rounded-full hover:bg-accent transition-colors"
-            >
-              我的訂單
-            </Link>
-          ) : (
-            <Link
-              href="/account"
-              className="hidden sm:inline-flex text-sm bg-ink text-cream px-3 py-1.5 rounded-full hover:bg-accent transition-colors"
-            >
-              登入
-            </Link>
-          )}
+          <Link
+            href="/account"
+            className="hidden sm:inline-flex text-sm bg-ink text-cream px-3 py-1.5 rounded-full hover:bg-accent transition-colors"
+          >
+            {session ? '會員中心' : '登入'}
+          </Link>
           <MobileNav
             items={[
               ...NAV_ITEMS,
-              session
-                ? { href: '/account/orders', label: '我的訂單' }
-                : { href: '/account', label: '登入' },
+              { href: '/account', label: session ? '會員中心' : '登入' },
             ]}
           />
         </div>

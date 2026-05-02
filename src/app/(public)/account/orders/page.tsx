@@ -39,32 +39,26 @@ export default async function MyOrdersPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 py-12">
+      <nav className="text-xs text-ink-soft mb-4">
+        <Link href="/account" className="hover:text-ink">會員中心</Link>
+        <span className="mx-2">/</span>
+        <span>我的訂單</span>
+      </nav>
       <header className="flex items-start justify-between mb-8">
         <div>
-          <p className="text-xs uppercase tracking-widest text-ink-soft mb-2">
-            Account
-          </p>
           <h1 className="font-serif text-3xl">我的訂單</h1>
           <p className="text-ink-soft text-sm mt-1">
-            登入身份：{customer.name ?? customer.email}
+            {customer.name ?? customer.email}
           </p>
         </div>
-        <div className="flex flex-col items-end gap-2">
-          <Link
-            href="/account/settings"
-            className="text-xs text-ink-soft hover:text-accent underline"
+        <form action={logoutAccountAction}>
+          <button
+            type="submit"
+            className="text-xs text-ink-soft hover:text-danger underline"
           >
-            帳號設定
-          </Link>
-          <form action={logoutAccountAction}>
-            <button
-              type="submit"
-              className="text-xs text-ink-soft hover:text-danger underline"
-            >
-              登出
-            </button>
-          </form>
-        </div>
+            登出
+          </button>
+        </form>
       </header>
 
       {myOrders.length === 0 ? (

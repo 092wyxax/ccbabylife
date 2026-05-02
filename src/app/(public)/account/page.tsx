@@ -1,10 +1,17 @@
-import { redirect } from 'next/navigation'
+import Link from 'next/link'
+import { desc, eq } from 'drizzle-orm'
+import { db } from '@/db/client'
+import { customers, orders } from '@/db/schema'
 import { OrderLookup } from '@/components/account/OrderLookup'
 import { SocialLoginButtons } from '@/components/account/SocialLoginButtons'
 import { getCustomerSession } from '@/lib/customer-session'
+import { logoutAccountAction } from '@/server/actions/account'
+import { ensureReferralCode } from '@/server/services/ReferralService'
+import { STATUS_LABEL, statusBadgeClass } from '@/lib/order-progress'
+import { formatTwd } from '@/lib/format'
 
 export const metadata = {
-  title: '會員登入 | 日系選物店',
+  title: '會員中心 | 日系選物店',
 }
 
 const ERR_LABEL: Record<string, string> = {
@@ -25,19 +32,20 @@ interface Props {
 
 export default async function AccountPage({ searchParams }: Props) {
   const session = await getCustomerSession()
-  if (session) redirect('/account/orders')
-
   const params = await searchParams
-  const errMessage = params.err
-    ? (ERR_LABEL[params.err] ?? decodeURIComponent(params.err))
-    : null
 
+  if (!session) return <LoggedOutView err={params.err} />
+  return <DashboardView customerId={session.customerId} />
+}
+
+function LoggedOutView({ err }: { err?: string }) {
+  const errMessage = err ? (ERR_LABEL[err] ?? decodeURIComponent(err)) : null
   return (
     <div className="mx-auto max-w-md px-4 sm:px-6 py-12">
       <p className="text-xs uppercase tracking-widest text-ink-soft mb-2">Account</p>
-      <h1 className="font-serif text-3xl mb-3">登入 / 查訂單</h1>
+      <h1 className="font-serif text-3xl mb-3">會員中心</h1>
       <p className="text-ink-soft text-sm mb-8 leading-relaxed">
-        登入後可以一覽所有訂單、調整通知偏好。
+        登入後可以一覽所有訂單、調整通知偏好、推薦朋友。
       </p>
 
       {errMessage && (
@@ -68,5 +76,164 @@ export default async function AccountPage({ searchParams }: Props) {
         或先用訂單編號 + Email 查詢。
       </p>
     </div>
+  )
+}
+
+async function DashboardView({ customerId }: { customerId: string }) {
+  const [customer] = await db
+    .select()
+    .from(customers)
+    .where(eq(customers.id, customerId))
+    .limit(1)
+
+  if (!customer) return <LoggedOutView />
+
+  const [recentOrders, referralCode, allOrders] = await Promise.all([
+    db
+      .select()
+      .from(orders)
+      .where(eq(orders.customerId, customerId))
+      .orderBy(desc(orders.createdAt))
+      .limit(3),
+    ensureReferralCode(customerId),
+    db
+      .select({ id: orders.id })
+      .from(orders)
+      .where(eq(orders.customerId, customerId)),
+  ])
+
+  const totalOrders = allOrders.length
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+
+  return (
+    <div className="mx-auto max-w-4xl px-4 sm:px-6 py-12">
+      <header className="flex items-start justify-between mb-10">
+        <div>
+          <p className="text-xs uppercase tracking-widest text-ink-soft mb-2">
+            Account
+          </p>
+          <h1 className="font-serif text-3xl">
+            嗨，{customer.name ?? customer.email.split('@')[0]}
+          </h1>
+          <p className="text-ink-soft text-sm mt-1">{customer.email}</p>
+        </div>
+        <form action={logoutAccountAction}>
+          <button
+            type="submit"
+            className="text-xs text-ink-soft hover:text-danger underline"
+          >
+            登出
+          </button>
+        </form>
+      </header>
+
+      <div className="grid sm:grid-cols-3 gap-4 mb-10">
+        <DashCard
+          href="/account/orders"
+          title="我的訂單"
+          value={`${totalOrders} 筆`}
+          desc="查看所有訂單與進度"
+        />
+        <DashCard
+          href="/account/settings"
+          title="帳號設定"
+          value="LINE / Email"
+          desc="調整通知偏好與基本資料"
+        />
+        <DashCard
+          href="#referral"
+          title="推薦朋友"
+          value={referralCode}
+          desc="朋友首單妳得購物金"
+        />
+      </div>
+
+      <section className="mb-10">
+        <header className="flex items-baseline justify-between mb-4">
+          <h2 className="font-serif text-xl">最近訂單</h2>
+          <Link href="/account/orders" className="text-xs text-ink-soft hover:text-accent">
+            看全部 {totalOrders > 0 && `(${totalOrders})`} →
+          </Link>
+        </header>
+        {recentOrders.length === 0 ? (
+          <div className="py-12 text-center text-ink-soft border border-dashed border-line rounded-lg">
+            目前沒有訂單。
+            <Link href="/shop" className="underline hover:text-accent ml-2">
+              逛逛選物
+            </Link>
+          </div>
+        ) : (
+          <ul className="space-y-3">
+            {recentOrders.map((o) => (
+              <li
+                key={o.id}
+                className="bg-white border border-line rounded-lg p-5 flex items-center justify-between"
+              >
+                <div>
+                  <Link
+                    href={`/track/${o.id}`}
+                    className="font-mono text-sm hover:text-accent"
+                  >
+                    {o.orderNumber}
+                  </Link>
+                  <p className="text-xs text-ink-soft mt-1">
+                    {new Date(o.createdAt).toLocaleString('zh-TW')}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="font-medium">{formatTwd(o.total)}</p>
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block ${statusBadgeClass(o.status)}`}
+                  >
+                    {STATUS_LABEL[o.status]}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section
+        id="referral"
+        className="bg-cream-100 border border-line rounded-lg p-6 scroll-mt-20"
+      >
+        <h2 className="font-serif text-xl mb-2">推薦朋友</h2>
+        <p className="text-ink-soft text-sm leading-relaxed mb-4">
+          把這條連結傳給朋友，朋友首單成立後妳會獲得購物金。
+        </p>
+        <div className="bg-white border border-line rounded-md p-3 text-xs font-mono break-all select-all mb-3">
+          {siteUrl}/api/referral/{referralCode}
+        </div>
+        <p className="text-xs text-ink-soft">
+          推薦碼：<span className="font-mono">{referralCode}</span>
+        </p>
+      </section>
+    </div>
+  )
+}
+
+function DashCard({
+  href,
+  title,
+  value,
+  desc,
+}: {
+  href: string
+  title: string
+  value: string
+  desc: string
+}) {
+  return (
+    <Link
+      href={href}
+      className="bg-white border border-line rounded-lg p-5 hover:border-ink transition-colors block"
+    >
+      <p className="text-xs uppercase tracking-widest text-ink-soft mb-2">
+        {title}
+      </p>
+      <p className="text-lg font-medium font-mono break-all">{value}</p>
+      <p className="text-xs text-ink-soft mt-2">{desc}</p>
+    </Link>
   )
 }
