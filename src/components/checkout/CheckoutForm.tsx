@@ -7,14 +7,63 @@ import { imageUrl } from '@/lib/image'
 import { formatTwd } from '@/lib/format'
 import { shippingFee } from '@/lib/pricing'
 import { checkoutAction, type CheckoutState } from '@/server/actions/checkout'
+import type { CustomerAddress } from '@/db/schema/customer_addresses'
 
 const initial: CheckoutState = {}
 
-export function CheckoutForm() {
+interface Prefill {
+  name: string
+  email: string
+  phone: string
+  lineUserId: string
+}
+
+interface Props {
+  prefill: Prefill
+  savedAddresses: CustomerAddress[]
+}
+
+interface AddressFields {
+  recipientName: string
+  recipientPhone: string
+  recipientCity: string
+  recipientZip: string
+  recipientAddress: string
+}
+
+function addrToFields(a: CustomerAddress): AddressFields {
+  return {
+    recipientName: a.recipientName,
+    recipientPhone: a.phone,
+    recipientCity: a.city,
+    recipientZip: a.zipcode,
+    recipientAddress: a.street,
+  }
+}
+
+export function CheckoutForm({ prefill, savedAddresses }: Props) {
   const [mounted, setMounted] = useState(false)
   const items = useCartStore((s) => s.items)
   const totals = useCartStore((s) => s.totals)
   useEffect(() => setMounted(true), [])
+
+  const defaultAddress =
+    savedAddresses.find((a) => a.isDefault) ?? savedAddresses[0] ?? null
+
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
+    defaultAddress?.id ?? null
+  )
+  const [fields, setFields] = useState<AddressFields>(() =>
+    defaultAddress
+      ? addrToFields(defaultAddress)
+      : {
+          recipientName: prefill.name,
+          recipientPhone: prefill.phone,
+          recipientCity: '',
+          recipientZip: '',
+          recipientAddress: '',
+        }
+  )
 
   const [state, formAction, pending] = useActionState(checkoutAction, initial)
   const errs = state.fieldErrors ?? {}
@@ -38,6 +87,22 @@ export function CheckoutForm() {
   const total = t.subtotal + computedShip
   const overweight = ship < 0
 
+  const pickAddress = (id: string | null) => {
+    setSelectedAddressId(id)
+    if (id === null) {
+      setFields({
+        recipientName: prefill.name,
+        recipientPhone: prefill.phone,
+        recipientCity: '',
+        recipientZip: '',
+        recipientAddress: '',
+      })
+      return
+    }
+    const a = savedAddresses.find((x) => x.id === id)
+    if (a) setFields(addrToFields(a))
+  }
+
   return (
     <form action={formAction} className="grid lg:grid-cols-[1fr_360px] gap-8">
       <div className="space-y-8">
@@ -47,10 +112,25 @@ export function CheckoutForm() {
           </div>
         )}
 
-        <Section title="收件人資訊">
+        <Section title="お客様情報 · 收件人資訊">
           <Row>
-            <Field label="收件人姓名" name="recipientName" required error={errs.recipientName} />
-            <Field label="電話" name="recipientPhone" type="tel" required error={errs.recipientPhone} />
+            <Field
+              label="收件人姓名"
+              name="recipientName"
+              required
+              error={errs.recipientName}
+              value={fields.recipientName}
+              onChange={(v) => setFields((f) => ({ ...f, recipientName: v }))}
+            />
+            <Field
+              label="電話"
+              name="recipientPhone"
+              type="tel"
+              required
+              error={errs.recipientPhone}
+              value={fields.recipientPhone}
+              onChange={(v) => setFields((f) => ({ ...f, recipientPhone: v }))}
+            />
           </Row>
           <Field
             label="Email"
@@ -59,19 +139,86 @@ export function CheckoutForm() {
             required
             hint="訂單通知 + Email 備援會寄到這"
             error={errs.recipientEmail}
+            defaultValue={prefill.email}
           />
           <Field
             label="LINE ID（選填）"
             name="recipientLineId"
             hint="填了之後 LINE 推播會直接送到妳的 LINE"
             error={errs.recipientLineId}
+            defaultValue={prefill.lineUserId}
           />
         </Section>
 
-        <Section title="寄送地址">
+        <Section title="お届け先 · 寄送地址">
+          {savedAddresses.length > 0 && (
+            <div className="bg-cream-100 border border-line rounded-lg p-4 mb-2">
+              <p className="font-jp text-xs tracking-[0.2em] text-ink-soft mb-3">
+                既存のお届け先 · 從常用地址挑選
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {savedAddresses.map((a) => (
+                  <button
+                    key={a.id}
+                    type="button"
+                    onClick={() => pickAddress(a.id)}
+                    className={
+                      'text-xs px-3 py-1.5 rounded-full border transition-colors ' +
+                      (selectedAddressId === a.id
+                        ? 'bg-ink text-cream border-ink'
+                        : 'bg-cream border-line text-ink-soft hover:border-ink hover:text-ink')
+                    }
+                  >
+                    {a.label}
+                    {a.isDefault && (
+                      <span className="ml-1.5 font-jp text-[10px] opacity-70">既定</span>
+                    )}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => pickAddress(null)}
+                  className={
+                    'text-xs px-3 py-1.5 rounded-full border transition-colors font-jp ' +
+                    (selectedAddressId === null
+                      ? 'bg-ink text-cream border-ink'
+                      : 'bg-cream border-line text-ink-soft hover:border-ink hover:text-ink')
+                  }
+                >
+                  その他 · 手動填寫
+                </button>
+              </div>
+              <p className="text-xs text-ink-soft mt-3">
+                沒有想要的地址？
+                <Link
+                  href="/account/addresses/new"
+                  className="underline hover:text-accent ml-1"
+                  target="_blank"
+                >
+                  新增常用地址
+                </Link>
+              </p>
+            </div>
+          )}
           <Row>
-            <Field label="縣市" name="recipientCity" required placeholder="例：台北市" error={errs.recipientCity} />
-            <Field label="郵遞區號" name="recipientZip" required placeholder="例：106" error={errs.recipientZip} />
+            <Field
+              label="縣市"
+              name="recipientCity"
+              required
+              placeholder="例：台北市"
+              error={errs.recipientCity}
+              value={fields.recipientCity}
+              onChange={(v) => setFields((f) => ({ ...f, recipientCity: v }))}
+            />
+            <Field
+              label="郵遞區號"
+              name="recipientZip"
+              required
+              placeholder="例：106"
+              error={errs.recipientZip}
+              value={fields.recipientZip}
+              onChange={(v) => setFields((f) => ({ ...f, recipientZip: v }))}
+            />
           </Row>
           <Field
             label="詳細地址"
@@ -79,10 +226,12 @@ export function CheckoutForm() {
             required
             placeholder="例：信義路四段 1 號 5 樓"
             error={errs.recipientAddress}
+            value={fields.recipientAddress}
+            onChange={(v) => setFields((f) => ({ ...f, recipientAddress: v }))}
           />
         </Section>
 
-        <Section title="寶寶資訊（選填）">
+        <Section title="お子様情報 · 寶寶資訊（選填）">
           <Field
             label="寶寶月齡"
             name="babyAgeMonths"
@@ -153,9 +302,9 @@ export function CheckoutForm() {
         <button
           type="submit"
           disabled={pending}
-          className="w-full bg-ink text-cream py-3 rounded-md hover:bg-accent transition-colors disabled:opacity-50"
+          className="font-jp w-full bg-ink text-cream py-3 rounded-md hover:bg-accent transition-colors disabled:opacity-50 tracking-wider"
         >
-          {pending ? '建立訂單中⋯' : '送出訂單'}
+          {pending ? '送信中・・・' : 'ご注文を確定する · 送出訂單'}
         </button>
 
         <p className="text-xs text-ink-soft leading-relaxed">
@@ -174,7 +323,7 @@ export function CheckoutForm() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
-      <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-3">
+      <h2 className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-3">
         {title}
       </h2>
       <div className="space-y-4">{children}</div>
@@ -194,9 +343,23 @@ interface FieldProps {
   placeholder?: string
   hint?: string
   error?: string
+  value?: string
+  defaultValue?: string
+  onChange?: (v: string) => void
 }
 
-function Field({ label, name, type = 'text', required, placeholder, hint, error }: FieldProps) {
+function Field({
+  label,
+  name,
+  type = 'text',
+  required,
+  placeholder,
+  hint,
+  error,
+  value,
+  defaultValue,
+  onChange,
+}: FieldProps) {
   return (
     <div>
       <label htmlFor={name} className="block text-sm mb-1.5">
@@ -209,6 +372,9 @@ function Field({ label, name, type = 'text', required, placeholder, hint, error 
         type={type}
         required={required}
         placeholder={placeholder}
+        value={value}
+        defaultValue={defaultValue}
+        onChange={onChange ? (e) => onChange(e.target.value) : undefined}
         className="w-full border border-line rounded-md px-3 py-2 focus:outline-none focus:border-ink"
       />
       {hint && !error && <p className="text-xs text-ink-soft mt-1">{hint}</p>}

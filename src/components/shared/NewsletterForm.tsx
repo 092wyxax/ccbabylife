@@ -29,13 +29,19 @@ export function NewsletterForm({ source = 'footer' }: Props) {
         <button
           type="submit"
           disabled={pending}
-          className="bg-ink text-cream px-4 py-2 rounded-md text-sm hover:bg-accent transition-colors disabled:opacity-50 whitespace-nowrap"
+          className="font-jp bg-ink text-cream px-4 py-2 rounded-md text-sm hover:bg-accent transition-colors disabled:opacity-50 whitespace-nowrap tracking-wider"
         >
-          {pending ? '⋯' : '訂閱'}
+          {pending ? '・・・' : '購読 · 訂閱'}
         </button>
       </div>
       {state.error && <p className="text-xs text-danger">{state.error}</p>}
-      {state.success && <p className="text-xs text-success">{state.success}</p>}
+      {state.success && (
+        <p className="text-xs text-success">
+          <span className="font-jp tracking-wider">お便りのご登録ありがとうございます</span>
+          <br />
+          {state.success}
+        </p>
+      )}
     </form>
   )
 }

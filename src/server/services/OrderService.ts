@@ -21,6 +21,72 @@ import {
   InvalidStatusTransitionError,
   TRANSITIONS,
 } from '@/lib/order-state-machine'
+import { LINE_TEMPLATES, renderTemplate } from '@/lib/line-templates'
+import { queueAndSendLine } from '@/server/services/NotificationService'
+
+const STATUS_TO_TEMPLATE: Partial<Record<OrderStatus, string>> = {
+  paid: 'L2-paid',
+  sourcing_jp: 'L2-sourcing',
+  shipped: 'L7-shipped',
+}
+
+function formatDateForTemplate(d: Date): string {
+  const m = d.getMonth() + 1
+  const day = d.getDate()
+  return `${m}/${day}`
+}
+
+async function sendStatusNotification(
+  order: Order,
+  newStatus: OrderStatus
+): Promise<void> {
+  if (!order.customerId) return
+  const tmplId = STATUS_TO_TEMPLATE[newStatus]
+  if (!tmplId) return
+
+  const tmpl = LINE_TEMPLATES.find((t) => t.id === tmplId)
+  if (!tmpl) return
+
+  const [customer] = await db
+    .select({ name: customers.name, prefs: customers.notificationPrefs })
+    .from(customers)
+    .where(eq(customers.id, order.customerId))
+    .limit(1)
+  if (!customer?.prefs?.line) return
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
+  const trackingUrl = `${siteUrl}/track/${order.id}`
+  const expectedDelivery = order.expectedDelivery
+    ? formatDateForTemplate(new Date(order.expectedDelivery))
+    : '—'
+
+  const vars: Record<string, string> = {
+    customer_name: customer.name ?? '妳',
+    order_number: order.orderNumber,
+    order_total: `NT$${order.total.toLocaleString('en-US')}`,
+    tracking_url: trackingUrl,
+    tracking_no: '—',
+    date_jp_order: '—',
+    date_received_jp: '—',
+    date_shipping_intl: '—',
+    date_arrived_tw: '—',
+    date_expected_delivery: expectedDelivery,
+    date_arrival: expectedDelivery,
+  }
+
+  const body = renderTemplate(tmpl.body, vars)
+  try {
+    await queueAndSendLine({
+      customerId: order.customerId,
+      templateId: tmpl.id,
+      body,
+      payload: { orderId: order.id, status: newStatus },
+    })
+  } catch {
+    // queueAndSendLine swallows network errors internally; outer catch is
+    // belt-and-suspenders so order status update never rolls back due to LINE.
+  }
+}
 
 export { canTransition, InvalidStatusTransitionError }
 
@@ -52,6 +118,9 @@ export async function changeStatus(
       reason,
     })
   })
+
+  // Fire-and-forget LINE notification. Failure does not roll back status change.
+  void sendStatusNotification(order, to)
 
   return { from: order.status, to }
 }

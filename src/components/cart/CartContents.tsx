@@ -17,7 +17,11 @@ export function CartContents() {
   useEffect(() => setMounted(true), [])
 
   if (!mounted) {
-    return <div className="text-ink-soft text-sm py-12 text-center">載入購物車⋯</div>
+    return (
+      <div className="text-ink-soft text-sm py-12 text-center">
+        <span className="font-jp tracking-wider">お待ちください・・・</span>
+      </div>
+    )
   }
 
   if (items.length === 0) {
@@ -50,7 +54,11 @@ export function CartContents() {
                 {it.nameZh}
               </Link>
               <p className="text-xs text-ink-soft mt-0.5">
-                {it.stockType === 'preorder' ? '預購' : '現貨'} · {formatTwd(it.priceTwd)} / 件
+                <span className="font-jp tracking-wider">
+                  {it.stockType === 'preorder' ? '予約' : '在庫'}
+                </span>
+                {' · '}
+                {formatTwd(it.priceTwd)} / 點
               </p>
 
               <div className="mt-3 flex items-center gap-3">
@@ -121,9 +129,9 @@ export function CartContents() {
 
         <Link
           href="/checkout"
-          className="block w-full text-center bg-ink text-cream py-3 rounded-md hover:bg-accent transition-colors"
+          className="font-jp block w-full text-center bg-ink text-cream py-3 rounded-md hover:bg-accent transition-colors tracking-wider"
         >
-          前往結帳
+          ご注文手続きへ · 前往結帳
         </Link>
 
         <Link

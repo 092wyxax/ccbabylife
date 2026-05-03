@@ -38,10 +38,10 @@ export function CutoffCountdown({ variant = 'banner' }: Props) {
     return (
       <span
         className={
-          'text-xs ' + (isUrgent ? 'text-warning font-medium' : 'text-ink-soft')
+          'text-xs font-jp tracking-wider ' + (isUrgent ? 'text-warning font-medium' : 'text-ink-soft')
         }
       >
-        本週截單剩 {text}
+        今週の締切まで {text}
       </span>
     )
   }
@@ -49,11 +49,11 @@ export function CutoffCountdown({ variant = 'banner' }: Props) {
   return (
     <div
       className={
-        'text-center text-sm py-2 px-4 ' +
+        'text-center text-sm py-2 px-4 font-jp tracking-wider ' +
         (isUrgent ? 'bg-warning text-ink' : 'bg-ink text-cream')
       }
     >
-      本週預購批次截單還剩 <strong>{text}</strong>{isUrgent && ' · 趕快下單' }
+      今週の予約締切まで <strong>{text}</strong>{isUrgent && ' · お早めに' }
     </div>
   )
 }

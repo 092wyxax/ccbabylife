@@ -8,7 +8,7 @@ import { getCustomerSession } from '@/lib/customer-session'
 import { formatTwd } from '@/lib/format'
 
 export const metadata = {
-  title: '我的優惠券 | 日系選物店',
+  title: '我的優惠券',
 }
 
 export default async function MyCouponsPage() {
@@ -53,11 +53,14 @@ export default async function MyCouponsPage() {
         <span>我的優惠券</span>
       </nav>
 
-      <h1 className="font-serif text-3xl mb-8">我的優惠券</h1>
+      <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-2">
+        COUPONS · クーポン
+      </p>
+      <h1 className="font-serif text-3xl mb-8 tracking-wide">我的優惠券</h1>
 
       <section className="mb-10">
-        <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-3">
-          可使用 ({usable.length})
+        <h2 className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-3">
+          ご利用可能 · 可使用（{usable.length}）
         </h2>
         {usable.length === 0 ? (
           <div className="py-10 text-center text-ink-soft border border-dashed border-line rounded-lg">
@@ -74,8 +77,8 @@ export default async function MyCouponsPage() {
 
       {publicCoupons.length > 0 && (
         <section className="mb-10">
-          <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-3">
-            目前可用的公開優惠
+          <h2 className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-3">
+            公開クーポン · 目前可用的公開優惠
           </h2>
           <ul className="grid sm:grid-cols-2 gap-3">
             {publicCoupons.map((c) => (
@@ -87,8 +90,8 @@ export default async function MyCouponsPage() {
 
       {used.length > 0 && (
         <section className="opacity-60">
-          <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-3">
-            已使用 ({used.length})
+          <h2 className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-3">
+            ご利用済み · 已使用（{used.length}）
           </h2>
           <ul className="grid sm:grid-cols-2 gap-3">
             {used.map(({ coupon, claim }) => (

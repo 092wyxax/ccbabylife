@@ -25,7 +25,10 @@ export default async function EditAddressPage({ params }: Props) {
         <span className="mx-2">/</span>
         <span>{address.label}</span>
       </nav>
-      <h1 className="font-serif text-3xl mb-8">編輯地址</h1>
+      <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-2">
+        EDIT · お届け先の編集
+      </p>
+      <h1 className="font-serif text-3xl mb-8 tracking-wide">編輯地址</h1>
       <AddressForm mode="edit" address={address} />
     </div>
   )

@@ -12,9 +12,9 @@ interface Props {
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params
   const post = await getPostBySlug(slug)
-  if (!post) return { title: '文章不存在 | 日系選物店' }
+  if (!post) return { title: '文章不存在' }
   return {
-    title: `${post.title} | 日系選物店`,
+    title: post.title,
     description: post.excerpt ?? undefined,
   }
 }
@@ -53,15 +53,15 @@ export default async function JournalDetailPage({ params }: Props) {
 
       <header className="mb-8">
         {post.publishedAt && (
-          <p className="text-xs text-ink-soft mb-3 uppercase tracking-widest">
-            {new Date(post.publishedAt).toLocaleDateString('zh-TW', {
+          <p className="font-jp text-xs text-ink-soft mb-3 tracking-[0.3em]">
+            {new Date(post.publishedAt).toLocaleDateString('ja-JP', {
               year: 'numeric',
               month: 'long',
               day: 'numeric',
             })}
           </p>
         )}
-        <h1 className="font-serif text-3xl sm:text-4xl leading-tight mb-4">
+        <h1 className="font-serif text-3xl sm:text-4xl leading-tight mb-4 tracking-wide">
           {post.title}
         </h1>
         {post.excerpt && (
@@ -86,8 +86,8 @@ export default async function JournalDetailPage({ params }: Props) {
       />
 
       <div className="mt-16 pt-8 border-t border-line text-sm text-ink-soft">
-        <Link href="/journal" className="hover:text-accent">
-          ← 回部落格
+        <Link href="/journal" className="hover:text-accent font-jp">
+          ← 一覧へ戻る · 回部落格
         </Link>
       </div>
     </article>

@@ -5,6 +5,7 @@ import { db } from '@/db/client'
 import { brands, products, productImages } from '@/db/schema'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { ProductGrid } from '@/components/shop/ProductGrid'
+import { BRAND_STORIES } from '@/lib/japan-content'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -17,9 +18,9 @@ export async function generateMetadata({ params }: Props) {
     .from(brands)
     .where(and(eq(brands.orgId, DEFAULT_ORG_ID), eq(brands.slug, slug)))
     .limit(1)
-  if (!brand) return { title: '品牌不存在 | 日系選物店' }
+  if (!brand) return { title: '品牌不存在' }
   return {
-    title: `${brand.nameZh} | 日系選物店`,
+    title: brand.nameZh,
     description: brand.description ?? `${brand.nameZh} 的所有日系選物`,
   }
 }
@@ -66,12 +67,12 @@ export default async function BrandPage({ params }: Props) {
       </nav>
 
       <header className="mb-10">
-        <p className="text-xs uppercase tracking-widest text-ink-soft mb-2">
-          Brand
+        <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-2">
+          BRAND STORY · ブランド物語
         </p>
-        <h1 className="font-serif text-4xl mb-2">{brand.nameZh}</h1>
+        <h1 className="font-serif text-4xl mb-2 tracking-wide">{brand.nameZh}</h1>
         {brand.nameJp && (
-          <p className="text-ink-soft text-lg mb-3">{brand.nameJp}</p>
+          <p className="font-jp text-ink-soft text-lg mb-3">{brand.nameJp}</p>
         )}
         {brand.description && (
           <p className="text-ink-soft leading-relaxed max-w-2xl">
@@ -80,8 +81,45 @@ export default async function BrandPage({ params }: Props) {
         )}
       </header>
 
-      <p className="text-sm text-ink-soft mb-6 pb-4 border-b border-line">
-        共 {items.length} 件選物
+      {(() => {
+        const story = BRAND_STORIES[brand.slug]
+        if (!story) return null
+        return (
+          <section className="mb-12 grid lg:grid-cols-[1fr_280px] gap-8 pb-10 border-b border-line">
+            <div>
+              <p className="font-jp text-xs tracking-[0.3em] text-accent mb-2">
+                {story.foundedYear} 年創業
+              </p>
+              <h2 className="font-serif text-2xl mb-5 tracking-wide leading-snug">
+                {story.headline}
+              </h2>
+              <div className="text-ink/90 leading-relaxed space-y-4">
+                {story.story.split(/\n\n+/).map((para, i) => (
+                  <p key={i} className="whitespace-pre-line">
+                    {para}
+                  </p>
+                ))}
+              </div>
+            </div>
+            <aside className="bg-cream-100 border border-line rounded-lg p-5 h-fit">
+              <p className="font-jp text-xs tracking-[0.2em] text-ink-soft mb-3">
+                ファクト · 數據面
+              </p>
+              <ul className="space-y-2 text-sm">
+                {story.facts.map((f, i) => (
+                  <li key={i} className="flex gap-2">
+                    <span className="text-accent shrink-0">·</span>
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+            </aside>
+          </section>
+        )
+      })()}
+
+      <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-6">
+        全商品 · 全 {items.length} 點
       </p>
 
       <ProductGrid products={items} />

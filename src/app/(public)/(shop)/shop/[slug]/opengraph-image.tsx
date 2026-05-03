@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og'
 import { getProductBySlug } from '@/server/services/ProductService'
 import { formatTwd } from '@/lib/format'
 
-export const alt = '日系選物店 — 商品'
+export const alt = '熙熙初日｜日系選物店 — 商品'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -27,7 +27,7 @@ export default async function Image({ params }: Props) {
             fontSize: 60,
           }}
         >
-          日系選物店
+          熙熙初日
         </div>
       ),
       { ...size }
@@ -88,7 +88,7 @@ export default async function Image({ params }: Props) {
               borderRadius: 999,
             }}
           >
-            日系選物店 · 1 歲娃媽嚴選
+            熙熙初日 · 1 歲娃媽嚴選
           </span>
         </div>
       </div>

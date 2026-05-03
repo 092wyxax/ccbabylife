@@ -20,16 +20,19 @@ export default async function AddressesPage() {
 
       <header className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="font-serif text-3xl">常用地址</h1>
+          <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-2">
+            ADDRESS · お届け先
+          </p>
+          <h1 className="font-serif text-3xl tracking-wide">常用地址</h1>
           <p className="text-ink-soft text-sm mt-1">
             結帳時可以直接挑選，不用每次重打。第一個會自動成為預設。
           </p>
         </div>
         <Link
           href="/account/addresses/new"
-          className="bg-ink text-cream px-4 py-2 rounded-md text-sm hover:bg-accent transition-colors"
+          className="font-jp bg-ink text-cream px-4 py-2 rounded-md text-sm hover:bg-accent transition-colors tracking-wider"
         >
-          + 新增地址
+          + 新規追加 · 新增
         </Link>
       </header>
 
@@ -49,8 +52,8 @@ export default async function AddressesPage() {
                   <h3 className="font-medium flex items-center gap-2">
                     {a.label}
                     {a.isDefault && (
-                      <span className="text-xs bg-accent/20 text-ink px-2 py-0.5 rounded-full">
-                        預設
+                      <span className="font-jp text-xs bg-accent/20 text-ink px-2 py-0.5 rounded-full tracking-wider">
+                        既定 · 預設
                       </span>
                     )}
                   </h3>

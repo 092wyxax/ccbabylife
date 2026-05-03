@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 export const metadata = {
-  title: '常見問題 | 日系選物店',
+  title: '常見問題',
   description: '預購流程、付款、退換貨、法規限制等常見問題',
 }
 
@@ -79,13 +79,13 @@ const FAQS = [
 export default function FaqPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 py-16">
-      <p className="text-xs uppercase tracking-widest text-ink-soft mb-3">FAQ</p>
-      <h1 className="font-serif text-4xl mb-8">常見問題</h1>
+      <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-3">FAQ · よくある質問</p>
+      <h1 className="font-serif text-4xl mb-8 tracking-wide">常見問題</h1>
 
       <div className="space-y-12">
         {FAQS.map((sec) => (
           <section key={sec.section}>
-            <h2 className="font-serif text-xl mb-4 pb-2 border-b border-line">
+            <h2 className="font-serif text-xl mb-4 pb-2 border-b border-line tracking-wide">
               {sec.section}
             </h2>
             <div className="space-y-6">

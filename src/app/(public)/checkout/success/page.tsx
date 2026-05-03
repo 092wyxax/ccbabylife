@@ -9,7 +9,7 @@ interface Props {
 }
 
 export const metadata = {
-  title: '訂單已送出 | 日系選物店',
+  title: '訂單已送出',
 }
 
 export default async function CheckoutSuccessPage({ searchParams }: Props) {
@@ -29,7 +29,10 @@ export default async function CheckoutSuccessPage({ searchParams }: Props) {
         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-success/20 flex items-center justify-center text-success text-3xl">
           ✓
         </div>
-        <h1 className="font-serif text-3xl mb-2">訂單已送出</h1>
+        <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-2">
+          ご注文ありがとうございました
+        </p>
+        <h1 className="font-serif text-3xl mb-2 tracking-wide">訂單已送出</h1>
         <p className="text-ink-soft text-sm">
           我們已收到妳的訂單，請保留以下資訊查詢進度。
         </p>
@@ -37,21 +40,21 @@ export default async function CheckoutSuccessPage({ searchParams }: Props) {
 
       <div className="bg-white border border-line rounded-lg p-6 space-y-3 mb-8">
         <div className="flex justify-between">
-          <span className="text-ink-soft text-sm">訂單編號</span>
+          <span className="font-jp text-ink-soft text-sm">お注文番号 · 訂單編號</span>
           <span className="font-mono">{order.orderNumber}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-ink-soft text-sm">訂單金額</span>
+          <span className="font-jp text-ink-soft text-sm">合計金額 · 訂單金額</span>
           <span className="font-medium">{formatTwd(order.total)}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-ink-soft text-sm">收件 Email</span>
+          <span className="font-jp text-ink-soft text-sm">メール · 收件 Email</span>
           <span className="text-sm">{order.recipientEmail}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-ink-soft text-sm">目前狀態</span>
-          <span className="text-sm bg-warning/20 px-2 py-0.5 rounded-full text-xs">
-            待付款
+          <span className="font-jp text-ink-soft text-sm">現狀 · 目前狀態</span>
+          <span className="font-jp text-xs bg-warning/20 px-2 py-0.5 rounded-full tracking-wider">
+            お支払待ち · 待付款
           </span>
         </div>
       </div>

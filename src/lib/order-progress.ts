@@ -1,26 +1,26 @@
 import type { OrderStatus } from '@/db/schema'
 
 export const STATUS_LABEL: Record<OrderStatus, string> = {
-  pending_payment: '待付款',
-  paid: '已付款',
-  sourcing_jp: '日本下單中',
-  received_jp: '日本到貨',
-  shipping_intl: '國際集運中',
-  arrived_tw: '台灣到港',
-  shipped: '已出貨',
-  completed: '已完成',
-  cancelled: '已取消',
-  refunded: '已退款',
+  pending_payment: 'お支払待ち · 待付款',
+  paid: 'お支払済 · 已付款',
+  sourcing_jp: '日本手配中 · 日本下單中',
+  received_jp: '日本入荷 · 日本到貨',
+  shipping_intl: '国際輸送中 · 國際集運中',
+  arrived_tw: '台湾到着 · 台灣到港',
+  shipped: '発送済 · 已出貨',
+  completed: '完了 · 已完成',
+  cancelled: 'キャンセル · 已取消',
+  refunded: '返金済 · 已退款',
 }
 
 export const PROGRESS_STAGES: Array<{ status: OrderStatus; label: string }> = [
-  { status: 'paid', label: '已付款' },
-  { status: 'sourcing_jp', label: '日本下單' },
-  { status: 'received_jp', label: '日本到貨' },
-  { status: 'shipping_intl', label: '國際集運' },
-  { status: 'arrived_tw', label: '台灣到港' },
-  { status: 'shipped', label: '已出貨' },
-  { status: 'completed', label: '已完成' },
+  { status: 'paid', label: 'お支払済' },
+  { status: 'sourcing_jp', label: '日本手配' },
+  { status: 'received_jp', label: '日本入荷' },
+  { status: 'shipping_intl', label: '国際輸送' },
+  { status: 'arrived_tw', label: '台湾到着' },
+  { status: 'shipped', label: '発送済' },
+  { status: 'completed', label: '完了' },
 ]
 
 export type ProgressState =

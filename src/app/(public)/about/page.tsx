@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 export const metadata = {
-  title: '關於我們 + 法規誠信宣告 | 日系選物店',
+  title: '關於我們 + 法規誠信宣告',
   description:
     '1 歲娃媽親身試用、嚴選日系好物。我們不販售需查驗登記商品，這是我們選擇難走但合法的路。',
 }
@@ -9,10 +9,10 @@ export const metadata = {
 export default function AboutPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 py-16">
-      <p className="text-xs uppercase tracking-widest text-ink-soft mb-3">
-        About
+      <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-3">
+        ABOUT · 私たちのこと
       </p>
-      <h1 className="font-serif text-4xl mb-8">關於我們</h1>
+      <h1 className="font-serif text-4xl mb-8 tracking-wide">關於我們</h1>
 
       <section className="prose prose-stone max-w-none text-ink leading-relaxed space-y-5">
         <p>
@@ -32,10 +32,10 @@ export default function AboutPage() {
       </section>
 
       <section className="mt-16 p-8 border-2 border-accent rounded-lg bg-accent/5">
-        <p className="text-xs uppercase tracking-widest text-accent mb-3">
-          法規誠信宣告
+        <p className="font-jp text-xs tracking-[0.3em] text-accent mb-3">
+          法令誠信 · COMPLIANCE
         </p>
-        <h2 className="font-serif text-2xl mb-5">不販售需查驗登記商品</h2>
+        <h2 className="font-serif text-2xl mb-5 tracking-wide">不販售需查驗登記商品</h2>
 
         <div className="space-y-4 text-sm leading-relaxed">
           <p>我們堅持只販售可合法平行輸入的綠燈品項。我們<strong>不代購</strong>以下商品：</p>
@@ -71,13 +71,13 @@ export default function AboutPage() {
       </section>
 
       <section className="mt-12 text-sm text-ink-soft">
-        <p className="mb-2">營業資訊</p>
-        <ul className="space-y-1">
-          <li>統一編號：60766849</li>
-          <li>負責人：先生（Tech Lead） / 太太（Brand & CS） / 朋友（JP Sourcing）</li>
-          <li>營業時間：週一～五 09:00–18:00（LINE 客服）</li>
-          <li>截單日：每週日 23:59（隔週一日本下單）</li>
-        </ul>
+        <p className="font-jp mb-2 tracking-[0.2em] text-ink/70">営業案內 · INFO</p>
+        <dl className="space-y-1">
+          <div className="flex gap-3"><dt className="font-jp shrink-0 w-20 text-ink/70">統一編號</dt><dd>60766849</dd></div>
+          <div className="flex gap-3"><dt className="font-jp shrink-0 w-20 text-ink/70">店主</dt><dd>先生（Tech Lead） / 太太（Brand & CS） / 朋友（JP Sourcing）</dd></div>
+          <div className="flex gap-3"><dt className="font-jp shrink-0 w-20 text-ink/70">営業時間</dt><dd>週一〜五 09:00–18:00（LINE 客服）</dd></div>
+          <div className="flex gap-3"><dt className="font-jp shrink-0 w-20 text-ink/70">締切</dt><dd>毎週日 23:59（隔週一日本下單）</dd></div>
+        </dl>
       </section>
     </div>
   )

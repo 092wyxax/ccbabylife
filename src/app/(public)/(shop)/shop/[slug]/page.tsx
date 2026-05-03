@@ -24,9 +24,9 @@ interface Props {
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params
   const detail = await getProductBySlug(slug)
-  if (!detail) return { title: '商品不存在 | 日系選物店' }
+  if (!detail) return { title: '商品不存在' }
   return {
-    title: `${detail.product.nameZh} | 日系選物店`,
+    title: detail.product.nameZh,
     description: detail.product.seoDescription ?? detail.product.description ?? undefined,
   }
 }
@@ -137,22 +137,25 @@ export default async function ProductDetailPage({ params }: Props) {
 
           <div className="flex items-baseline gap-4 mb-6">
             <span className="text-3xl font-medium">{formatTwd(product.priceTwd)}</span>
-            <span className="text-sm text-ink-soft">日本售價 {formatJpy(product.priceJpy)}</span>
+            <span className="text-sm text-ink-soft font-jp">
+              日本参考価格 {formatJpy(product.priceJpy)}
+              <span className="ml-1 text-[10px] tracking-wider">税込</span>
+            </span>
           </div>
 
           <div className="flex flex-wrap gap-2 mb-8">
             {ageLabel && (
-              <span className="text-xs border border-line rounded-full px-3 py-1">
+              <span className="text-xs border border-line px-3 py-1">
                 {ageLabel}
               </span>
             )}
             {isPreorder ? (
-              <span className="text-xs bg-warning/20 text-ink rounded-full px-3 py-1">
-                預購 · 約 10–14 天到貨
+              <span className="font-jp text-xs bg-warning/20 text-ink px-3 py-1 tracking-wider">
+                予約 · 約 10–14 日でお届け
               </span>
             ) : (
-              <span className="text-xs bg-success/20 text-ink rounded-full px-3 py-1">
-                現貨庫存 {product.stockQuantity}
+              <span className="font-jp text-xs bg-success/20 text-ink px-3 py-1 tracking-wider">
+                在庫 {product.stockQuantity} 點
               </span>
             )}
           </div>

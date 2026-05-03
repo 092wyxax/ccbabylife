@@ -11,7 +11,7 @@ import { STATUS_LABEL, statusBadgeClass } from '@/lib/order-progress'
 import { formatTwd } from '@/lib/format'
 
 export const metadata = {
-  title: '會員中心 | 日系選物店',
+  title: '會員中心',
 }
 
 const ERR_LABEL: Record<string, string> = {
@@ -42,8 +42,8 @@ function LoggedOutView({ err }: { err?: string }) {
   const errMessage = err ? (ERR_LABEL[err] ?? decodeURIComponent(err)) : null
   return (
     <div className="mx-auto max-w-md px-4 sm:px-6 py-12">
-      <p className="text-xs uppercase tracking-widest text-ink-soft mb-2">Account</p>
-      <h1 className="font-serif text-3xl mb-3">會員中心</h1>
+      <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-2">ACCOUNT · マイページ</p>
+      <h1 className="font-serif text-3xl mb-3 tracking-wide">會員中心</h1>
       <p className="text-ink-soft text-sm mb-8 leading-relaxed">
         登入後可以一覽所有訂單、調整通知偏好、推薦朋友。
       </p>
@@ -116,20 +116,20 @@ async function DashboardView({ customerId }: { customerId: string }) {
     <div className="mx-auto max-w-4xl px-4 sm:px-6 py-12">
       <header className="flex items-start justify-between mb-10">
         <div>
-          <p className="text-xs uppercase tracking-widest text-ink-soft mb-2">
-            Account
+          <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-2">
+            ACCOUNT · マイページ
           </p>
-          <h1 className="font-serif text-3xl">
-            嗨，{customer.name ?? customer.email.split('@')[0]}
+          <h1 className="font-serif text-3xl tracking-wide">
+            <span className="font-jp">こんにちは、</span>{customer.name ?? customer.email.split('@')[0]}
           </h1>
           <p className="text-ink-soft text-sm mt-1">{customer.email}</p>
         </div>
         <form action={logoutAccountAction}>
           <button
             type="submit"
-            className="text-xs text-ink-soft hover:text-danger underline"
+            className="font-jp text-xs text-ink-soft hover:text-danger underline tracking-wider"
           >
-            登出
+            ログアウト · 登出
           </button>
         </form>
       </header>
@@ -156,31 +156,31 @@ async function DashboardView({ customerId }: { customerId: string }) {
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
         <DashCard
           href="/account/orders"
-          title="我的訂單"
-          value={`${totalOrders} 筆`}
+          title="ご注文 · 我的訂單"
+          value={`${totalOrders} 件`}
           desc="查看所有訂單與進度"
         />
         <DashCard
           href="/account/addresses"
-          title="常用地址"
+          title="お届け先 · 常用地址"
           value="📦"
           desc="收件地址管理（家、辦公室）"
         />
         <DashCard
           href="/account/coupons"
-          title="優惠券"
+          title="クーポン · 優惠券"
           value="🎟"
           desc="可使用的優惠碼"
         />
         <DashCard
           href="/account/settings"
-          title="帳號設定"
+          title="設定 · 帳號設定"
           value="⚙"
           desc="通知偏好與基本資料"
         />
         <DashCard
           href="#referral"
-          title="推薦朋友"
+          title="ご紹介 · 推薦朋友"
           value={referralCode}
           desc="朋友首單妳得購物金"
         />
@@ -188,9 +188,12 @@ async function DashboardView({ customerId }: { customerId: string }) {
 
       <section className="mb-10">
         <header className="flex items-baseline justify-between mb-4">
-          <h2 className="font-serif text-xl">最近訂單</h2>
-          <Link href="/account/orders" className="text-xs text-ink-soft hover:text-accent">
-            看全部 {totalOrders > 0 && `(${totalOrders})`} →
+          <h2 className="font-serif text-xl tracking-wide">
+            <span className="font-jp text-xs tracking-[0.3em] text-ink-soft mr-3">最近のご注文</span>
+            最近訂單
+          </h2>
+          <Link href="/account/orders" className="text-xs text-ink-soft hover:text-accent font-jp">
+            一覧へ {totalOrders > 0 && `(${totalOrders})`} →
           </Link>
         </header>
         {recentOrders.length === 0 ? (
@@ -236,7 +239,8 @@ async function DashboardView({ customerId }: { customerId: string }) {
         id="referral"
         className="bg-cream-100 border border-line rounded-lg p-6 scroll-mt-20"
       >
-        <h2 className="font-serif text-xl mb-2">推薦朋友</h2>
+        <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-1">REFERRAL · ご紹介</p>
+        <h2 className="font-serif text-xl mb-2 tracking-wide">推薦朋友</h2>
         <p className="text-ink-soft text-sm leading-relaxed mb-4">
           把這條連結傳給朋友，朋友首單成立後妳會獲得購物金。
         </p>
@@ -267,7 +271,7 @@ function DashCard({
       href={href}
       className="bg-white border border-line rounded-lg p-5 hover:border-ink transition-colors block"
     >
-      <p className="text-xs uppercase tracking-widest text-ink-soft mb-2">
+      <p className="font-jp text-xs tracking-[0.2em] text-ink-soft mb-2">
         {title}
       </p>
       <p className="text-lg font-medium font-mono break-all">{value}</p>

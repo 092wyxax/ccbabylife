@@ -41,7 +41,7 @@ export function ReviewForm({ productId, isLoggedIn }: Props) {
       <input type="hidden" name="rating" value={rating} />
 
       <div>
-        <span className="block text-sm mb-1.5">評分</span>
+        <span className="block text-sm mb-1.5 font-jp">評価 · 評分</span>
         <div className="flex gap-1">
           {[1, 2, 3, 4, 5].map((n) => (
             <button
@@ -58,8 +58,8 @@ export function ReviewForm({ productId, isLoggedIn }: Props) {
       </div>
 
       <div>
-        <label htmlFor="title" className="block text-sm mb-1.5">
-          標題（選填）
+        <label htmlFor="title" className="block text-sm mb-1.5 font-jp">
+          タイトル · 標題（選填）
         </label>
         <input
           id="title"
@@ -70,8 +70,8 @@ export function ReviewForm({ productId, isLoggedIn }: Props) {
       </div>
 
       <div>
-        <label htmlFor="body" className="block text-sm mb-1.5">
-          心得 <span className="text-danger">*</span>
+        <label htmlFor="body" className="block text-sm mb-1.5 font-jp">
+          ご感想 · 心得 <span className="text-danger">*</span>
         </label>
         <textarea
           id="body"
@@ -89,7 +89,7 @@ export function ReviewForm({ productId, isLoggedIn }: Props) {
         disabled={pending}
         className="bg-ink text-cream px-5 py-2 rounded-md text-sm hover:bg-accent transition-colors disabled:opacity-50"
       >
-        {pending ? '送出中⋯' : '送出心得'}
+        {pending ? '送信中・・・' : '送出心得'}
       </button>
     </form>
   )

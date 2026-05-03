@@ -4,6 +4,14 @@
     {
       "path": "/api/cron/baby-age-push",
       "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/cron/dispatch-pushes",
+      "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/api/cron/scrape-trending",
+      "schedule": "0 20 * * 3"
     }
   ]
 }

@@ -7,7 +7,7 @@ export const SAMPLE_VARS: Record<string, string> = {
   customer_name: '小芳',
   order_number: 'N20260512001',
   order_total: 'NT$2,480',
-  tracking_url: 'https://nihon-select.tw/track/abc-123',
+  tracking_url: 'https://ccbabylife.com/track/abc-123',
   date_jp_order: '5/13',
   date_received_jp: '5/15',
   date_shipping_intl: '5/22',
@@ -17,7 +17,7 @@ export const SAMPLE_VARS: Record<string, string> = {
   date_arrival: '5/28',
   tracking_no: '123-4567-8901',
   remaining_amount: 'NT$1,200',
-  payment_url: 'https://nihon-select.tw/pay/abc-123',
+  payment_url: 'https://ccbabylife.com/pay/abc-123',
   deposit: 'NT$744',
   refund_amount: 'NT$1,736',
   refund_message:
@@ -29,15 +29,15 @@ export const SAMPLE_VARS: Record<string, string> = {
   price_2: '850',
   product_3_name: 'Pigeon 純水嬰兒濕巾',
   price_3: '460',
-  recommend_url: 'https://nihon-select.tw/recommend',
+  recommend_url: 'https://ccbabylife.com/shop',
   product_name: 'Pigeon 母乳實感奶瓶 240ml',
   price_jpy: '2,480',
   weight_g: '320',
   estimated_twd: '1,200',
   quote_id: 'q-987',
-  about_url: 'https://nihon-select.tw/about',
-  site_url: 'https://nihon-select.tw',
-  line_official_id: '@nihon-select',
+  about_url: 'https://ccbabylife.com/about',
+  site_url: 'https://ccbabylife.com',
+  line_official_id: '@ccbabylife',
   phone: '02-1234-5678',
   referral_code: 'XIAO-FANG',
 }
@@ -57,7 +57,7 @@ export const LINE_TEMPLATES: LineTemplate[] = [
     triggerLabel: 'L1 加好友自動回覆',
     channel: 'reply',
     pricedAt: '免費',
-    body: `妳好，這裡是日系選物店～
+    body: `妳好，這裡是熙熙初日｜日系選物店～
 
 我們是一家媽媽親選日系母嬰／寵物用品的小店。每週日截單、週一日本下單、約 10–14 天到貨。
 
@@ -146,6 +146,21 @@ export const LINE_TEMPLATES: LineTemplate[] = [
 完整推薦：{{recommend_url}}
 
 （⚠ 此推送每月一次，回覆「停止推送」可取消）`,
+  },
+  {
+    id: 'L8-payment-link',
+    triggerLabel: 'L8 付款連結提醒（手動 / 自動催繳）',
+    channel: 'push',
+    pricedAt: '計費',
+    body: `[訂單 #{{order_number}}]
+
+提醒：您有一筆未完成付款的訂單～
+訂單金額：{{order_total}}
+
+點此付款 → {{payment_url}}
+
+如已完成付款，請忽略此訊息。
+若有問題，回覆此訊息我們會盡快回覆。`,
   },
   {
     id: 'L3-quote-success',

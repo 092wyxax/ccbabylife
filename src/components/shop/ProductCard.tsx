@@ -31,13 +31,13 @@ export function ProductCard({ product, imageUrl }: ProductCardProps) {
         )}
 
         {product.stockType === 'preorder' && (
-          <span className="absolute top-2 left-2 bg-cream/90 text-ink text-xs px-2 py-0.5 rounded-full">
-            預購
+          <span className="font-jp absolute top-2 left-2 bg-cream/95 text-ink text-[11px] px-2 py-0.5 tracking-wider">
+            予約 · 預購
           </span>
         )}
         {isOutOfStock && (
-          <span className="absolute top-2 left-2 bg-danger text-white text-xs px-2 py-0.5 rounded-full">
-            售完
+          <span className="font-jp absolute top-2 left-2 bg-danger text-white text-[11px] px-2 py-0.5 tracking-wider">
+            完売 · 售完
           </span>
         )}
       </div>

@@ -8,8 +8,8 @@ interface OrgInfo {
 }
 
 const ORG: OrgInfo = {
-  name: '日系選物店',
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://nihon-select.tw',
+  name: '熙熙初日｜日系選物店',
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ccbabylife.com',
 }
 
 export function organizationLd() {

@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
-export const alt = '日系選物店'
+export const alt = '熙熙初日｜日系選物店'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -24,7 +24,10 @@ export default async function Image() {
           NIHON SELECT
         </div>
         <div style={{ flex: 1 }} />
-        <div style={{ fontSize: 90, lineHeight: 1.1 }}>日系選物店</div>
+        <div style={{ fontSize: 90, lineHeight: 1.1 }}>熙熙初日</div>
+        <div style={{ fontSize: 28, color: '#7a756f', marginTop: 12, letterSpacing: 4 }}>
+          日系選物店
+        </div>
         <div style={{ fontSize: 36, color: '#7a756f', marginTop: 24 }}>
           1 歲娃媽親身試用、嚴選日系好物
         </div>

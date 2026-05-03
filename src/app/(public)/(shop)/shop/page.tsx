@@ -6,7 +6,7 @@ import {
 import { ProductGrid } from '@/components/shop/ProductGrid'
 
 export const metadata = {
-  title: '所有選物 | 日系選物店',
+  title: '所有選物',
   description: '日本母嬰、寵物選物，每週預購批次',
 }
 
@@ -36,9 +36,12 @@ export default async function ShopPage({ searchParams }: Props) {
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-16">
       <header className="mb-8">
-        <h1 className="font-serif text-3xl sm:text-4xl">所有選物</h1>
+        <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-2">
+          SHOP · 全商品一覧
+        </p>
+        <h1 className="font-serif text-3xl sm:text-4xl tracking-wide">所有選物</h1>
         <p className="text-ink-soft mt-2 text-sm">
-          目前共 {items.length} 件商品 · 預購制，每週日截單
+          現在 <span className="font-jp">{items.length} 點</span> · 予約制 · 毎週日 23:59 締切
         </p>
       </header>
 
@@ -63,12 +66,12 @@ export default async function ShopPage({ searchParams }: Props) {
         <FilterChip
           href={`/shop?stock=preorder${params.category ? `&category=${params.category}` : ''}`}
           active={stockType === 'preorder'}
-          label="預購"
+          label="予約 · 預購"
         />
         <FilterChip
           href={`/shop?stock=in_stock${params.category ? `&category=${params.category}` : ''}`}
           active={stockType === 'in_stock'}
-          label="現貨"
+          label="在庫 · 現貨"
         />
       </div>
 

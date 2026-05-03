@@ -8,18 +8,21 @@ const COOKIE = 'nihon_onboarded'
 const STEPS = [
   {
     icon: '🏪',
-    title: '歡迎來到日系選物店',
-    body: '我們是一家媽媽親選日系母嬰／寵物用品的小店。每週日截單、週一日本下單、約 10–14 天到貨。',
+    eyebrow: 'いらっしゃいませ',
+    title: '歡迎來到熙熙初日',
+    body: '我們是一家娃媽親選日系母嬰／寵物用品的小店。每週日截單、週一日本下單、約 10–14 天到貨。',
   },
   {
     icon: '📅',
-    title: '什麼是「預購制」？',
-    body: '你下單我們才去日本買 — 沒有囤貨、沒有水貨。週日截單是固定節奏，每週一批集運回來。所以下單後請耐心等 10–14 天。',
+    eyebrow: '予約制について',
+    title: '什麼是「予約制 · 預購制」？',
+    body: '你下單我們才去日本買 — 沒有囤貨、沒有水貨。週日 23:59 締切是固定節奏，每週一批集運回來。所以下單後請耐心等 10–14 天。',
   },
   {
-    icon: '🎁',
-    title: '不確定買什麼？',
-    body: '試試「月齡推薦器」— 輸入寶寶月齡，自動列出適合的選物。或看「彌月禮指南」依預算挑禮物。',
+    icon: '🇯🇵',
+    eyebrow: '日本のいま',
+    title: '看日本當下流行什麼？',
+    body: '「日本熱賣榜」— 每週更新樂天 / Amazon JP 熱銷榜。「媽媽選書」— 日本 IG 媽媽社群熱議精選。「季節限定」— 各都道府縣四季限定品。',
   },
 ]
 
@@ -48,7 +51,10 @@ export function OnboardingWizard() {
       <div className="absolute inset-0 bg-ink/50" onClick={dismiss} />
       <div className="relative bg-cream border border-line rounded-2xl max-w-md w-full p-8 shadow-xl">
         <div className="text-5xl mb-4 text-center">{s.icon}</div>
-        <h2 className="font-serif text-2xl text-center mb-3">{s.title}</h2>
+        <p className="font-jp text-xs tracking-[0.3em] text-ink-soft text-center mb-2">
+          {s.eyebrow}
+        </p>
+        <h2 className="font-serif text-2xl text-center mb-3 tracking-wide">{s.title}</h2>
         <p className="text-sm text-ink-soft text-center leading-relaxed mb-6">
           {s.body}
         </p>
@@ -69,25 +75,25 @@ export function OnboardingWizard() {
           <button
             type="button"
             onClick={dismiss}
-            className="flex-1 border border-line py-2.5 rounded-md text-sm hover:border-ink"
+            className="font-jp flex-1 border border-line py-2.5 rounded-md text-sm hover:border-ink tracking-wider"
           >
-            稍後再看
+            後で · 稍後再看
           </button>
           {isLast ? (
             <Link
-              href="/recommend"
+              href="/trending"
               onClick={dismiss}
-              className="flex-1 bg-ink text-cream py-2.5 rounded-md text-sm hover:bg-accent text-center transition-colors"
+              className="font-jp flex-1 bg-ink text-cream py-2.5 rounded-md text-sm hover:bg-accent text-center transition-colors tracking-wider"
             >
-              試試月齡推薦
+              日本熱賣榜 →
             </Link>
           ) : (
             <button
               type="button"
               onClick={() => setStep((s) => s + 1)}
-              className="flex-1 bg-ink text-cream py-2.5 rounded-md text-sm hover:bg-accent transition-colors"
+              className="font-jp flex-1 bg-ink text-cream py-2.5 rounded-md text-sm hover:bg-accent transition-colors tracking-wider"
             >
-              下一步
+              次へ · 下一步
             </button>
           )}
         </div>

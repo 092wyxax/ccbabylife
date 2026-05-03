@@ -11,7 +11,7 @@ import { formatTwd } from '@/lib/format'
 import { ensureReferralCode } from '@/server/services/ReferralService'
 
 export const metadata = {
-  title: '我的訂單 | 日系選物店',
+  title: '我的訂單',
 }
 
 export default async function MyOrdersPage() {
@@ -46,7 +46,10 @@ export default async function MyOrdersPage() {
       </nav>
       <header className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="font-serif text-3xl">我的訂單</h1>
+          <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-2">
+            ORDERS · ご注文一覧
+          </p>
+          <h1 className="font-serif text-3xl tracking-wide">我的訂單</h1>
           <p className="text-ink-soft text-sm mt-1">
             {customer.name ?? customer.email}
           </p>
@@ -54,9 +57,9 @@ export default async function MyOrdersPage() {
         <form action={logoutAccountAction}>
           <button
             type="submit"
-            className="text-xs text-ink-soft hover:text-danger underline"
+            className="font-jp text-xs text-ink-soft hover:text-danger underline tracking-wider"
           >
-            登出
+            ログアウト · 登出
           </button>
         </form>
       </header>
@@ -97,11 +100,12 @@ export default async function MyOrdersPage() {
       )}
 
       <p className="mt-8 text-xs text-ink-soft">
-        共 {myOrders.length} 筆訂單。需要協助請私訊 LINE 客服。
+        <span className="font-jp">全 {myOrders.length} 件</span>。需要協助請私訊 LINE 客服。
       </p>
 
       <section className="mt-12 p-5 bg-cream-100 border border-line rounded-lg text-sm">
-        <h2 className="font-serif text-lg mb-2">推薦朋友</h2>
+        <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-1">REFERRAL · ご紹介</p>
+        <h2 className="font-serif text-lg mb-2 tracking-wide">推薦朋友</h2>
         <p className="text-ink-soft text-xs leading-relaxed mb-3">
           把這條連結傳給朋友，朋友首單成立後妳會獲得購物金（金額之後公告）。
         </p>

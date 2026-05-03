@@ -25,9 +25,9 @@ export function AddToCartButton({ item, outOfStock }: Props) {
       <button
         type="button"
         disabled
-        className="w-full bg-line text-ink-soft py-4 rounded-full cursor-not-allowed"
+        className="font-jp w-full bg-line text-ink-soft py-4 cursor-not-allowed tracking-wider"
       >
-        售完
+        完売 · 售完
       </button>
     )
   }
@@ -37,11 +37,11 @@ export function AddToCartButton({ item, outOfStock }: Props) {
       type="button"
       onClick={handleClick}
       className={
-        'w-full text-cream py-4 rounded-full transition-colors ' +
+        'w-full text-cream py-4 transition-colors tracking-wide ' +
         (added ? 'bg-success' : 'bg-ink hover:bg-accent')
       }
     >
-      {added ? '✓ 已加入購物車' : '加入購物車'}
+      {added ? '✓ 已加入購物車' : 'カートに入れる · 加入購物車'}
     </button>
   )
 }

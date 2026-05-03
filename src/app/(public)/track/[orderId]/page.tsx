@@ -10,7 +10,7 @@ interface Props {
 }
 
 export const metadata = {
-  title: '訂單追蹤 | 日系選物店',
+  title: '訂單追蹤',
 }
 
 export default async function TrackPage({ params }: Props) {
@@ -22,12 +22,12 @@ export default async function TrackPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 py-12">
-      <p className="text-xs uppercase tracking-widest text-ink-soft mb-2">
-        Order Tracking
+      <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-2">
+        ORDER · ご注文確認
       </p>
       <h1 className="font-serif text-2xl mb-1 font-mono">{order.orderNumber}</h1>
       <p className="text-ink-soft text-sm mb-8">
-        建立於 {new Date(order.createdAt).toLocaleString('zh-TW')}
+        <span className="font-jp">受付</span> {new Date(order.createdAt).toLocaleString('ja-JP')}
         <span className={`ml-3 inline-block text-xs px-2 py-0.5 rounded-full ${statusBadgeClass(order.status)}`}>
           {STATUS_LABEL[order.status]}
         </span>
@@ -39,9 +39,9 @@ export default async function TrackPage({ params }: Props) {
 
       {order.expectedDelivery && (
         <section className="mb-8 bg-cream-100 border border-line rounded-lg p-5 text-sm">
-          <p className="text-ink-soft mb-1">預計到貨</p>
+          <p className="font-jp text-ink-soft mb-1 tracking-wider">お届け予定 · 預計到貨</p>
           <p className="font-medium text-base">
-            {new Date(order.expectedDelivery).toLocaleDateString('zh-TW', {
+            {new Date(order.expectedDelivery).toLocaleDateString('ja-JP', {
               year: 'numeric',
               month: 'long',
               day: 'numeric',
@@ -49,14 +49,14 @@ export default async function TrackPage({ params }: Props) {
             })}
           </p>
           <p className="text-xs text-ink-soft mt-2">
-            預購商品依當週批次集運。每階段我們會 LINE 推播通知妳。
+            予約商品依當週批次集運。每階段我們會 LINE 推播通知妳。
           </p>
         </section>
       )}
 
       <section className="mb-8">
-        <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-3">
-          訂購內容
+        <h2 className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-3">
+          ご注文內容 · 訂購內容
         </h2>
         <div className="bg-white border border-line rounded-lg overflow-hidden">
           {items.length === 0 ? (
@@ -85,12 +85,12 @@ export default async function TrackPage({ params }: Props) {
         </div>
 
         <div className="mt-4 pt-4 border-t border-line space-y-1 text-sm">
-          <Row label="商品小計" value={formatTwd(order.subtotal)} />
-          <Row label="運費" value={formatTwd(order.shippingFee)} />
+          <Row label="小計" value={formatTwd(order.subtotal)} />
+          <Row label="送料" value={formatTwd(order.shippingFee)} />
           {order.storeCreditUsed > 0 && (
-            <Row label="購物金折抵" value={`−${formatTwd(order.storeCreditUsed)}`} />
+            <Row label="ポイント利用" value={`−${formatTwd(order.storeCreditUsed)}`} />
           )}
-          <Row label="總計" value={formatTwd(order.total)} bold />
+          <Row label="合計" value={formatTwd(order.total)} bold />
         </div>
       </section>
 
@@ -108,7 +108,7 @@ export default async function TrackPage({ params }: Props) {
 function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
   return (
     <div className="flex justify-between">
-      <span className="text-ink-soft">{label}</span>
+      <span className="font-jp text-ink-soft">{label}</span>
       <span className={bold ? 'font-medium' : ''}>{value}</span>
     </div>
   )

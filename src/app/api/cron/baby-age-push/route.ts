@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
       price_2: String(top3[1]?.product.priceTwd ?? 0),
       product_3_name: top3[2]?.product.nameZh ?? '—',
       price_3: String(top3[2]?.product.priceTwd ?? 0),
-      recommend_url: `${process.env.NEXT_PUBLIC_SITE_URL}/recommend?bornAt=${c.babyBirthDate?.slice(0, 7) ?? ''}`,
+      recommend_url: `${process.env.NEXT_PUBLIC_SITE_URL}/shop`,
     }
 
     const body = renderTemplate(tmpl.body, vars)

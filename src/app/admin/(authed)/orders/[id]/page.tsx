@@ -6,6 +6,9 @@ import {
 } from '@/server/services/OrderService'
 import { OrderProgressBar } from '@/components/order/OrderProgressBar'
 import { StatusChangeForm } from '@/components/order/StatusChangeForm'
+import { ResendPaymentLinkButton } from '@/components/order/ResendPaymentLinkButton'
+import { CancelRefundForms } from '@/components/order/CancelRefundForms'
+import { canTransition } from '@/lib/order-state-machine'
 import { STATUS_LABEL, statusBadgeClass } from '@/lib/order-progress'
 import { formatTwd } from '@/lib/format'
 
@@ -147,6 +150,34 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               orderId={order.id}
               currentStatus={order.status}
               validNext={validNext}
+            />
+          </section>
+
+          {order.status === 'pending_payment' && (
+            <section className="bg-white border border-line rounded-lg p-5">
+              <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-3">
+                付款連結
+              </h2>
+              <p className="text-xs text-ink-soft mb-3 leading-relaxed">
+                重新透過 LINE 推送付款連結到客戶手機。
+                訂單仍處於「待付款」狀態才會生效。
+              </p>
+              <ResendPaymentLinkButton
+                orderId={order.id}
+                hasLineUserId={Boolean(customer?.lineUserId)}
+              />
+            </section>
+          )}
+
+          <section className="bg-white border border-line rounded-lg p-5">
+            <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-3">
+              取消 / 退款
+            </h2>
+            <CancelRefundForms
+              orderId={order.id}
+              orderTotal={order.total}
+              canCancel={canTransition(order.status, 'cancelled')}
+              canRefund={canTransition(order.status, 'refunded')}
             />
           </section>
 

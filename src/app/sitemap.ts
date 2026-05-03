@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next'
 import { listActiveProducts } from '@/server/services/ProductService'
 import { listPublishedPosts } from '@/server/services/JournalService'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://nihon-select.tw'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ccbabylife.com'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [products, posts] = await Promise.all([
@@ -13,7 +13,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/`, changeFrequency: 'daily', priority: 1.0 },
     { url: `${SITE_URL}/shop`, changeFrequency: 'daily', priority: 0.9 },
-    { url: `${SITE_URL}/recommend`, changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${SITE_URL}/trending`, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${SITE_URL}/insta-picks`, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${SITE_URL}/seasonal`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${SITE_URL}/gift-guide`, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${SITE_URL}/journal`, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${SITE_URL}/about`, changeFrequency: 'monthly', priority: 0.5 },

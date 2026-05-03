@@ -1,5 +1,5 @@
-import type { Metadata } from 'next'
-import { Noto_Sans_TC, Noto_Serif_TC } from 'next/font/google'
+import type { Metadata, Viewport } from 'next'
+import { Noto_Sans_TC, Noto_Serif_TC, Noto_Serif_JP, Shippori_Mincho } from 'next/font/google'
 import './globals.css'
 import { organizationLd, websiteLd, jsonLdScript } from '@/lib/jsonld'
 import { Toaster } from '@/components/shared/Toaster'
@@ -18,9 +18,42 @@ const notoSerif = Noto_Serif_TC({
   display: 'swap',
 })
 
+const notoSerifJp = Noto_Serif_JP({
+  variable: '--font-noto-serif-jp',
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  display: 'swap',
+})
+
+const shippori = Shippori_Mincho({
+  variable: '--font-shippori',
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  display: 'swap',
+})
+
 export const metadata: Metadata = {
-  title: '日系選物店',
+  title: {
+    default: '熙熙初日｜日系選物店',
+    template: '%s | 熙熙初日｜日系選物店',
+  },
   description: '1 歲娃媽親身試用、嚴選日系好物、不賣需查驗登記商品',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    title: '熙熙初日',
+    statusBarStyle: 'default',
+  },
+  icons: {
+    apple: '/apple-icon-180.png',
+  },
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: '#2d2a26',
 }
 
 export default function RootLayout({
@@ -29,7 +62,7 @@ export default function RootLayout({
   return (
     <html
       lang="zh-Hant"
-      className={`${notoSans.variable} ${notoSerif.variable} h-full antialiased`}
+      className={`${notoSans.variable} ${notoSerif.variable} ${notoSerifJp.variable} ${shippori.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-cream text-ink">
         <script

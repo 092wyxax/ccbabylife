@@ -24,6 +24,7 @@ const serverEnvSchema = z.object({
 
   ANTHROPIC_API_KEY: z.string().optional(),
   OPENAI_API_KEY: z.string().optional(),
+  RAKUTEN_APP_ID: z.string().optional(),
 
   CF_ACCOUNT_ID: z.string().optional(),
   CF_IMAGES_TOKEN: z.string().optional(),
@@ -35,6 +36,8 @@ const serverEnvSchema = z.object({
 
   SENTRY_DSN: z.string().optional(),
   SENTRY_AUTH_TOKEN: z.string().optional(),
+  SENTRY_ORG: z.string().optional(),
+  SENTRY_PROJECT: z.string().optional(),
 
   COMPANY_TAX_ID: z.string().default('60766849'),
   COMPANY_NAME: z.string().optional(),
@@ -42,9 +45,10 @@ const serverEnvSchema = z.object({
 
 const publicEnvSchema = z.object({
   NEXT_PUBLIC_SITE_URL: z.string().url(),
-  NEXT_PUBLIC_SITE_NAME: z.string().default('日系選物店'),
+  NEXT_PUBLIC_SITE_NAME: z.string().default('熙熙初日｜日系選物店'),
   NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
+  NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
 })
 
 export const serverEnv = serverEnvSchema.parse(process.env)

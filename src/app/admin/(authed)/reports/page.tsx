@@ -28,11 +28,11 @@ export default async function AdminReportsPage() {
       .limit(12),
     db
       .select({
-        totalOrders: sql<number>`count(*)::int`,
-        revenue: sql<number>`COALESCE(sum(${orders.total}) filter (where ${orders.status} not in ('cancelled', 'refunded', 'pending_payment')), 0)::int`,
-        last30Revenue: sql<number>`COALESCE(sum(${orders.total}) filter (where ${orders.status} not in ('cancelled', 'refunded', 'pending_payment') AND ${orders.createdAt} > ${thirtyDaysAgo}), 0)::int`,
-        avgOrderValue: sql<number>`COALESCE(avg(${orders.total}) filter (where ${orders.status} not in ('cancelled', 'refunded', 'pending_payment')), 0)::int`,
-        cancelRate: sql<number>`COALESCE(100.0 * count(*) filter (where ${orders.status} = 'cancelled') / NULLIF(count(*), 0), 0)::int`,
+        totalOrders: sql<number>`coalesce(count(*), 0)::int`,
+        revenue: sql<number>`coalesce(sum(${orders.total})::int filter (where ${orders.status} not in ('cancelled', 'refunded', 'pending_payment')), 0)`,
+        last30Revenue: sql<number>`coalesce(sum(${orders.total})::int filter (where ${orders.status} not in ('cancelled', 'refunded', 'pending_payment') AND ${orders.createdAt} > ${thirtyDaysAgo}), 0)`,
+        avgOrderValue: sql<number>`coalesce(round(avg(${orders.total}) filter (where ${orders.status} not in ('cancelled', 'refunded', 'pending_payment')))::int, 0)`,
+        cancelRate: sql<number>`coalesce(round(100.0 * count(*) filter (where ${orders.status} = 'cancelled') / nullif(count(*), 0))::int, 0)`,
       })
       .from(orders)
       .where(eq(orders.orgId, DEFAULT_ORG_ID)),

@@ -16,7 +16,10 @@ export default async function NewAddressPage() {
         <span className="mx-2">/</span>
         <span>新增</span>
       </nav>
-      <h1 className="font-serif text-3xl mb-8">新增地址</h1>
+      <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-2">
+        NEW ADDRESS · 新規お届け先
+      </p>
+      <h1 className="font-serif text-3xl mb-8 tracking-wide">新增地址</h1>
       <AddressForm mode="create" />
     </div>
   )

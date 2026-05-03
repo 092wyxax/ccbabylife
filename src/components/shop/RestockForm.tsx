@@ -31,12 +31,12 @@ export function RestockForm({ productId }: Props) {
         <button
           type="submit"
           disabled={pending}
-          className="bg-ink text-cream px-4 py-2 rounded-md text-sm hover:bg-accent transition-colors disabled:opacity-50 whitespace-nowrap"
+          className="font-jp bg-ink text-cream px-4 py-2 rounded-md text-sm hover:bg-accent transition-colors disabled:opacity-50 whitespace-nowrap tracking-wider"
         >
-          {pending ? '⋯' : '到貨通知我'}
+          {pending ? '・・・' : '入荷通知 · 到貨通知我'}
         </button>
       </div>
-      <p className="text-xs text-ink-soft">補貨後會 Email 通知，不會收到行銷信。</p>
+      <p className="text-xs text-ink-soft">入荷後 Email 通知，不會收到行銷信。</p>
     </form>
   )
 }

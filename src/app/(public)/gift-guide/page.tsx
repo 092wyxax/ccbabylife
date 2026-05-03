@@ -3,7 +3,7 @@ import { listGiftProducts, GIFT_TIERS } from '@/server/services/ProductService'
 import { ProductGrid } from '@/components/shop/ProductGrid'
 
 export const metadata = {
-  title: '彌月禮指南 | 日系選物店',
+  title: '彌月禮指南',
   description: '依預算分級選購日系彌月禮，從紗布巾、固齒器到精選玩具。',
 }
 
@@ -23,10 +23,10 @@ export default async function GiftGuidePage({ searchParams }: Props) {
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-12">
       <header className="mb-10">
-        <p className="text-xs uppercase tracking-widest text-ink-soft mb-3">
-          Gift Guide
+        <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-3">
+          GIFT GUIDE · お祝いギフト
         </p>
-        <h1 className="font-serif text-3xl sm:text-4xl mb-3">彌月禮指南</h1>
+        <h1 className="font-serif text-3xl sm:text-4xl mb-3 tracking-wide">彌月禮指南</h1>
         <p className="text-ink-soft max-w-2xl leading-relaxed">
           選彌月禮兩個重點：<strong>實用</strong>（媽媽真的會用）+ <strong>不撞</strong>（避免重複）。
           我們依預算分級，幫你挑出對的東西，不踩雷。
@@ -50,8 +50,8 @@ export default async function GiftGuidePage({ searchParams }: Props) {
         ))}
       </div>
 
-      <h2 className="font-serif text-xl mb-6">
-        {activeTier.label} · {items.length} 件選物
+      <h2 className="font-serif text-xl mb-6 tracking-wide">
+        {activeTier.label} · <span className="font-jp">{items.length} 點</span>
       </h2>
 
       {items.length === 0 ? (
