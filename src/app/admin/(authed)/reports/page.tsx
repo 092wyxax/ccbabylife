@@ -7,9 +7,8 @@ import { formatTwd } from '@/lib/format'
 export const dynamic = 'force-dynamic'
 
 export default async function AdminReportsPage() {
-  const now = new Date()
-  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
-  const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString()
+  const thirtyDaysAgo = sql`(now() - interval '30 days')`
+  const ninetyDaysAgo = sql`(now() - interval '90 days')`
 
   const errors: string[] = []
   const tryQ = async <T,>(name: string, fn: () => Promise<T>): Promise<T | null> => {
