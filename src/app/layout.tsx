@@ -7,29 +7,32 @@ import { Toaster } from '@/components/shared/Toaster'
 const notoSans = Noto_Sans_TC({
   variable: '--font-noto-sans',
   subsets: ['latin'],
-  weight: ['400', '500', '700'],
+  weight: ['400', '700'],
   display: 'swap',
 })
 
 const notoSerif = Noto_Serif_TC({
   variable: '--font-noto-serif',
   subsets: ['latin'],
-  weight: ['400', '500', '700'],
+  weight: ['400', '700'],
   display: 'swap',
+  preload: false,
 })
 
 const notoSerifJp = Noto_Serif_JP({
   variable: '--font-noto-serif-jp',
   subsets: ['latin'],
-  weight: ['400', '500', '700'],
+  weight: ['400', '700'],
   display: 'swap',
+  preload: false,
 })
 
 const shippori = Shippori_Mincho({
   variable: '--font-shippori',
   subsets: ['latin'],
-  weight: ['400', '500', '700'],
+  weight: ['400', '700'],
   display: 'swap',
+  preload: false,
 })
 
 export const metadata: Metadata = {
