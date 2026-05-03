@@ -18,8 +18,29 @@ export default async function Image() {
           flexDirection: 'column',
           padding: '80px',
           fontFamily: 'serif',
+          position: 'relative',
         }}
       >
+        <div
+          style={{
+            position: 'absolute',
+            top: 70,
+            right: 70,
+            width: 140,
+            height: 140,
+            borderRadius: '50%',
+            background: '#F5EFE6',
+            border: '2px solid #2d2a26',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 96,
+            fontWeight: 700,
+            color: '#2d2a26',
+          }}
+        >
+          初
+        </div>
         <div style={{ fontSize: 24, letterSpacing: 8, color: '#7a756f' }}>
           NIHON SELECT
         </div>

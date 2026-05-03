@@ -47,9 +47,6 @@ export const metadata: Metadata = {
     title: '熙熙初日',
     statusBarStyle: 'default',
   },
-  icons: {
-    apple: '/apple-icon-180.png',
-  },
   other: {
     'google': 'notranslate',
   },
