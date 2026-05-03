@@ -11,79 +11,104 @@ export default async function AdminReportsPage() {
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
   const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString()
 
-  let monthly: any[], overall: any[], topCustomers: any[], repeatRate: any[]
-  try {
-    ;[monthly, overall, topCustomers, repeatRate] = await Promise.all([
-    db
-      .select({
-        month: sql<string>`to_char(${orders.createdAt}, 'YYYY-MM')`,
-        count: sql<number>`count(*)::int`,
-        revenue: sql<number>`COALESCE(sum(${orders.total}) filter (where ${orders.status} not in ('cancelled', 'refunded', 'pending_payment')), 0)::int`,
-      })
-      .from(orders)
-      .where(eq(orders.orgId, DEFAULT_ORG_ID))
-      .groupBy(sql`to_char(${orders.createdAt}, 'YYYY-MM')`)
-      .orderBy(desc(sql`to_char(${orders.createdAt}, 'YYYY-MM')`))
-      .limit(12),
-    db
-      .select({
-        totalOrders: sql<number>`coalesce(count(*), 0)::int`,
-        revenue: sql<number>`coalesce(sum(${orders.total})::int filter (where ${orders.status} not in ('cancelled', 'refunded', 'pending_payment')), 0)`,
-        last30Revenue: sql<number>`coalesce(sum(${orders.total})::int filter (where ${orders.status} not in ('cancelled', 'refunded', 'pending_payment') AND ${orders.createdAt} > ${thirtyDaysAgo}), 0)`,
-        avgOrderValue: sql<number>`coalesce(round(avg(${orders.total}) filter (where ${orders.status} not in ('cancelled', 'refunded', 'pending_payment')))::int, 0)`,
-        cancelRate: sql<number>`coalesce(round(100.0 * count(*) filter (where ${orders.status} = 'cancelled') / nullif(count(*), 0))::int, 0)`,
-      })
-      .from(orders)
-      .where(eq(orders.orgId, DEFAULT_ORG_ID)),
-    db
-      .select({
-        customer: customers,
-        orderCount: sql<number>`count(${orders.id})::int`,
-        spent: sql<number>`COALESCE(sum(${orders.total}) filter (where ${orders.status} not in ('cancelled', 'refunded', 'pending_payment')), 0)::int`,
-      })
-      .from(customers)
-      .leftJoin(orders, eq(orders.customerId, customers.id))
-      .where(eq(customers.orgId, DEFAULT_ORG_ID))
-      .groupBy(customers.id)
-      .orderBy(desc(sql`sum(${orders.total}) filter (where ${orders.status} not in ('cancelled', 'refunded', 'pending_payment'))`))
-      .limit(10),
-    db
-      .select({
-        // customers with > 1 completed order in last 90 days
-        repeatBuyers: sql<number>`(
-          SELECT count(*)::int FROM (
-            SELECT ${orders.customerId} FROM ${orders}
+  const errors: string[] = []
+  const tryQ = async <T,>(name: string, fn: () => Promise<T>): Promise<T | null> => {
+    try {
+      return await fn()
+    } catch (err) {
+      const msg = `${name}: ${err instanceof Error ? err.message : String(err)}`
+      errors.push(msg)
+      console.error('[admin/reports]', msg, err)
+      return null
+    }
+  }
+
+  const [monthly, overall, topCustomers, repeatRate] = await Promise.all([
+    tryQ('monthly', () =>
+      db
+        .select({
+          month: sql<string>`to_char(${orders.createdAt}, 'YYYY-MM')`,
+          count: sql<number>`count(*)::int`,
+          revenue: sql<number>`COALESCE(sum(${orders.total}) filter (where ${orders.status} not in ('cancelled', 'refunded', 'pending_payment')), 0)::int`,
+        })
+        .from(orders)
+        .where(eq(orders.orgId, DEFAULT_ORG_ID))
+        .groupBy(sql`to_char(${orders.createdAt}, 'YYYY-MM')`)
+        .orderBy(desc(sql`to_char(${orders.createdAt}, 'YYYY-MM')`))
+        .limit(12)
+    ),
+    tryQ('overall', () =>
+      db
+        .select({
+          totalOrders: sql<number>`coalesce(count(*), 0)::int`,
+          revenue: sql<number>`coalesce(sum(${orders.total})::int filter (where ${orders.status} not in ('cancelled', 'refunded', 'pending_payment')), 0)`,
+          last30Revenue: sql<number>`coalesce(sum(${orders.total})::int filter (where ${orders.status} not in ('cancelled', 'refunded', 'pending_payment') AND ${orders.createdAt} > ${thirtyDaysAgo}), 0)`,
+          avgOrderValue: sql<number>`coalesce(round(avg(${orders.total}) filter (where ${orders.status} not in ('cancelled', 'refunded', 'pending_payment')))::int, 0)`,
+          cancelRate: sql<number>`coalesce(round(100.0 * count(*) filter (where ${orders.status} = 'cancelled') / nullif(count(*), 0))::int, 0)`,
+        })
+        .from(orders)
+        .where(eq(orders.orgId, DEFAULT_ORG_ID))
+    ),
+    tryQ('topCustomers', () =>
+      db
+        .select({
+          customer: customers,
+          orderCount: sql<number>`count(${orders.id})::int`,
+          spent: sql<number>`COALESCE(sum(${orders.total}) filter (where ${orders.status} not in ('cancelled', 'refunded', 'pending_payment')), 0)::int`,
+        })
+        .from(customers)
+        .leftJoin(orders, eq(orders.customerId, customers.id))
+        .where(eq(customers.orgId, DEFAULT_ORG_ID))
+        .groupBy(customers.id)
+        .orderBy(desc(sql`sum(${orders.total}) filter (where ${orders.status} not in ('cancelled', 'refunded', 'pending_payment'))`))
+        .limit(10)
+    ),
+    tryQ('repeatRate', () =>
+      db
+        .select({
+          repeatBuyers: sql<number>`(
+            SELECT count(*)::int FROM (
+              SELECT ${orders.customerId} FROM ${orders}
+              WHERE ${orders.orgId} = ${DEFAULT_ORG_ID}
+                AND ${orders.status} not in ('cancelled', 'refunded', 'pending_payment')
+                AND ${orders.createdAt} > ${ninetyDaysAgo}
+              GROUP BY ${orders.customerId}
+              HAVING count(*) > 1
+            ) sub
+          )`,
+          totalBuyers: sql<number>`(
+            SELECT count(distinct ${orders.customerId})::int FROM ${orders}
             WHERE ${orders.orgId} = ${DEFAULT_ORG_ID}
               AND ${orders.status} not in ('cancelled', 'refunded', 'pending_payment')
               AND ${orders.createdAt} > ${ninetyDaysAgo}
-            GROUP BY ${orders.customerId}
-            HAVING count(*) > 1
-          ) sub
-        )`,
-        totalBuyers: sql<number>`(
-          SELECT count(distinct ${orders.customerId})::int FROM ${orders}
-          WHERE ${orders.orgId} = ${DEFAULT_ORG_ID}
-            AND ${orders.status} not in ('cancelled', 'refunded', 'pending_payment')
-            AND ${orders.createdAt} > ${ninetyDaysAgo}
-        )`,
-      })
-      .from(orders)
-      .limit(1),
+          )`,
+        })
+        .from(orders)
+        .limit(1)
+    ),
   ])
-  } catch (err) {
-    console.error('[admin/reports] query failed:', err)
-    throw err
+
+  if (errors.length > 0) {
+    return (
+      <div className="p-8 max-w-3xl">
+        <h1 className="font-serif text-2xl mb-4">報表（診斷模式）</h1>
+        <div className="bg-red-50 border border-red-200 rounded p-4 space-y-2">
+          {errors.map((e, i) => (
+            <pre key={i} className="text-xs text-red-800 whitespace-pre-wrap">{e}</pre>
+          ))}
+        </div>
+      </div>
+    )
   }
 
-  const o = overall[0]
-  const r = repeatRate[0]
+  const o = overall![0]
+  const r = repeatRate![0]
   const repeatPct =
     r && r.totalBuyers > 0
       ? Math.round((100 * r.repeatBuyers) / r.totalBuyers)
       : 0
 
-  // Find max revenue for chart scaling
-  const maxRevenue = Math.max(1, ...monthly.map((m) => m.revenue))
+  const maxRevenue = Math.max(1, ...monthly!.map((m) => m.revenue))
 
   return (
     <div className="p-8 max-w-6xl">
@@ -106,11 +131,11 @@ export default async function AdminReportsPage() {
         <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-4">
           每月訂單與營收（近 12 個月）
         </h2>
-        {monthly.length === 0 ? (
+        {monthly!.length === 0 ? (
           <p className="text-ink-soft text-sm py-6 text-center">尚無訂單資料</p>
         ) : (
           <ul className="space-y-2 text-sm">
-            {monthly.map((m) => (
+            {monthly!.map((m) => (
               <li key={m.month} className="grid grid-cols-[80px_1fr_120px_60px] gap-3 items-center">
                 <span className="text-xs text-ink-soft font-mono">{m.month}</span>
                 <div className="bg-cream-100 rounded-md h-5 relative overflow-hidden">
@@ -132,11 +157,11 @@ export default async function AdminReportsPage() {
           <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-3">
             Top 10 客戶（依 LTV）
           </h2>
-          {topCustomers.length === 0 ? (
+          {topCustomers!.length === 0 ? (
             <p className="text-sm text-ink-soft py-4 text-center">尚無資料</p>
           ) : (
             <ol className="space-y-2 text-sm">
-              {topCustomers.map(({ customer, orderCount, spent }) => (
+              {topCustomers!.map(({ customer, orderCount, spent }) => (
                 <li
                   key={customer.id}
                   className="flex items-center justify-between gap-4 py-1"
