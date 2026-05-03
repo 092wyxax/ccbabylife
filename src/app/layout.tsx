@@ -50,6 +50,9 @@ export const metadata: Metadata = {
   icons: {
     apple: '/apple-icon-180.png',
   },
+  other: {
+    'google': 'notranslate',
+  },
 }
 
 export const viewport: Viewport = {
