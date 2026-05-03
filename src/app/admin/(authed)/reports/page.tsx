@@ -11,12 +11,9 @@ export default async function AdminReportsPage() {
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
   const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString()
 
-  const [
-    monthly,
-    overall,
-    topCustomers,
-    repeatRate,
-  ] = await Promise.all([
+  let monthly: any[], overall: any[], topCustomers: any[], repeatRate: any[]
+  try {
+    ;[monthly, overall, topCustomers, repeatRate] = await Promise.all([
     db
       .select({
         month: sql<string>`to_char(${orders.createdAt}, 'YYYY-MM')`,
@@ -73,6 +70,10 @@ export default async function AdminReportsPage() {
       .from(orders)
       .limit(1),
   ])
+  } catch (err) {
+    console.error('[admin/reports] query failed:', err)
+    throw err
+  }
 
   const o = overall[0]
   const r = repeatRate[0]
