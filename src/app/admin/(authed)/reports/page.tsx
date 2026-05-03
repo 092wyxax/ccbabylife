@@ -4,6 +4,8 @@ import { orders, customers } from '@/db/schema'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { formatTwd } from '@/lib/format'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminReportsPage() {
   const now = new Date()
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
