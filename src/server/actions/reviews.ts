@@ -11,6 +11,7 @@ import {
 } from '@/server/services/ReviewService'
 import { recordAudit } from '@/server/services/AuditService'
 import { rateLimit, getClientIp } from '@/lib/rate-limit'
+import { verifyTurnstile } from '@/lib/turnstile'
 
 const writeSchema = z.object({
   productId: z.string().uuid(),
@@ -33,6 +34,9 @@ export async function writeReviewAction(
   const ip = await getClientIp()
   const limit = rateLimit(`review:${ip}`, 5, 60 * 60 * 1000)
   if (!limit.ok) return { error: '評論太頻繁，請稍後再試' }
+
+  const human = await verifyTurnstile(formData.get('cf-turnstile-response') as string | null)
+  if (!human) return { error: '人機驗證失敗，請重試' }
 
   const parsed = writeSchema.safeParse({
     productId: formData.get('productId'),

@@ -5,6 +5,7 @@ import {
   subscribeNewsletterAction,
   type SubscribeState,
 } from '@/server/actions/newsletter'
+import { Turnstile } from './Turnstile'
 
 const initial: SubscribeState = {}
 
@@ -34,6 +35,7 @@ export function NewsletterForm({ source = 'footer' }: Props) {
           {pending ? '・・・' : '購読 · 訂閱'}
         </button>
       </div>
+      <Turnstile />
       {state.error && <p className="text-xs text-danger">{state.error}</p>}
       {state.success && (
         <p className="text-xs text-success">

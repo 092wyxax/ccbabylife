@@ -7,6 +7,7 @@ import { db } from '@/db/client'
 import { newsletterSubscribers } from '@/db/schema'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { rateLimit, getClientIp } from '@/lib/rate-limit'
+import { verifyTurnstile } from '@/lib/turnstile'
 
 const subscribeSchema = z.object({
   email: z.string().email('請填正確 email'),
@@ -25,6 +26,11 @@ export async function subscribeNewsletterAction(
     return {
       error: `操作太頻繁，請等 ${Math.ceil(limit.retryAfterMs / 60000)} 分鐘`,
     }
+  }
+
+  const human = await verifyTurnstile(formData.get('cf-turnstile-response') as string | null)
+  if (!human) {
+    return { error: '人機驗證失敗，請重試' }
   }
 
   const parsed = subscribeSchema.safeParse({

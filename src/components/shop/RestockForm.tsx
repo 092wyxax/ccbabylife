@@ -6,6 +6,7 @@ import {
   subscribeRestockAction,
   type RestockState,
 } from '@/server/actions/restock'
+import { Turnstile } from '@/components/shared/Turnstile'
 
 const initial: RestockState = {}
 
@@ -36,6 +37,7 @@ export function RestockForm({ productId }: Props) {
           {pending ? '・・・' : '入荷通知 · 到貨通知我'}
         </button>
       </div>
+      <Turnstile />
       <p className="text-xs text-ink-soft">入荷後 Email 通知，不會收到行銷信。</p>
     </form>
   )

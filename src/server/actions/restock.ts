@@ -7,6 +7,7 @@ import { db } from '@/db/client'
 import { restockSubscriptions, products } from '@/db/schema'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { rateLimit, getClientIp } from '@/lib/rate-limit'
+import { verifyTurnstile } from '@/lib/turnstile'
 
 const subscribeSchema = z.object({
   productId: z.string().uuid(),
@@ -23,6 +24,11 @@ export async function subscribeRestockAction(
   const limit = rateLimit(`restock:${ip}`, 10, 60 * 60 * 1000)
   if (!limit.ok) {
     return { error: '操作太頻繁，請稍後再試' }
+  }
+
+  const human = await verifyTurnstile(formData.get('cf-turnstile-response') as string | null)
+  if (!human) {
+    return { error: '人機驗證失敗，請重試' }
   }
 
   const parsed = subscribeSchema.safeParse({
