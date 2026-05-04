@@ -6,7 +6,11 @@
  * - a legacy full http(s) URL (sample seed data, Unsplash 等) → returned as-is
  */
 export function imageUrl(stored: string): string {
-  if (stored.startsWith('http://') || stored.startsWith('https://')) {
+  if (
+    stored.startsWith('http://') ||
+    stored.startsWith('https://') ||
+    stored.startsWith('/')
+  ) {
     return stored
   }
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL
