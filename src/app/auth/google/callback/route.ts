@@ -61,5 +61,5 @@ export async function GET(request: NextRequest) {
   // We use our own customer-session JWT, not Supabase session, for customers.
   await supabase.auth.signOut()
 
-  return NextResponse.redirect(new URL('/account/orders', request.url))
+  return NextResponse.redirect(new URL('/account', request.url))
 }

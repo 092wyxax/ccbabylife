@@ -40,12 +40,12 @@ export async function Header() {
             href="/account"
             className="font-jp hidden sm:inline-flex text-sm bg-ink text-cream px-3 py-1.5 rounded-md hover:bg-accent transition-colors tracking-wider"
           >
-            {session ? 'マイページ' : 'ログイン'}
+            {session ? '會員中心' : '登入'}
           </Link>
           <MobileNav
             items={[
               ...NAV_ITEMS,
-              { href: '/account', label: session ? 'マイページ · 會員中心' : 'ログイン · 登入' },
+              { href: '/account', label: session ? '會員中心' : '登入' },
             ]}
           />
         </div>

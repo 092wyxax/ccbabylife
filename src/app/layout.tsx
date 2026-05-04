@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     default: '熙熙初日｜日系選物店',
     template: '%s | 熙熙初日｜日系選物店',
   },
-  description: '1 歲娃媽親身試用、嚴選日系好物、不賣需查驗登記商品',
+  description: '1 歲寶寶媽媽親身試用、嚴選日系好物、不販售需查驗登記商品',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,

@@ -42,8 +42,8 @@ function LoggedOutView({ err }: { err?: string }) {
   const errMessage = err ? (ERR_LABEL[err] ?? decodeURIComponent(err)) : null
   return (
     <div className="mx-auto max-w-md px-4 sm:px-6 py-12">
-      <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-2">ACCOUNT · マイページ</p>
-      <h1 className="font-serif text-3xl mb-3 tracking-wide">會員中心</h1>
+      <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-2">ACCOUNT · 會員</p>
+      <h1 className="font-serif text-3xl mb-3 tracking-wide">會員登入</h1>
       <p className="text-ink-soft text-sm mb-8 leading-relaxed">
         登入後可以一覽所有訂單、調整通知偏好、推薦朋友。
       </p>

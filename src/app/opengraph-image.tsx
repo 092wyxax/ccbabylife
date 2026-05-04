@@ -50,7 +50,7 @@ export default async function Image() {
           日系選物店
         </div>
         <div style={{ fontSize: 36, color: '#7a756f', marginTop: 24 }}>
-          1 歲娃媽親身試用、嚴選日系好物
+          1 歲寶寶媽媽親身試用、嚴選日系好物
         </div>
         <div style={{ display: 'flex', gap: 16, marginTop: 40 }}>
           <span

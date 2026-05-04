@@ -123,5 +123,5 @@ export async function GET(request: NextRequest) {
   }
 
   await setCustomerSession({ customerId, email: customerEmail })
-  return NextResponse.redirect(new URL('/account/orders', request.url))
+  return NextResponse.redirect(new URL('/account', request.url))
 }

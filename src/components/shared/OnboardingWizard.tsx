@@ -81,11 +81,11 @@ export function OnboardingWizard() {
           </button>
           {isLast ? (
             <Link
-              href="/trending"
+              href="/"
               onClick={dismiss}
               className="font-jp flex-1 bg-ink text-cream py-2.5 rounded-md text-sm hover:bg-accent text-center transition-colors tracking-wider"
             >
-              日本熱賣榜 →
+              開始逛逛 →
             </Link>
           ) : (
             <button

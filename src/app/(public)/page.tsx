@@ -59,7 +59,7 @@ export default async function HomePage() {
               <span className="font-jp text-[11px] text-ink-soft">にほんセレクト</span>
             </div>
             <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl leading-tight max-w-xl tracking-wide">
-              1 歲娃媽親身試用，<br />嚴選日系好物。
+              1 歲寶寶媽媽親身試用，<br />嚴選日系好物。
             </h1>
             <p className="text-ink-soft mt-5 max-w-lg leading-relaxed text-sm sm:text-base">
               每週日截單、週一日本下單，10–14 天到貨。<br />
