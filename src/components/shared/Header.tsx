@@ -5,6 +5,7 @@ import { getCustomerSession } from '@/lib/customer-session'
 
 const NAV_ITEMS = [
   { href: '/shop', label: '選物' },
+  { href: '/brand', label: '品牌' },
   { href: '/trending', label: '日本熱賣榜' },
   { href: '/insta-picks', label: '媽媽選書' },
   { href: '/seasonal', label: '季節限定' },
