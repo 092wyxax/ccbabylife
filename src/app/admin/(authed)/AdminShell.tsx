@@ -6,15 +6,16 @@ import { logoutAction } from '@/server/actions/auth'
 import type { AdminRole } from '@/db/schema'
 
 type NavItem = { href: string; label: string }
+type NavGroup = { label: string; items: NavItem[] }
 
 type Props = {
   admin: { name: string | null; email: string; role: AdminRole }
   roleLabel: string
-  visibleNav: NavItem[]
+  navGroups: NavGroup[]
   children: React.ReactNode
 }
 
-export function AdminShell({ admin, roleLabel, visibleNav, children }: Props) {
+export function AdminShell({ admin, roleLabel, navGroups, children }: Props) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -71,16 +72,25 @@ export function AdminShell({ admin, roleLabel, visibleNav, children }: Props) {
           </button>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1 text-sm overflow-y-auto">
-          {visibleNav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setOpen(false)}
-              className="block px-3 py-2 rounded-md hover:bg-cream-100 text-ink-soft hover:text-ink"
-            >
-              {item.label}
-            </Link>
+        <nav className="flex-1 p-3 text-sm overflow-y-auto">
+          {navGroups.map((group, gi) => (
+            <div key={group.label} className={gi > 0 ? 'mt-4' : ''}>
+              <p className="px-3 mb-1 text-[10px] uppercase tracking-[0.2em] text-ink-soft/70">
+                {group.label}
+              </p>
+              <div className="space-y-0.5">
+                {group.items.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    className="block px-3 py-1.5 rounded-md hover:bg-cream-100 text-ink-soft hover:text-ink"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
 

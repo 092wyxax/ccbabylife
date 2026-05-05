@@ -3,27 +3,61 @@ import { getCurrentAdmin } from '@/server/services/AdminAuthService'
 import type { AdminRole } from '@/db/schema'
 import { AdminShell } from './AdminShell'
 
-const NAV: Array<{ href: string; label: string; roles?: AdminRole[] }> = [
-  { href: '/admin', label: '儀表板' },
-  { href: '/admin/orders', label: '訂單', roles: ['owner', 'manager', 'ops', 'buyer'] },
-  { href: '/admin/products', label: '商品', roles: ['owner', 'manager', 'ops', 'buyer'] },
-  { href: '/admin/journal', label: '部落格', roles: ['owner', 'manager', 'editor'] },
-  { href: '/admin/customers', label: '客戶', roles: ['owner', 'manager', 'ops'] },
-  { href: '/admin/reviews', label: '評論', roles: ['owner', 'manager', 'ops'] },
-  { href: '/admin/restock', label: '補貨通知', roles: ['owner', 'manager', 'ops'] },
-  { href: '/admin/subscriptions', label: '訂閱', roles: ['owner', 'manager', 'ops'] },
-  { href: '/admin/inventory', label: '庫存', roles: ['owner', 'manager', 'ops', 'buyer'] },
-  { href: '/admin/purchases', label: '採購', roles: ['owner', 'manager', 'buyer'] },
-  { href: '/admin/sources', label: '進貨來源', roles: ['owner', 'manager', 'buyer'] },
-  { href: '/admin/marketing', label: '行銷', roles: ['owner', 'manager', 'editor'] },
-  { href: '/admin/newsletter', label: '電子報', roles: ['owner', 'manager', 'editor'] },
-  { href: '/admin/reports', label: '報表', roles: ['owner', 'manager'] },
-  { href: '/admin/intelligence', label: '市場情報', roles: ['owner', 'manager', 'editor'] },
-  { href: '/admin/experiments', label: 'A/B 測試', roles: ['owner', 'manager'] },
-  { href: '/admin/audit-logs', label: '稽核紀錄', roles: ['owner', 'manager'] },
-  { href: '/admin/board', label: '公告留言板' },
-  { href: '/admin/admins', label: '管理員', roles: ['owner'] },
-  { href: '/admin/settings', label: '設定', roles: ['owner'] },
+type NavItem = { href: string; label: string; roles?: AdminRole[] }
+type NavGroup = { label: string; items: NavItem[] }
+
+const NAV: NavGroup[] = [
+  {
+    label: '總覽',
+    items: [{ href: '/admin', label: '儀表板' }],
+  },
+  {
+    label: '訂單與客戶',
+    items: [
+      { href: '/admin/orders', label: '訂單', roles: ['owner', 'manager', 'ops', 'buyer'] },
+      { href: '/admin/customers', label: '客戶', roles: ['owner', 'manager', 'ops'] },
+      { href: '/admin/reviews', label: '評論', roles: ['owner', 'manager', 'ops'] },
+      { href: '/admin/restock', label: '補貨通知', roles: ['owner', 'manager', 'ops'] },
+      { href: '/admin/subscriptions', label: '訂閱', roles: ['owner', 'manager', 'ops'] },
+    ],
+  },
+  {
+    label: '商品與庫存',
+    items: [
+      { href: '/admin/products', label: '商品', roles: ['owner', 'manager', 'ops', 'buyer'] },
+      { href: '/admin/inventory', label: '庫存', roles: ['owner', 'manager', 'ops', 'buyer'] },
+      { href: '/admin/purchases', label: '採購單', roles: ['owner', 'manager', 'buyer'] },
+      { href: '/admin/sources', label: '進貨來源', roles: ['owner', 'manager', 'buyer'] },
+    ],
+  },
+  {
+    label: '行銷與內容',
+    items: [
+      { href: '/admin/journal', label: '部落格', roles: ['owner', 'manager', 'editor'] },
+      { href: '/admin/marketing', label: '行銷活動', roles: ['owner', 'manager', 'editor'] },
+      { href: '/admin/newsletter', label: '電子報', roles: ['owner', 'manager', 'editor'] },
+      { href: '/admin/experiments', label: 'A/B 測試', roles: ['owner', 'manager'] },
+    ],
+  },
+  {
+    label: '數據分析',
+    items: [
+      { href: '/admin/reports', label: '報表', roles: ['owner', 'manager'] },
+      { href: '/admin/intelligence', label: '市場情報', roles: ['owner', 'manager', 'editor'] },
+    ],
+  },
+  {
+    label: '內部協作',
+    items: [{ href: '/admin/board', label: '公告留言板' }],
+  },
+  {
+    label: '系統管理',
+    items: [
+      { href: '/admin/admins', label: '管理員', roles: ['owner'] },
+      { href: '/admin/audit-logs', label: '稽核紀錄', roles: ['owner', 'manager'] },
+      { href: '/admin/settings', label: '設定', roles: ['owner'] },
+    ],
+  },
 ]
 
 export default async function AuthedAdminLayout({
@@ -39,15 +73,18 @@ export default async function AuthedAdminLayout({
     redirect('/admin/change-password')
   }
 
-  const visibleNav = NAV.filter(
-    (item) => !item.roles || item.roles.includes(admin.role)
-  )
+  const visibleGroups = NAV.map((g) => ({
+    label: g.label,
+    items: g.items
+      .filter((it) => !it.roles || it.roles.includes(admin.role))
+      .map((it) => ({ href: it.href, label: it.label })),
+  })).filter((g) => g.items.length > 0)
 
   return (
     <AdminShell
       admin={{ name: admin.name, email: admin.email, role: admin.role }}
       roleLabel={roleLabel(admin.role)}
-      visibleNav={visibleNav.map((i) => ({ href: i.href, label: i.label }))}
+      navGroups={visibleGroups}
     >
       {children}
     </AdminShell>
