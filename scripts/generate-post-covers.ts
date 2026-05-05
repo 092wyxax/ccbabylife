@@ -20,11 +20,15 @@ import { DEFAULT_ORG_ID } from '../src/db/schema/organizations'
 
 const PROMPTS: Record<string, string> = {
   'why-preorder-not-stock':
-    'A pair of hands carefully wrapping a small white box with brown twine on a smooth wooden table, soft warm window light from the side, shallow depth of field, minimal Japanese aesthetic, no text, no labels',
+    'A small wrapped white gift box tied with brown twine and a kraft paper tag, sitting alone on a smooth wooden table next to a folded linen cloth, soft warm window light from the side, top-down close-up, minimal Japanese aesthetic, no humans, no hands, no people, no text',
   'newborn-0-3-months-essentials':
-    'A single neatly folded soft white cotton baby onesie placed next to a small wooden teether ring on a cream linen cloth, top-down view, soft directional natural light, minimal Japanese baby product photography, no humans, no text',
+    'A single neatly folded soft white cotton baby onesie placed next to a small wooden teether ring on a cream linen cloth, top-down view, soft directional natural light, minimal Japanese baby product photography, no humans, no hands, no text',
+  'pigeon-bottle-6-months-review':
+    'A clean white baby feeding bottle standing on a soft beige cloth, blurred natural background, product photography, soft window light, minimal Japanese aesthetic, no humans, no hands',
+  'gauze-cloth-5-brands-test':
+    'Neatly folded stack of white cotton gauze cloths on a natural wood surface, soft window light, top-down view, minimal Japanese aesthetic, no humans, no hands, no text',
   'why-no-baby-formula':
-    'A traditional Japanese red hanko stamp resting on a stack of cream paper documents on a dark walnut desk, soft warm directional light, minimal aesthetic, top-down close-up, no text, no logos',
+    'A traditional Japanese red hanko stamp resting on a stack of cream paper documents on a dark walnut desk, soft warm directional light, minimal aesthetic, top-down close-up, no humans, no hands, no text, no logos',
 }
 
 const MODEL = '@cf/stabilityai/stable-diffusion-xl-base-1.0'
