@@ -6,6 +6,7 @@ import { sources } from '@/db/schema/sources'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { SourceForm } from '@/components/admin/SourceForm'
 import { updateSourceAction, deleteSourceAction } from '@/server/actions/sources'
+import { requireRole } from '@/server/services/AdminAuthService'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export default async function EditSourcePage({ params }: Props) {
+  await requireRole(['owner', 'manager', 'buyer'])
   const { id } = await params
 
   const [source] = await db

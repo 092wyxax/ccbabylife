@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { listAuditLogs } from '@/server/services/AuditService'
 import { parsePage } from '@/lib/pagination'
 import { Pagination, SearchBox } from '@/components/admin/Pagination'
+import { requireRole } from '@/server/services/AdminAuthService'
 
 const ENTITY_TYPES = ['product', 'order', 'customer', 'purchase', 'post']
 
@@ -18,6 +19,7 @@ const ACTION_LABEL: Record<string, string> = {
 }
 
 export default async function AuditLogsPage({ searchParams }: Props) {
+  await requireRole(['owner', 'manager'])
   const params = await searchParams
   const result = await listAuditLogs({
     search: params.q,

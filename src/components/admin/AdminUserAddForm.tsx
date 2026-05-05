@@ -5,9 +5,16 @@ import {
   createAdminUserAction,
   type AdminUserActionState,
 } from '@/server/actions/admin-users'
-import { adminRoleEnum } from '@/db/schema'
+import type { AdminRole } from '@/db/schema/admin_users'
 
 const initial: AdminUserActionState = {}
+
+const ROLE_OPTIONS: Array<{ value: AdminRole; label: string; hint: string }> = [
+  { value: 'manager', label: '經理', hint: '除人事與店設定外，其他皆可改' },
+  { value: 'ops', label: '客服', hint: '處理訂單、客戶、評論、補貨通知' },
+  { value: 'buyer', label: '採購', hint: '採購單、進貨來源、商品與庫存' },
+  { value: 'editor', label: '編輯', hint: '部落格、電子報、行銷' },
+]
 
 export function AdminUserAddForm() {
   const [state, formAction, pending] = useActionState(createAdminUserAction, initial)
@@ -42,15 +49,18 @@ export function AdminUserAddForm() {
           id="role"
           name="role"
           required
-          defaultValue="admin"
+          defaultValue="ops"
           className="w-full border border-line rounded-md px-2 py-1 text-sm bg-white"
         >
-          {adminRoleEnum.map((r) => (
-            <option key={r} value={r}>
-              {r}
+          {ROLE_OPTIONS.map((r) => (
+            <option key={r.value} value={r.value}>
+              {r.label} — {r.hint}
             </option>
           ))}
         </select>
+        <p className="text-xs text-ink-soft mt-1">
+          僅有店主能存在 1 位，所以下拉沒有「店主」選項。
+        </p>
       </div>
 
       <button

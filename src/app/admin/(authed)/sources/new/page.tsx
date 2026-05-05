@@ -1,10 +1,13 @@
 import Link from 'next/link'
 import { SourceForm } from '@/components/admin/SourceForm'
 import { createSourceAction } from '@/server/actions/sources'
+import { requireRole } from '@/server/services/AdminAuthService'
 
 export const dynamic = 'force-dynamic'
 
-export default function NewSourcePage() {
+export default async function NewSourcePage() {
+  await requireRole(['owner', 'manager', 'buyer'])
+
   return (
     <div className="p-6 sm:p-8">
       <header className="mb-6">

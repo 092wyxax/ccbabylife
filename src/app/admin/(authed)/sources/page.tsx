@@ -3,6 +3,7 @@ import { and, desc, eq } from 'drizzle-orm'
 import { db } from '@/db/client'
 import { sources, type Source } from '@/db/schema/sources'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
+import { requireRole } from '@/server/services/AdminAuthService'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,6 +22,8 @@ const STATUS_LABEL: Record<Source['status'], { label: string; color: string }> =
 }
 
 export default async function AdminSourcesPage() {
+  await requireRole(['owner', 'manager', 'buyer'])
+
   const rows = await db
     .select()
     .from(sources)

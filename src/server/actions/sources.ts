@@ -7,7 +7,7 @@ import { and, eq } from 'drizzle-orm'
 import { db } from '@/db/client'
 import { sources, vendorTypeEnum, vendorStatusEnum } from '@/db/schema/sources'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
-import { requireAdmin } from '@/server/services/AdminAuthService'
+import { requireRole } from '@/server/services/AdminAuthService'
 
 const baseSchema = z.object({
   name: z.string().min(1, '請填網站名稱').max(100),
@@ -75,7 +75,7 @@ export async function createSourceAction(
   _prev: SourceFormState,
   formData: FormData
 ): Promise<SourceFormState> {
-  await requireAdmin()
+  await requireRole(['owner', 'manager', 'buyer'])
   const parsed = parse(formData)
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? '輸入錯誤' }
@@ -93,7 +93,7 @@ export async function updateSourceAction(
   _prev: SourceFormState,
   formData: FormData
 ): Promise<SourceFormState> {
-  await requireAdmin()
+  await requireRole(['owner', 'manager', 'buyer'])
   const parsed = parse(formData)
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? '輸入錯誤' }
@@ -108,7 +108,7 @@ export async function updateSourceAction(
 }
 
 export async function deleteSourceAction(id: string) {
-  await requireAdmin()
+  await requireRole(['owner', 'manager', 'buyer'])
   await db
     .delete(sources)
     .where(and(eq(sources.orgId, DEFAULT_ORG_ID), eq(sources.id, id)))

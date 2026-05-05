@@ -3,10 +3,12 @@ import { db } from '@/db/client'
 import { orders, customers } from '@/db/schema'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { formatTwd } from '@/lib/format'
+import { requireRole } from '@/server/services/AdminAuthService'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminReportsPage() {
+  await requireRole(['owner', 'manager'])
   const thirtyDaysAgo = sql`(now() - interval '30 days')`
   const ninetyDaysAgo = sql`(now() - interval '90 days')`
 

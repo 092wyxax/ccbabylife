@@ -3,12 +3,14 @@ import { listCustomers, babyAgeMonths } from '@/server/services/CustomerService'
 import { formatTwd } from '@/lib/format'
 import { parsePage } from '@/lib/pagination'
 import { Pagination, SearchBox } from '@/components/admin/Pagination'
+import { requireRole } from '@/server/services/AdminAuthService'
 
 interface Props {
   searchParams: Promise<{ q?: string; page?: string }>
 }
 
 export default async function AdminCustomersPage({ searchParams }: Props) {
+  await requireRole(['owner', 'manager', 'ops'])
   const params = await searchParams
   const page = parsePage(params.page)
   const result = await listCustomers({ search: params.q, page })
