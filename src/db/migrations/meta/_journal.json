@@ -92,6 +92,13 @@
       "when": 1777997509241,
       "tag": "0012_mean_magdalene",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1777998046249,
+      "tag": "0013_crazy_magneto",
+      "breakpoints": true
     }
   ]
 }
