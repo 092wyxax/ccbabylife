@@ -25,26 +25,49 @@ export default async function EditCouponPage({ params }: Props) {
   const me = await requireRole(['owner', 'manager', 'editor'])
   const { id } = await params
 
-  const coupon = await getCouponById(id)
-  if (!coupon) notFound()
+  let coupon: Awaited<ReturnType<typeof getCouponById>>
+  let grants: Array<{
+    id: string
+    claimedAt: Date
+    usedAt: Date | null
+    customerName: string | null
+    customerEmail: string | null
+  }>
 
-  const grants = await db
-    .select({
-      id: customerCoupons.id,
-      claimedAt: customerCoupons.claimedAt,
-      usedAt: customerCoupons.usedAt,
-      customerName: customers.name,
-      customerEmail: customers.email,
-    })
-    .from(customerCoupons)
-    .leftJoin(customers, eq(customerCoupons.customerId, customers.id))
-    .where(
-      and(
-        eq(customerCoupons.orgId, DEFAULT_ORG_ID),
-        eq(customerCoupons.couponId, id)
+  try {
+    coupon = await getCouponById(id)
+    if (!coupon) notFound()
+
+    grants = await db
+      .select({
+        id: customerCoupons.id,
+        claimedAt: customerCoupons.claimedAt,
+        usedAt: customerCoupons.usedAt,
+        customerName: customers.name,
+        customerEmail: customers.email,
+      })
+      .from(customerCoupons)
+      .leftJoin(customers, eq(customerCoupons.customerId, customers.id))
+      .where(
+        and(
+          eq(customerCoupons.orgId, DEFAULT_ORG_ID),
+          eq(customerCoupons.couponId, id)
+        )
       )
+      .orderBy(desc(customerCoupons.claimedAt))
+  } catch (err) {
+    return (
+      <div className="p-8 max-w-2xl">
+        <h1 className="font-serif text-2xl mb-4">優惠券編輯（診斷）</h1>
+        <div className="bg-red-50 border border-red-200 rounded p-4">
+          <pre className="text-xs text-red-800 whitespace-pre-wrap break-all">
+            {err instanceof Error ? `${err.message}\n\n${err.stack}` : String(err)}
+          </pre>
+        </div>
+      </div>
     )
-    .orderBy(desc(customerCoupons.claimedAt))
+  }
+  if (!coupon) notFound()
 
   const usedCount = grants.filter((g) => g.usedAt).length
 
