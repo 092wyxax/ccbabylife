@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, index } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, text, timestamp, boolean, index } from 'drizzle-orm/pg-core'
 import { organizations } from './organizations'
 
 export const adminRoleEnum = ['owner', 'manager', 'ops', 'buyer', 'editor'] as const
@@ -17,6 +17,7 @@ export const adminUsers = pgTable(
     name: text('name').notNull(),
     role: text('role', { enum: adminRoleEnum }).notNull(),
     status: text('status', { enum: adminStatusEnum }).notNull().default('active'),
+    mustChangePassword: boolean('must_change_password').notNull().default(false),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },

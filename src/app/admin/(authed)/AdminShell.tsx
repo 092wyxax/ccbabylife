@@ -84,20 +84,31 @@ export function AdminShell({ admin, roleLabel, visibleNav, children }: Props) {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-line text-xs">
-          <p className="text-ink-soft mb-1">登入身份</p>
-          <p className="font-medium">{admin.name}</p>
-          <p className="text-ink-soft mb-3">
-            {admin.email} · {roleLabel}
-          </p>
-          <form action={logoutAction}>
-            <button
-              type="submit"
-              className="text-ink-soft hover:text-danger underline"
+        <div className="p-4 border-t border-line text-xs space-y-2">
+          <div>
+            <p className="text-ink-soft mb-1">登入身份</p>
+            <p className="font-medium">{admin.name}</p>
+            <p className="text-ink-soft">
+              {admin.email} · {roleLabel}
+            </p>
+          </div>
+          <div className="flex items-center gap-3 pt-1">
+            <Link
+              href="/admin/change-password"
+              onClick={() => setOpen(false)}
+              className="text-ink-soft hover:text-ink underline"
             >
-              登出
-            </button>
-          </form>
+              修改密碼
+            </Link>
+            <form action={logoutAction}>
+              <button
+                type="submit"
+                className="text-ink-soft hover:text-danger underline"
+              >
+                登出
+              </button>
+            </form>
+          </div>
         </div>
       </aside>
 

@@ -34,6 +34,9 @@ export default async function AuthedAdminLayout({
   if (!admin) {
     redirect('/admin/login')
   }
+  if (admin.mustChangePassword) {
+    redirect('/admin/change-password')
+  }
 
   const visibleNav = NAV.filter(
     (item) => !item.roles || item.roles.includes(admin.role)

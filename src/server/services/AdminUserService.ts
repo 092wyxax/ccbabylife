@@ -61,6 +61,7 @@ export async function createAdminUserWithSupabase(input: {
       email: input.email,
       name: input.name,
       role: input.role,
+      mustChangePassword: true,
     })
     .onConflictDoUpdate({
       target: adminUsers.supabaseUserId,
@@ -68,6 +69,7 @@ export async function createAdminUserWithSupabase(input: {
         name: input.name,
         role: input.role,
         email: input.email,
+        mustChangePassword: true,
         updatedAt: new Date(),
       },
     })
@@ -86,6 +88,23 @@ export async function updateAdminRole(
     .returning()
   if (!row) throw new Error(`Admin user not found: ${id}`)
   return row
+}
+
+export async function changeAdminPassword(
+  adminId: string,
+  supabaseUserId: string,
+  newPassword: string
+): Promise<void> {
+  const sb = supabaseAdmin()
+  const { error } = await sb.auth.admin.updateUserById(supabaseUserId, {
+    password: newPassword,
+  })
+  if (error) throw new Error(error.message)
+
+  await db
+    .update(adminUsers)
+    .set({ mustChangePassword: false, updatedAt: new Date() })
+    .where(eq(adminUsers.id, adminId))
 }
 
 export async function deleteAdminUser(id: string): Promise<void> {
