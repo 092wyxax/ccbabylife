@@ -1,10 +1,32 @@
 import 'server-only'
 import { and, asc, eq, sql } from 'drizzle-orm'
 import { db } from '@/db/client'
-import { coupons, type Coupon, type CouponType } from '@/db/schema/coupons'
+import {
+  coupons,
+  type Coupon,
+  type CouponType,
+  type CouponAutoIssue,
+} from '@/db/schema/coupons'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 
 export { validateCoupon, type CouponValidation } from '@/lib/coupon-validation'
+
+export interface CouponInput {
+  code: string
+  type: CouponType
+  value: number
+  description?: string | null
+  minOrderTwd?: number
+  maxUses?: number | null
+  perUserLimit?: number | null
+  startsAt?: Date | null
+  expiresAt?: Date | null
+  applicableProductIds?: string[]
+  applicableCategorySlugs?: string[]
+  autoIssueOn?: CouponAutoIssue
+  isActive?: boolean
+  notes?: string | null
+}
 
 export async function listCoupons(): Promise<Coupon[]> {
   return db
@@ -12,6 +34,15 @@ export async function listCoupons(): Promise<Coupon[]> {
     .from(coupons)
     .where(eq(coupons.orgId, DEFAULT_ORG_ID))
     .orderBy(asc(coupons.code))
+}
+
+export async function getCouponById(id: string): Promise<Coupon | null> {
+  const [row] = await db
+    .select()
+    .from(coupons)
+    .where(and(eq(coupons.orgId, DEFAULT_ORG_ID), eq(coupons.id, id)))
+    .limit(1)
+  return row ?? null
 }
 
 export async function findActiveCouponByCode(code: string): Promise<Coupon | null> {
@@ -29,29 +60,49 @@ export async function findActiveCouponByCode(code: string): Promise<Coupon | nul
   return row ?? null
 }
 
-export async function createCoupon(input: {
-  code: string
-  type: CouponType
-  value: number
-  minOrderTwd?: number
-  maxUses?: number | null
-  expiresAt?: Date | null
-  notes?: string | null
-}): Promise<Coupon> {
+function rowFromInput(input: CouponInput) {
+  return {
+    code: input.code.toUpperCase(),
+    type: input.type,
+    value: input.value,
+    description: input.description ?? null,
+    minOrderTwd: input.minOrderTwd ?? 0,
+    maxUses: input.maxUses ?? null,
+    perUserLimit: input.perUserLimit ?? null,
+    startsAt: input.startsAt ?? null,
+    expiresAt: input.expiresAt ?? null,
+    applicableProductIds: input.applicableProductIds ?? [],
+    applicableCategorySlugs: input.applicableCategorySlugs ?? [],
+    autoIssueOn: input.autoIssueOn ?? 'manual',
+    isActive: input.isActive ?? true,
+    notes: input.notes ?? null,
+  }
+}
+
+export async function createCoupon(input: CouponInput): Promise<Coupon> {
   const [row] = await db
     .insert(coupons)
     .values({
       orgId: DEFAULT_ORG_ID,
-      code: input.code.toUpperCase(),
-      type: input.type,
-      value: input.value,
-      minOrderTwd: input.minOrderTwd ?? 0,
-      maxUses: input.maxUses ?? null,
-      expiresAt: input.expiresAt ?? null,
-      notes: input.notes ?? null,
+      ...rowFromInput(input),
     })
     .returning()
   return row
+}
+
+export async function updateCoupon(id: string, input: CouponInput): Promise<Coupon> {
+  const [row] = await db
+    .update(coupons)
+    .set({ ...rowFromInput(input), updatedAt: new Date() })
+    .where(and(eq(coupons.orgId, DEFAULT_ORG_ID), eq(coupons.id, id)))
+    .returning()
+  return row
+}
+
+export async function deleteCoupon(id: string): Promise<void> {
+  await db
+    .delete(coupons)
+    .where(and(eq(coupons.orgId, DEFAULT_ORG_ID), eq(coupons.id, id)))
 }
 
 export async function toggleCouponActive(id: string): Promise<Coupon> {
