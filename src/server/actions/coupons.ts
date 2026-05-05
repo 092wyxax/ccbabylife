@@ -3,6 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import { and, eq, inArray, isNull } from 'drizzle-orm'
+import { db } from '@/db/client'
 import { requireRole } from '@/server/services/AdminAuthService'
 import {
   createCoupon,
@@ -14,6 +16,9 @@ import {
   type CouponInput,
 } from '@/server/services/CouponService'
 import { couponTypeEnum, couponAutoIssueEnum } from '@/db/schema/coupons'
+import { customerCoupons } from '@/db/schema/customer_coupons'
+import { customers } from '@/db/schema/customers'
+import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { rateLimit, getClientIp } from '@/lib/rate-limit'
 
 export type CouponActionState = { error?: string; success?: string }
@@ -153,6 +158,105 @@ export type CouponCheckState = {
   discount?: number
   code?: string
   freeShipping?: boolean
+}
+
+export type GrantCouponState = {
+  error?: string
+  granted?: number
+  alreadyHad?: number
+  notFound?: string[]
+}
+
+const grantSchema = z.object({
+  emails: z.string().min(1, '請輸入至少一個 Email'),
+})
+
+export async function grantCouponAction(
+  couponId: string,
+  _prev: GrantCouponState,
+  formData: FormData
+): Promise<GrantCouponState> {
+  await requireRole(['owner', 'manager', 'editor'])
+
+  const parsed = grantSchema.safeParse({ emails: formData.get('emails') })
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? '輸入錯誤' }
+  }
+
+  const inputEmails = parsed.data.emails
+    .split(/[\s,;]+/)
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean)
+
+  if (inputEmails.length === 0) {
+    return { error: '請輸入 Email' }
+  }
+  if (inputEmails.length > 200) {
+    return { error: '單次最多 200 筆' }
+  }
+
+  const matches = await db
+    .select({ id: customers.id, email: customers.email })
+    .from(customers)
+    .where(
+      and(
+        eq(customers.orgId, DEFAULT_ORG_ID),
+        inArray(customers.email, inputEmails)
+      )
+    )
+
+  const matchedEmails = new Set(matches.map((m) => m.email.toLowerCase()))
+  const notFound = inputEmails.filter((e) => !matchedEmails.has(e))
+
+  // Find existing grants to skip
+  const existing = await db
+    .select({ customerId: customerCoupons.customerId })
+    .from(customerCoupons)
+    .where(
+      and(
+        eq(customerCoupons.couponId, couponId),
+        inArray(customerCoupons.customerId, matches.map((m) => m.id))
+      )
+    )
+  const existingIds = new Set(existing.map((e) => e.customerId))
+
+  const toInsert = matches.filter((m) => !existingIds.has(m.id))
+  if (toInsert.length > 0) {
+    await db.insert(customerCoupons).values(
+      toInsert.map((m) => ({
+        orgId: DEFAULT_ORG_ID,
+        customerId: m.id,
+        couponId,
+      }))
+    )
+  }
+
+  revalidatePath(`/admin/marketing/coupons/${couponId}`)
+
+  return {
+    granted: toInsert.length,
+    alreadyHad: existingIds.size,
+    notFound,
+  }
+}
+
+export async function revokeCouponGrantAction(
+  customerCouponId: string,
+  couponId: string
+) {
+  await requireRole(['owner', 'manager', 'editor'])
+
+  // Only revoke if not yet used
+  await db
+    .delete(customerCoupons)
+    .where(
+      and(
+        eq(customerCoupons.id, customerCouponId),
+        isNull(customerCoupons.usedAt)
+      )
+    )
+
+  revalidatePath(`/admin/marketing/coupons/${couponId}`)
 }
 
 export async function checkCouponAction(
