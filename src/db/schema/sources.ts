@@ -9,8 +9,8 @@ import {
 } from 'drizzle-orm/pg-core'
 import { organizations } from './organizations'
 
-export const sourceTypeEnum = ['platform', 'brand', 'chain', 'resale', 'other'] as const
-export const sourceStatusEnum = ['active', 'paused', 'dropped'] as const
+export const vendorTypeEnum = ['platform', 'brand', 'chain', 'resale', 'other'] as const
+export const vendorStatusEnum = ['active', 'paused', 'dropped'] as const
 
 export const sources = pgTable(
   'sources',
@@ -21,9 +21,9 @@ export const sources = pgTable(
     // Tier 1
     name: text('name').notNull(),
     url: text('url').notNull(),
-    type: text('type', { enum: sourceTypeEnum }).notNull().default('other'),
+    type: text('type', { enum: vendorTypeEnum }).notNull().default('other'),
     strengths: text('strengths'),
-    status: text('status', { enum: sourceStatusEnum }).notNull().default('active'),
+    status: text('status', { enum: vendorStatusEnum }).notNull().default('active'),
 
     // Tier 2
     rating: integer('rating'), // 1–5
@@ -49,5 +49,5 @@ export const sources = pgTable(
 
 export type Source = typeof sources.$inferSelect
 export type NewSource = typeof sources.$inferInsert
-export type SourceType = (typeof sourceTypeEnum)[number]
-export type SourceStatus = (typeof sourceStatusEnum)[number]
+export type SourceType = (typeof vendorTypeEnum)[number]
+export type SourceStatus = (typeof vendorStatusEnum)[number]

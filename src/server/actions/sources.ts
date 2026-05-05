@@ -5,16 +5,16 @@ import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { and, eq } from 'drizzle-orm'
 import { db } from '@/db/client'
-import { sources, sourceTypeEnum, sourceStatusEnum } from '@/db/schema/sources'
+import { sources, vendorTypeEnum, vendorStatusEnum } from '@/db/schema/sources'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { requireAdmin } from '@/server/services/AdminAuthService'
 
 const baseSchema = z.object({
   name: z.string().min(1, '請填網站名稱').max(100),
   url: z.string().url('請填正確網址（含 https://）'),
-  type: z.enum(sourceTypeEnum),
+  type: z.enum(vendorTypeEnum),
   strengths: z.string().max(500).optional(),
-  status: z.enum(sourceStatusEnum),
+  status: z.enum(vendorStatusEnum),
 
   rating: z.coerce.number().int().min(1).max(5).optional().nullable(),
   categories: z.array(z.string()).optional(),
