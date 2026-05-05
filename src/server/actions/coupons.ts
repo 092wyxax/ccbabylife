@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
-import { and, eq, inArray, isNull } from 'drizzle-orm'
+import { and, eq, ilike, inArray, isNull } from 'drizzle-orm'
 import { db } from '@/db/client'
 import { requireRole } from '@/server/services/AdminAuthService'
 import {
@@ -164,11 +164,66 @@ export type GrantCouponState = {
   error?: string
   granted?: number
   alreadyHad?: number
-  notFound?: string[]
 }
 
-const grantSchema = z.object({
-  emails: z.string().min(1, '請輸入至少一個 Email'),
+export interface CustomerSearchResult {
+  id: string
+  name: string | null
+  email: string
+}
+
+export async function searchCustomersForGrantAction(
+  query: string
+): Promise<CustomerSearchResult[]> {
+  await requireRole(['owner', 'manager', 'editor'])
+
+  const q = query.trim().toLowerCase()
+  if (q.length < 1) return []
+
+  const rows = await db
+    .select({
+      id: customers.id,
+      name: customers.name,
+      email: customers.email,
+    })
+    .from(customers)
+    .where(
+      and(
+        eq(customers.orgId, DEFAULT_ORG_ID),
+        ilike(customers.email, `%${q}%`)
+      )
+    )
+    .limit(20)
+
+  // Also search by name and merge
+  const byName = await db
+    .select({
+      id: customers.id,
+      name: customers.name,
+      email: customers.email,
+    })
+    .from(customers)
+    .where(
+      and(
+        eq(customers.orgId, DEFAULT_ORG_ID),
+        ilike(customers.name, `%${q}%`)
+      )
+    )
+    .limit(20)
+
+  const seen = new Set<string>()
+  const merged: CustomerSearchResult[] = []
+  for (const r of [...rows, ...byName]) {
+    if (seen.has(r.id)) continue
+    seen.add(r.id)
+    merged.push(r)
+    if (merged.length >= 20) break
+  }
+  return merged
+}
+
+const grantIdsSchema = z.object({
+  customerIds: z.array(z.string().uuid()).min(1, '請至少選一位會員'),
 })
 
 export async function grantCouponAction(
@@ -178,65 +233,54 @@ export async function grantCouponAction(
 ): Promise<GrantCouponState> {
   await requireRole(['owner', 'manager', 'editor'])
 
-  const parsed = grantSchema.safeParse({ emails: formData.get('emails') })
+  const ids = formData.getAll('customerIds').map(String).filter(Boolean)
+  const parsed = grantIdsSchema.safeParse({ customerIds: ids })
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? '輸入錯誤' }
+    return { error: parsed.error.issues[0]?.message ?? '請至少選一位會員' }
+  }
+  if (parsed.data.customerIds.length > 200) {
+    return { error: '單次最多 200 位' }
   }
 
-  const inputEmails = parsed.data.emails
-    .split(/[\s,;]+/)
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean)
-
-  if (inputEmails.length === 0) {
-    return { error: '請輸入 Email' }
-  }
-  if (inputEmails.length > 200) {
-    return { error: '單次最多 200 筆' }
-  }
-
-  const matches = await db
-    .select({ id: customers.id, email: customers.email })
+  // Verify the customers belong to this org
+  const verified = await db
+    .select({ id: customers.id })
     .from(customers)
     .where(
       and(
         eq(customers.orgId, DEFAULT_ORG_ID),
-        inArray(customers.email, inputEmails)
+        inArray(customers.id, parsed.data.customerIds)
       )
     )
+  const verifiedIds = verified.map((v) => v.id)
 
-  const matchedEmails = new Set(matches.map((m) => m.email.toLowerCase()))
-  const notFound = inputEmails.filter((e) => !matchedEmails.has(e))
-
-  // Find existing grants to skip
+  // Skip already-granted
   const existing = await db
     .select({ customerId: customerCoupons.customerId })
     .from(customerCoupons)
     .where(
       and(
         eq(customerCoupons.couponId, couponId),
-        inArray(customerCoupons.customerId, matches.map((m) => m.id))
+        inArray(customerCoupons.customerId, verifiedIds)
       )
     )
-  const existingIds = new Set(existing.map((e) => e.customerId))
+  const existingSet = new Set(existing.map((e) => e.customerId))
 
-  const toInsert = matches.filter((m) => !existingIds.has(m.id))
+  const toInsert = verifiedIds.filter((id) => !existingSet.has(id))
   if (toInsert.length > 0) {
     await db.insert(customerCoupons).values(
-      toInsert.map((m) => ({
+      toInsert.map((id) => ({
         orgId: DEFAULT_ORG_ID,
-        customerId: m.id,
+        customerId: id,
         couponId,
       }))
     )
   }
 
   revalidatePath(`/admin/marketing/coupons/${couponId}`)
-
   return {
     granted: toInsert.length,
-    alreadyHad: existingIds.size,
-    notFound,
+    alreadyHad: existingSet.size,
   }
 }
 
