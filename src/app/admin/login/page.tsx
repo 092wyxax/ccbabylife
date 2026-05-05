@@ -59,10 +59,19 @@ export default function AdminLoginPage() {
           >
             {pending ? '登入中⋯' : '登入'}
           </button>
+
+          <div className="text-center">
+            <Link
+              href="/admin/forgot-password"
+              className="text-xs text-ink-soft hover:text-ink underline"
+            >
+              忘記密碼？
+            </Link>
+          </div>
         </form>
 
         <p className="mt-8 text-xs text-ink-soft text-center">
-          僅限店主、客服、合夥人使用
+          僅限店主、經理、客服、採購、編輯使用
         </p>
       </div>
     </div>
