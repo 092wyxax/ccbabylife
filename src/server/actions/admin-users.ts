@@ -11,7 +11,17 @@ import {
 import { recordAudit } from '@/server/services/AuditService'
 import { adminRoleEnum } from '@/db/schema'
 
-export type AdminUserActionState = { error?: string; success?: string }
+export type AdminUserActionState = {
+  error?: string
+  success?: string
+  credentials?: {
+    name: string
+    email: string
+    password: string
+    role: string
+    loginUrl: string
+  }
+}
 
 const createSchema = z.object({
   email: z.string().email('請填正確 email'),
@@ -51,7 +61,17 @@ export async function createAdminUserAction(
       data: { email: created.email, role: created.role },
     })
     revalidatePath('/admin/admins')
-    return { success: `已新增 ${created.name}（${created.role}）` }
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ccbabylife.com'
+    return {
+      success: `已新增 ${created.name}`,
+      credentials: {
+        name: created.name,
+        email: created.email,
+        password: parsed.data.password,
+        role: created.role,
+        loginUrl: `${siteUrl}/admin/login`,
+      },
+    }
   } catch (e) {
     return { error: e instanceof Error ? e.message : String(e) }
   }
