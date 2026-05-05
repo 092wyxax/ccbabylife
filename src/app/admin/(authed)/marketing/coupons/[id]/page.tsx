@@ -22,52 +22,48 @@ interface Props {
 }
 
 export default async function EditCouponPage({ params }: Props) {
-  const me = await requireRole(['owner', 'manager', 'editor'])
-  const { id } = await params
-
-  let coupon: Awaited<ReturnType<typeof getCouponById>>
-  let grants: Array<{
-    id: string
-    claimedAt: Date
-    usedAt: Date | null
-    customerName: string | null
-    customerEmail: string | null
-  }>
-
   try {
-    coupon = await getCouponById(id)
-    if (!coupon) notFound()
-
-    grants = await db
-      .select({
-        id: customerCoupons.id,
-        claimedAt: customerCoupons.claimedAt,
-        usedAt: customerCoupons.usedAt,
-        customerName: customers.name,
-        customerEmail: customers.email,
-      })
-      .from(customerCoupons)
-      .leftJoin(customers, eq(customerCoupons.customerId, customers.id))
-      .where(
-        and(
-          eq(customerCoupons.orgId, DEFAULT_ORG_ID),
-          eq(customerCoupons.couponId, id)
-        )
-      )
-      .orderBy(desc(customerCoupons.claimedAt))
+    return await renderPage(await params)
   } catch (err) {
     return (
-      <div className="p-8 max-w-2xl">
-        <h1 className="font-serif text-2xl mb-4">優惠券編輯（診斷）</h1>
+      <div className="p-8 max-w-3xl">
+        <h1 className="font-serif text-2xl mb-4">優惠券編輯（診斷模式）</h1>
         <div className="bg-red-50 border border-red-200 rounded p-4">
-          <pre className="text-xs text-red-800 whitespace-pre-wrap break-all">
-            {err instanceof Error ? `${err.message}\n\n${err.stack}` : String(err)}
+          <pre className="text-xs text-red-800 whitespace-pre-wrap break-all leading-relaxed">
+{err instanceof Error ? `${err.name}: ${err.message}\n\n${err.stack ?? '(no stack)'}` : String(err)}
           </pre>
         </div>
+        <p className="text-xs text-ink-soft mt-3">
+          參考：把這段截圖傳給工程師。
+        </p>
       </div>
     )
   }
+}
+
+async function renderPage({ id }: { id: string }) {
+  const me = await requireRole(['owner', 'manager', 'editor'])
+
+  const coupon = await getCouponById(id)
   if (!coupon) notFound()
+
+  const grants = await db
+    .select({
+      id: customerCoupons.id,
+      claimedAt: customerCoupons.claimedAt,
+      usedAt: customerCoupons.usedAt,
+      customerName: customers.name,
+      customerEmail: customers.email,
+    })
+    .from(customerCoupons)
+    .leftJoin(customers, eq(customerCoupons.customerId, customers.id))
+    .where(
+      and(
+        eq(customerCoupons.orgId, DEFAULT_ORG_ID),
+        eq(customerCoupons.couponId, id)
+      )
+    )
+    .orderBy(desc(customerCoupons.claimedAt))
 
   const usedCount = grants.filter((g) => g.usedAt).length
 
@@ -95,11 +91,6 @@ export default async function EditCouponPage({ params }: Props) {
             <button
               type="submit"
               className="text-sm text-danger hover:underline"
-              onClick={(e) => {
-                if (!confirm(`確定要刪除優惠碼「${coupon.code}」嗎？`)) {
-                  e.preventDefault()
-                }
-              }}
             >
               刪除
             </button>
@@ -168,12 +159,7 @@ export default async function EditCouponPage({ params }: Props) {
                       </td>
                       <td className="px-3 py-2 text-right">
                         {!g.usedAt && (
-                          <form
-                            action={async () => {
-                              'use server'
-                              await revokeCouponGrantAction(g.id, id)
-                            }}
-                          >
+                          <form action={revokeCouponGrantAction.bind(null, g.id, id)}>
                             <button
                               type="submit"
                               className="text-xs text-ink-soft hover:text-danger"
