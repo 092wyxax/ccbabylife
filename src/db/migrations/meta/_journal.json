@@ -71,6 +71,13 @@
       "when": 1777799671561,
       "tag": "0009_tidy_tempest",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1777993038813,
+      "tag": "0010_overjoyed_lizard",
+      "breakpoints": true
     }
   ]
 }
