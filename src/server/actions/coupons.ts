@@ -20,6 +20,9 @@ import { customerCoupons } from '@/db/schema/customer_coupons'
 import { customers } from '@/db/schema/customers'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { rateLimit, getClientIp } from '@/lib/rate-limit'
+import { enqueuePush, queueAndSendLine } from '@/server/services/NotificationService'
+import { getCouponById } from '@/server/services/CouponService'
+import { formatTwd } from '@/lib/format'
 
 export type CouponActionState = { error?: string; success?: string }
 
@@ -275,12 +278,74 @@ export async function grantCouponAction(
         couponId,
       }))
     )
+
+    await notifyCouponGranted(couponId, toInsert).catch((err) => {
+      console.error('[grantCouponAction] notification queue failed:', err)
+    })
   }
 
   revalidatePath(`/admin/marketing/coupons/${couponId}`)
   return {
     granted: toInsert.length,
     alreadyHad: existingSet.size,
+  }
+}
+
+function describeCouponInline(c: NonNullable<Awaited<ReturnType<typeof getCouponById>>>): string {
+  if (c.type === 'free_shipping') return '免運優惠'
+  if (c.type === 'percent') return `${c.value}% 折扣`
+  if (c.type === 'tiered') return `滿 ${formatTwd(c.minOrderTwd)} 折 ${formatTwd(c.value)}`
+  return `折抵 ${formatTwd(c.value)}`
+}
+
+async function notifyCouponGranted(couponId: string, customerIds: string[]) {
+  const coupon = await getCouponById(couponId)
+  if (!coupon) return
+
+  const recipients = await db
+    .select({
+      id: customers.id,
+      name: customers.name,
+      email: customers.email,
+      lineUserId: customers.lineUserId,
+      notificationPrefs: customers.notificationPrefs,
+    })
+    .from(customers)
+    .where(
+      and(
+        eq(customers.orgId, DEFAULT_ORG_ID),
+        inArray(customers.id, customerIds)
+      )
+    )
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ccbabylife.com'
+  const desc = describeCouponInline(coupon)
+  const expiresLine = coupon.expiresAt
+    ? `\n有效期限：${new Date(coupon.expiresAt).toLocaleDateString('zh-Hant')}`
+    : ''
+
+  for (const r of recipients) {
+    const body = `你收到一張新優惠券 🎁\n\n代碼：${coupon.code}\n優惠：${desc}${expiresLine}\n\n到會員中心查看：${siteUrl}/account/coupons`
+    const prefs = r.notificationPrefs ?? { line: true, email: true }
+
+    if (prefs.line && r.lineUserId) {
+      await queueAndSendLine({
+        customerId: r.id,
+        templateId: 'coupon.granted',
+        body,
+        payload: { couponId, code: coupon.code },
+      }).catch(() => {})
+    }
+    if (prefs.email) {
+      await enqueuePush({
+        customerId: r.id,
+        channel: 'email',
+        templateId: 'coupon.granted',
+        subject: `你收到一張新優惠券：${coupon.code}`,
+        body,
+        payload: { couponId, code: coupon.code },
+      }).catch(() => {})
+    }
   }
 }
 
