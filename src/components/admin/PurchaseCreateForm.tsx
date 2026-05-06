@@ -46,7 +46,7 @@ export function PurchaseCreateForm({ suppliers }: Props) {
           className="w-full border border-line rounded-md px-3 py-2 focus:outline-none focus:border-ink"
         />
         <p className="text-xs text-ink-soft mt-1">
-          通常一週一張採購單。建議用 ISO 週數（YYYY-Www）或日本下單日期。
+          通常一週一張進貨單。建議用 ISO 週數（YYYY-Www）或日本下單日期。
         </p>
         {errs.batchLabel && <p className="text-xs text-danger mt-1">{errs.batchLabel}</p>}
       </div>
@@ -87,7 +87,7 @@ export function PurchaseCreateForm({ suppliers }: Props) {
         disabled={pending}
         className="bg-ink text-cream px-6 py-2.5 rounded-md hover:bg-accent transition-colors disabled:opacity-50"
       >
-        {pending ? '建立中⋯' : '建立採購單'}
+        {pending ? '建立中⋯' : '建立進貨單'}
       </button>
     </form>
   )

@@ -127,7 +127,7 @@ export default async function AdminDashboardPage() {
       href: '/admin/orders?status=paid',
     },
     {
-      label: '進行中採購單',
+      label: '進行中進貨單',
       value: activePurchaseRows.length,
       sub: '規劃 / 已下單 / 日本到貨',
       href: '/admin/purchases',
@@ -196,9 +196,9 @@ export default async function AdminDashboardPage() {
         </DashboardCard>
 
         <DashboardCard
-          title="進行中採購單"
+          title="進行中進貨單"
           count={activePurchaseRows.length}
-          empty="目前沒有進行中採購單"
+          empty="目前沒有進行中進貨單"
           link={{ href: '/admin/purchases', label: '所有採購 →' }}
         >
           <ul className="text-sm divide-y divide-line">

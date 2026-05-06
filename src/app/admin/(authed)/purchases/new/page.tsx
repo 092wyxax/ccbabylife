@@ -34,11 +34,11 @@ export default async function NewPurchaseOrderPage() {
   return (
     <div className="p-6 sm:p-8">
       <nav className="text-xs text-ink-soft mb-4">
-        <Link href="/admin/purchases" className="hover:text-ink">採購單</Link>
+        <Link href="/admin/purchases" className="hover:text-ink">進貨單</Link>
         <span className="mx-2">/</span>
         <span>新建</span>
       </nav>
-      <h1 className="font-serif text-2xl mb-1">新建採購單</h1>
+      <h1 className="font-serif text-2xl mb-1">新建進貨單</h1>
       <p className="text-ink-soft text-sm mb-6">
         填日幣單價跟數量，後台會自動算進口稅、推廣費、營業稅、雜支分攤、單價到岸成本與建議售價。
       </p>

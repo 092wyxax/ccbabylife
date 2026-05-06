@@ -40,7 +40,7 @@ export const clearanceFeePlans = pgTable(
     id: uuid('id').defaultRandom().primaryKey(),
     orgId: uuid('org_id').notNull().references(() => organizations.id),
     name: text('name').notNull(),
-    /** 報關雜支總額（每張採購單固定金額，新台幣）*/
+    /** 報關雜支總額（每張進貨單固定金額，新台幣）*/
     amountTwd: integer('amount_twd').notNull(),
     notes: text('notes'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -55,9 +55,9 @@ export const agentServicePlans = pgTable(
     id: uuid('id').defaultRandom().primaryKey(),
     orgId: uuid('org_id').notNull().references(() => organizations.id),
     name: text('name').notNull(),
-    /** 基本方案費（每張採購單固定，新台幣）*/
+    /** 基本方案費（每張進貨單固定，新台幣）*/
     baseFeeTwd: integer('base_fee_twd').notNull().default(0),
-    /** 手續費（每張採購單固定，新台幣）*/
+    /** 手續費（每張進貨單固定，新台幣）*/
     handlingFeeTwd: integer('handling_fee_twd').notNull().default(0),
     notes: text('notes'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

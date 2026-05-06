@@ -15,9 +15,9 @@ export default async function NewSourcePage() {
           href="/admin/sources"
           className="text-xs text-ink-soft hover:text-accent"
         >
-          ← 進貨來源
+          ← 採購商
         </Link>
-        <h1 className="font-serif text-2xl mt-1">新增進貨來源</h1>
+        <h1 className="font-serif text-2xl mt-1">新增採購商</h1>
       </header>
 
       <SourceForm action={createSourceAction} submitLabel="儲存" />

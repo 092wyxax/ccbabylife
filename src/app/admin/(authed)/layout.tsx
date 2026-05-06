@@ -26,8 +26,8 @@ const NAV: NavGroup[] = [
     items: [
       { href: '/admin/products', label: '商品', roles: ['owner', 'manager', 'ops', 'buyer'] },
       { href: '/admin/inventory', label: '庫存', roles: ['owner', 'manager', 'ops', 'buyer'] },
-      { href: '/admin/purchases', label: '採購單', roles: ['owner', 'manager', 'buyer'] },
-      { href: '/admin/sources', label: '進貨來源', roles: ['owner', 'manager', 'buyer'] },
+      { href: '/admin/purchases', label: '進貨單', roles: ['owner', 'manager', 'buyer'] },
+      { href: '/admin/sources', label: '採購商', roles: ['owner', 'manager', 'buyer'] },
       { href: '/admin/procurement-settings', label: '進貨設定', roles: ['owner', 'manager', 'buyer'] },
     ],
   },

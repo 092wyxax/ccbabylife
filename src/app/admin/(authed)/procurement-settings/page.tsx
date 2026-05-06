@@ -51,14 +51,14 @@ export default async function ProcurementSettingsPage() {
       <header>
         <h1 className="font-serif text-2xl mb-1">進貨設定</h1>
         <p className="text-ink-soft text-sm">
-          所有可在採購單下拉選擇的選項都在這裡管理。改完即時生效，採購單會看到最新值。
+          所有可在進貨單下拉選擇的選項都在這裡管理。改完即時生效，進貨單會看到最新值。
         </p>
       </header>
 
       {/* 1. 採購來源 SKU 簡碼 */}
       <Section
         title="採購來源 SKU 簡碼"
-        description="編輯既有「進貨來源」的簡碼（用於商品 SKU 開頭，例：NSW、NSE、SC）。新增 / 刪除採購來源請到「進貨來源」頁。"
+        description="編輯既有「採購商」的簡碼（用於商品 SKU 開頭，例：NSW、NSE、SC）。新增 / 刪除採購來源請到「採購商」頁。"
       >
         <div className="mb-3">
           <a
@@ -168,7 +168,7 @@ export default async function ProcurementSettingsPage() {
       {/* 4. 報關方案 */}
       <Section
         title="報關雜支方案"
-        description="每張採購單會選一個方案，金額會依採購單總件數平均分攤到每個商品。"
+        description="每張進貨單會選一個方案，金額會依進貨單總件數平均分攤到每個商品。"
       >
         <Row action={createClearanceFeePlanAction} cols="grid-cols-[1fr_120px_1fr_70px]" creating>
           <input name="name" required placeholder="例：A 方案" className={inputCls} />
@@ -203,7 +203,7 @@ export default async function ProcurementSettingsPage() {
       {/* 5. 代購方案 */}
       <Section
         title="代購公司方案"
-        description="基本方案費 + 手續費。每張採購單選一個方案，總額分攤到每個商品。"
+        description="基本方案費 + 手續費。每張進貨單選一個方案，總額分攤到每個商品。"
       >
         <Row action={createAgentPlanAction} cols="grid-cols-[1fr_110px_110px_1fr_70px]" creating>
           <input name="name" required placeholder="例：集運 A" className={inputCls} />
@@ -241,7 +241,7 @@ export default async function ProcurementSettingsPage() {
       {/* 6. 付款方式 */}
       <Section
         title="付款方式"
-        description="採購單付款方式下拉選項。例：信用卡（台新）、信用卡（玉山）、現金、銀行匯款。"
+        description="進貨單付款方式下拉選項。例：信用卡（台新）、信用卡（玉山）、現金、銀行匯款。"
       >
         <Row action={createPaymentMethodAction} cols="grid-cols-[1fr_1fr_70px]" creating>
           <input name="name" required placeholder="例：信用卡（台新）" className={inputCls} />

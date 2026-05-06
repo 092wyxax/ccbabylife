@@ -175,7 +175,7 @@ export function PurchaseOrderForm({
         </legend>
 
         <div className="grid sm:grid-cols-2 gap-4">
-          <Field label="採購單名稱" required>
+          <Field label="進貨單名稱" required>
             <input
               name="batchLabel"
               required
@@ -500,7 +500,7 @@ export function PurchaseOrderForm({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             className={inputCls}
-            placeholder="採購單備註（選填）"
+            placeholder="進貨單備註（選填）"
           />
         </Field>
       </div>
@@ -511,7 +511,7 @@ export function PurchaseOrderForm({
           disabled={pending}
           className="bg-ink text-cream px-5 py-2.5 rounded-md text-sm hover:bg-accent transition-colors disabled:opacity-50"
         >
-          {pending ? '儲存中⋯' : '儲存採購單'}
+          {pending ? '儲存中⋯' : '儲存進貨單'}
         </button>
       </div>
     </form>

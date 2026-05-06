@@ -34,7 +34,7 @@ export default async function AdminSourcesPage() {
     <div className="p-6 sm:p-8 max-w-6xl">
       <header className="flex items-start justify-between mb-6 gap-4">
         <div>
-          <h1 className="font-serif text-2xl mb-1">進貨來源</h1>
+          <h1 className="font-serif text-2xl mb-1">採購商</h1>
           <p className="text-ink-soft text-sm">
             日本端代購可用的網站、官網、連鎖店清單。內部紀錄，不對外公開。
           </p>
@@ -49,7 +49,7 @@ export default async function AdminSourcesPage() {
 
       {rows.length === 0 ? (
         <div className="bg-white border border-line rounded-lg p-12 text-center">
-          <p className="text-ink-soft text-sm mb-4">還沒有進貨來源紀錄。</p>
+          <p className="text-ink-soft text-sm mb-4">還沒有採購商紀錄。</p>
           <Link
             href="/admin/sources/new"
             className="text-sm text-accent hover:underline"

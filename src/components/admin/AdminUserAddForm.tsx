@@ -12,7 +12,7 @@ const initial: AdminUserActionState = {}
 const ROLE_OPTIONS: Array<{ value: AdminRole; label: string; hint: string }> = [
   { value: 'manager', label: '經理', hint: '除人事與店設定外，其他皆可改' },
   { value: 'ops', label: '客服', hint: '處理訂單、客戶、評論、補貨通知' },
-  { value: 'buyer', label: '採購', hint: '採購單、進貨來源、商品與庫存' },
+  { value: 'buyer', label: '採購', hint: '進貨單、採購商、商品與庫存' },
   { value: 'editor', label: '編輯', hint: '部落格、電子報、行銷' },
 ]
 

@@ -261,7 +261,7 @@ export default async function PurchaseDetailPage({ params }: Props) {
             <ul className="list-disc list-inside space-y-0.5">
               <li>每行項目的「實際單價」內聯編輯</li>
               <li>批次與訂單關聯（哪些訂單由此批次出貨）</li>
-              <li>採購單列印</li>
+              <li>進貨單列印</li>
             </ul>
             {allSuppliers.length === 0 && (
               <p className="mt-3 pt-3 border-t border-line text-ink">

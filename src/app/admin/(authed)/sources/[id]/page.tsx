@@ -37,7 +37,7 @@ export default async function EditSourcePage({ params }: Props) {
             href="/admin/sources"
             className="text-xs text-ink-soft hover:text-accent"
           >
-            ← 進貨來源
+            ← 採購商
           </Link>
           <h1 className="font-serif text-2xl mt-1">編輯：{source.name}</h1>
         </div>

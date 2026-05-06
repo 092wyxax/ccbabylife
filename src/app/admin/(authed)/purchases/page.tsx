@@ -12,7 +12,7 @@ export default async function AdminPurchasesPage() {
         <div>
           <h1 className="font-serif text-2xl mb-1">採購管理</h1>
           <p className="text-ink-soft text-sm">
-            共 {rows.length} 筆採購單 ·{' '}
+            共 {rows.length} 筆進貨單 ·{' '}
             <Link href="/admin/purchases/suppliers" className="underline hover:text-accent">
               供應商管理
             </Link>
@@ -22,7 +22,7 @@ export default async function AdminPurchasesPage() {
           href="/admin/purchases/new"
           className="bg-ink text-cream px-4 py-2 rounded-md text-sm hover:bg-accent transition-colors"
         >
-          + 建立採購單
+          + 建立進貨單
         </Link>
       </header>
 
@@ -43,7 +43,7 @@ export default async function AdminPurchasesPage() {
             {rows.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-4 py-12 text-center text-ink-soft">
-                  還沒有採購單。點右上「+ 建立採購單」開始。
+                  還沒有進貨單。點右上「+ 建立進貨單」開始。
                 </td>
               </tr>
             ) : (

@@ -16,7 +16,7 @@ export default async function SuppliersPage() {
 
       <h1 className="font-serif text-2xl mb-1">供應商管理</h1>
       <p className="text-ink-soft text-sm mb-8">
-        每張採購單可指定一個供應商，用於統計與對帳。
+        每張進貨單可指定一個供應商，用於統計與對帳。
       </p>
 
       <section className="grid lg:grid-cols-[1fr_320px] gap-8">

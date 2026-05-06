@@ -31,7 +31,7 @@ const itemSchema = z.object({
 })
 
 const headerSchema = z.object({
-  batchLabel: z.string().min(1, '請填採購單名稱').max(100),
+  batchLabel: z.string().min(1, '請填進貨單名稱').max(100),
   sourceId: z.string().uuid().optional().nullable(),
   purchaseDate: z.string().min(1, '請填採購日期'),
   exchangeRate: z.coerce.number().min(0).max(10),

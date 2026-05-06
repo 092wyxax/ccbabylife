@@ -236,7 +236,7 @@ export default async function AdminReportsPage() {
       <header className="mt-12 mb-6 pt-8 border-t border-line">
         <h2 className="font-serif text-xl mb-1">進貨統計</h2>
         <p className="text-ink-soft text-sm">
-          採購單成本與預期毛利。資料來自每張採購單儲存當下的 snapshot。
+          進貨單成本與預期毛利。資料來自每張進貨單儲存當下的 snapshot。
         </p>
       </header>
 
@@ -317,10 +317,10 @@ export default async function AdminReportsPage() {
 
         <div className="bg-white border border-line rounded-lg p-5">
           <h3 className="text-xs uppercase tracking-widest text-ink-soft mb-3">
-            最近採購單
+            最近進貨單
           </h3>
           {recentPurchases.length === 0 ? (
-            <p className="text-sm text-ink-soft py-4 text-center">尚無採購單</p>
+            <p className="text-sm text-ink-soft py-4 text-center">尚無進貨單</p>
           ) : (
             <ul className="space-y-2 text-sm">
               {recentPurchases.map((p) => (
