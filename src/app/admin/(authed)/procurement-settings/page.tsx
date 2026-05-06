@@ -58,10 +58,24 @@ export default async function ProcurementSettingsPage() {
       {/* 1. 採購來源 SKU 簡碼 */}
       <Section
         title="採購來源 SKU 簡碼"
-        description="編輯既有「進貨來源」的簡碼（用於商品 SKU 開頭，例：NSW、NSE、SC）。"
+        description="編輯既有「進貨來源」的簡碼（用於商品 SKU 開頭，例：NSW、NSE、SC）。新增 / 刪除採購來源請到「進貨來源」頁。"
       >
+        <div className="mb-3">
+          <a
+            href="/admin/sources/new"
+            className="inline-block text-xs bg-ink text-cream px-3 py-1.5 rounded hover:bg-accent"
+          >
+            + 新增採購來源 →
+          </a>
+          <a
+            href="/admin/sources"
+            className="inline-block text-xs text-ink-soft hover:text-ink underline ml-3"
+          >
+            管理所有來源
+          </a>
+        </div>
         {sourceRows.length === 0 ? (
-          <Empty msg="先到「進貨來源」建立採購對象，這裡再填簡碼。" />
+          <Empty msg="尚未建立採購來源，按上方「+ 新增採購來源」開始。" />
         ) : (
           <List>
             <Header cols="grid-cols-[1fr_120px_1fr_70px]">
