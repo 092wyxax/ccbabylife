@@ -1,7 +1,17 @@
-import { pgTable, uuid, text, integer, timestamp, index } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, text, integer, timestamp, date, index } from 'drizzle-orm/pg-core'
 import { organizations } from './organizations'
 import { adminUsers } from './admin_users'
-import { products } from './products'
+import { products, categories } from './products'
+import { sources } from './sources'
+import {
+  taxRateGroups,
+  clearanceFeePlans,
+  agentServicePlans,
+  paymentMethods,
+} from './procurement_settings'
+
+export const priceRoundStrategyEnum = ['A', 'B', 'C', 'D'] as const
+export type PriceRoundStrategy = (typeof priceRoundStrategyEnum)[number]
 
 export const supplierTypeEnum = [
   'rakuten',
@@ -46,6 +56,22 @@ export const purchases = pgTable(
     expectedJpyTotal: integer('expected_jpy_total').notNull().default(0),
     actualJpyTotal: integer('actual_jpy_total'),
     notes: text('notes'),
+
+    /* ───── Phase 2 finance integration fields ───── */
+    sourceId: uuid('source_id').references(() => sources.id),
+    purchaseDate: date('purchase_date'),
+    /** 匯率 × 100000 (e.g. 0.21359 = 21359). 5 decimal precision. */
+    exchangeRateScaled: integer('exchange_rate_scaled'),
+    twdTotal: integer('twd_total'),
+    agentPlanId: uuid('agent_plan_id').references(() => agentServicePlans.id),
+    clearanceFeePlanId: uuid('clearance_fee_plan_id').references(() => clearanceFeePlans.id),
+    packagingFeeTotal: integer('packaging_fee_total').notNull().default(0),
+    paymentMethodId: uuid('payment_method_id').references(() => paymentMethods.id),
+    /** 加成倍率 basis points × 100, default 3000 = 30% markup */
+    markupRateBp: integer('markup_rate_bp').notNull().default(3000),
+    priceRoundStrategy: text('price_round_strategy', { enum: priceRoundStrategyEnum })
+      .notNull()
+      .default('B'),
     createdById: uuid('created_by_id').references(() => adminUsers.id),
     submittedAt: timestamp('submitted_at', { withTimezone: true }),
     receivedAt: timestamp('received_at', { withTimezone: true }),
@@ -74,6 +100,27 @@ export const purchaseItems = pgTable(
     unitJpy: integer('unit_jpy').notNull(),
     actualUnitJpy: integer('actual_unit_jpy'),
     notes: text('notes'),
+
+    /* ───── Phase 2 finance integration fields ───── */
+    categoryId: uuid('category_id').references(() => categories.id),
+    taxRateGroupId: uuid('tax_rate_group_id').references(() => taxRateGroups.id),
+    nameZh: text('name_zh'),
+    nameJp: text('name_jp'),
+    spec: text('spec'),
+    description: text('description'),
+    /** Snapshots — calculated at save time, frozen for audit. All TWD integers. */
+    jpySubtotal: integer('jpy_subtotal'),
+    twdSubtotal: integer('twd_subtotal'),
+    importDuty: integer('import_duty'),
+    promoFee: integer('promo_fee'),
+    vat: integer('vat'),
+    clearanceFeeShare: integer('clearance_fee_share'),
+    packagingFeeShare: integer('packaging_fee_share'),
+    agentFeeShare: integer('agent_fee_share'),
+    landedCostPerUnit: integer('landed_cost_per_unit'),
+    suggestedPriceRaw: integer('suggested_price_raw'),
+    suggestedPrice: integer('suggested_price'),
+
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [index('purchase_items_purchase_idx').on(table.purchaseId)]
