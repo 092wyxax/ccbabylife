@@ -26,6 +26,9 @@ export const categories = pgTable(
     orgId: uuid('org_id').notNull().references(() => organizations.id),
     slug: text('slug').notNull(),
     name: text('name').notNull(),
+    /** SKU 編號用單字母代碼，例如 A=上衣 / B=褲子 */
+    code: text('code'),
+    notes: text('notes'),
     parentId: uuid('parent_id'),
     minAgeMonths: integer('min_age_months'),
     maxAgeMonths: integer('max_age_months'),

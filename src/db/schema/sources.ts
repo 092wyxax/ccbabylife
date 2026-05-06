@@ -20,6 +20,8 @@ export const sources = pgTable(
 
     // Tier 1
     name: text('name').notNull(),
+    /** SKU 編號用簡碼，例如 NSW / NSE / SC */
+    code: text('code'),
     url: text('url').notNull(),
     type: text('type', { enum: vendorTypeEnum }).notNull().default('other'),
     strengths: text('strengths'),
