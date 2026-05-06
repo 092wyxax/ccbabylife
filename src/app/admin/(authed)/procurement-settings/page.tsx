@@ -78,14 +78,14 @@ export default async function ProcurementSettingsPage() {
           <Empty msg="尚未建立採購來源，按上方「+ 新增採購來源」開始。" />
         ) : (
           <List>
-            <Header cols="grid-cols-[1fr_120px_1fr_70px]">
+            <Header cols="sm:grid-cols-[1fr_120px_1fr_70px]">
               <span>網站名稱</span>
               <span>簡碼</span>
               <span>註記</span>
               <span></span>
             </Header>
             {sourceRows.map((s) => (
-              <Row key={s.id} action={updateSourceCodeAction} cols="grid-cols-[1fr_120px_1fr_70px]">
+              <Row key={s.id} action={updateSourceCodeAction} cols="sm:grid-cols-[1fr_120px_1fr_70px]">
                 <input type="hidden" name="id" value={s.id} />
                 <span className="text-sm">{s.name}</span>
                 <input name="code" defaultValue={s.code ?? ''} maxLength={6} placeholder="NSW" className={codeCls} />
@@ -106,14 +106,14 @@ export default async function ProcurementSettingsPage() {
           <Empty msg="尚未建立商品分類。要先建分類後再填代碼。" />
         ) : (
           <List>
-            <Header cols="grid-cols-[1fr_80px_1fr_70px]">
+            <Header cols="sm:grid-cols-[1fr_80px_1fr_70px]">
               <span>分類名稱</span>
               <span>代碼</span>
               <span>註記</span>
               <span></span>
             </Header>
             {categoryRows.map((c) => (
-              <Row key={c.id} action={updateCategoryCodeAction} cols="grid-cols-[1fr_80px_1fr_70px]">
+              <Row key={c.id} action={updateCategoryCodeAction} cols="sm:grid-cols-[1fr_80px_1fr_70px]">
                 <input type="hidden" name="id" value={c.id} />
                 <span className="text-sm">{c.name}</span>
                 <input name="code" defaultValue={c.code ?? ''} maxLength={2} placeholder="A" className={codeCls} />
@@ -130,7 +130,7 @@ export default async function ProcurementSettingsPage() {
         title="進口稅率分組"
         description="按商品種類設定關稅率。建議參考海關稅則：嬰兒服飾 ~12%、紗布巾 ~7.5%、玩具 0%、奶瓶 0–5%。"
       >
-        <Row action={createTaxRateGroupAction} cols="grid-cols-[1fr_140px_1fr_70px]" creating>
+        <Row action={createTaxRateGroupAction} cols="sm:grid-cols-[1fr_140px_1fr_70px]" creating>
           <input name="name" required placeholder="例：嬰兒服飾" className={inputCls} />
           <input name="importDutyRateBp" type="number" min={0} max={10000} required placeholder="1200 = 12%" className={numCls} />
           <input name="notes" placeholder="備註（選填）" className={inputCls} />
@@ -139,7 +139,7 @@ export default async function ProcurementSettingsPage() {
 
         {taxRows.length > 0 && (
           <List>
-            <Header cols="grid-cols-[1fr_140px_1fr_120px]">
+            <Header cols="sm:grid-cols-[1fr_140px_1fr_120px]">
               <span>名稱</span>
               <span>稅率（× 100 = %）</span>
               <span>備註</span>
@@ -147,7 +147,7 @@ export default async function ProcurementSettingsPage() {
             </Header>
             {taxRows.map((t) => (
               <div key={t.id} className="border-t border-line">
-                <Row action={updateTaxRateGroupAction} cols="grid-cols-[1fr_140px_1fr_120px]">
+                <Row action={updateTaxRateGroupAction} cols="sm:grid-cols-[1fr_140px_1fr_120px]">
                   <input type="hidden" name="id" value={t.id} />
                   <input name="name" defaultValue={t.name} className={inputCls} />
                   <div>
@@ -170,7 +170,7 @@ export default async function ProcurementSettingsPage() {
         title="報關雜支方案"
         description="每張進貨單會選一個方案，金額會依進貨單總件數平均分攤到每個商品。"
       >
-        <Row action={createClearanceFeePlanAction} cols="grid-cols-[1fr_120px_1fr_70px]" creating>
+        <Row action={createClearanceFeePlanAction} cols="sm:grid-cols-[1fr_120px_1fr_70px]" creating>
           <input name="name" required placeholder="例：A 方案" className={inputCls} />
           <input name="amountTwd" type="number" min={0} required placeholder="200 (NT$)" className={numCls} />
           <input name="notes" placeholder="備註（選填）" className={inputCls} />
@@ -179,7 +179,7 @@ export default async function ProcurementSettingsPage() {
 
         {clearRows.length > 0 && (
           <List>
-            <Header cols="grid-cols-[1fr_120px_1fr_120px]">
+            <Header cols="sm:grid-cols-[1fr_120px_1fr_120px]">
               <span>名稱</span>
               <span>金額（NT$）</span>
               <span>備註</span>
@@ -187,7 +187,7 @@ export default async function ProcurementSettingsPage() {
             </Header>
             {clearRows.map((p) => (
               <div key={p.id} className="border-t border-line">
-                <Row action={updateClearanceFeePlanAction} cols="grid-cols-[1fr_120px_1fr_120px]">
+                <Row action={updateClearanceFeePlanAction} cols="sm:grid-cols-[1fr_120px_1fr_120px]">
                   <input type="hidden" name="id" value={p.id} />
                   <input name="name" defaultValue={p.name} className={inputCls} />
                   <input name="amountTwd" type="number" min={0} defaultValue={p.amountTwd} className={numCls} />
@@ -205,7 +205,7 @@ export default async function ProcurementSettingsPage() {
         title="代購公司方案"
         description="基本方案費 + 手續費。每張進貨單選一個方案，總額分攤到每個商品。"
       >
-        <Row action={createAgentPlanAction} cols="grid-cols-[1fr_110px_110px_1fr_70px]" creating>
+        <Row action={createAgentPlanAction} cols="sm:grid-cols-[1fr_110px_110px_1fr_70px]" creating>
           <input name="name" required placeholder="例：集運 A" className={inputCls} />
           <input name="baseFeeTwd" type="number" min={0} placeholder="基本 500" className={numCls} />
           <input name="handlingFeeTwd" type="number" min={0} placeholder="手續 500" className={numCls} />
@@ -215,7 +215,7 @@ export default async function ProcurementSettingsPage() {
 
         {agentRows.length > 0 && (
           <List>
-            <Header cols="grid-cols-[1fr_110px_110px_1fr_120px]">
+            <Header cols="sm:grid-cols-[1fr_110px_110px_1fr_120px]">
               <span>名稱</span>
               <span>基本費</span>
               <span>手續費</span>
@@ -224,7 +224,7 @@ export default async function ProcurementSettingsPage() {
             </Header>
             {agentRows.map((p) => (
               <div key={p.id} className="border-t border-line">
-                <Row action={updateAgentPlanAction} cols="grid-cols-[1fr_110px_110px_1fr_120px]">
+                <Row action={updateAgentPlanAction} cols="sm:grid-cols-[1fr_110px_110px_1fr_120px]">
                   <input type="hidden" name="id" value={p.id} />
                   <input name="name" defaultValue={p.name} className={inputCls} />
                   <input name="baseFeeTwd" type="number" min={0} defaultValue={p.baseFeeTwd} className={numCls} />
@@ -243,7 +243,7 @@ export default async function ProcurementSettingsPage() {
         title="付款方式"
         description="進貨單付款方式下拉選項。例：信用卡（台新）、信用卡（玉山）、現金、銀行匯款。"
       >
-        <Row action={createPaymentMethodAction} cols="grid-cols-[1fr_1fr_70px]" creating>
+        <Row action={createPaymentMethodAction} cols="sm:grid-cols-[1fr_1fr_70px]" creating>
           <input name="name" required placeholder="例：信用卡（台新）" className={inputCls} />
           <input name="notes" placeholder="備註（選填）" className={inputCls} />
           <CreateBtn />
@@ -251,14 +251,14 @@ export default async function ProcurementSettingsPage() {
 
         {payRows.length > 0 && (
           <List>
-            <Header cols="grid-cols-[1fr_1fr_120px]">
+            <Header cols="sm:grid-cols-[1fr_1fr_120px]">
               <span>名稱</span>
               <span>備註</span>
               <span></span>
             </Header>
             {payRows.map((p) => (
               <div key={p.id} className="border-t border-line">
-                <Row action={updatePaymentMethodAction} cols="grid-cols-[1fr_1fr_120px]">
+                <Row action={updatePaymentMethodAction} cols="sm:grid-cols-[1fr_1fr_120px]">
                   <input type="hidden" name="id" value={p.id} />
                   <input name="name" defaultValue={p.name} className={inputCls} />
                   <input name="notes" defaultValue={p.notes ?? ''} className={inputCls} />
@@ -312,7 +312,7 @@ function Header({
 }) {
   return (
     <div
-      className={`grid ${cols} gap-2 px-3 py-2 bg-cream-50 text-xs text-ink-soft uppercase tracking-wider items-center`}
+      className={`hidden sm:grid ${cols.replace(/^sm:/, '')} gap-2 px-3 py-2 bg-cream-50 text-xs text-ink-soft uppercase tracking-wider items-center`}
     >
       {children}
     </div>
@@ -333,7 +333,7 @@ function Row({
   return (
     <form
       action={action}
-      className={`grid ${cols} gap-2 ${creating ? 'bg-cream-50/50 border border-line rounded p-3 mb-3' : 'px-3 py-2'} items-start`}
+      className={`grid grid-cols-1 ${cols} gap-2 ${creating ? 'bg-cream-50/50 border border-line rounded p-3 mb-3' : 'px-3 py-3 sm:py-2 border-t border-line first:border-t-0'} sm:items-start`}
     >
       {children}
     </form>
