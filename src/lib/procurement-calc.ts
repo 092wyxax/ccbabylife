@@ -10,6 +10,8 @@
 export const PROMO_FEE_RATE_BP = 4 // 推廣貿易服務費 0.04%
 export const VAT_RATE_BP = 500 // 進口營業稅 5%
 
+export type PriceRoundStrategy = 'A' | 'B' | 'C' | 'D'
+
 export interface PurchaseHeader {
   exchangeRateScaled: number
   agentBaseFeeTwd: number
