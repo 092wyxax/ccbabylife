@@ -12,7 +12,9 @@ import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { requireRole } from '@/server/services/AdminAuthService'
 import {
   updateSourceCodeAction,
+  createCategoryAction,
   updateCategoryCodeAction,
+  deleteCategoryAction,
   createTaxRateGroupAction,
   updateTaxRateGroupAction,
   deleteTaxRateGroupAction,
@@ -97,28 +99,33 @@ export default async function ProcurementSettingsPage() {
         )}
       </Section>
 
-      {/* 2. 商品分類類別碼 */}
+      {/* 2. 商品分類 */}
       <Section
-        title="商品分類類別碼"
-        description="編輯既有「商品分類」的單字母代碼（用於 SKU 第三段，例：A=上衣、B=褲子）。"
+        title="商品分類"
+        description="商品分類 + 單字母代碼（用於 SKU 第三段，例：A=上衣、B=褲子）。"
       >
-        {categoryRows.length === 0 ? (
-          <Empty msg="尚未建立商品分類。要先建分類後再填代碼。" />
-        ) : (
+        <Row action={createCategoryAction} cols="sm:grid-cols-[1fr_80px_1fr_70px]" creating>
+          <input name="name" required placeholder="例：上衣" className={inputCls} />
+          <input name="code" maxLength={2} placeholder="A" className={codeCls} />
+          <input name="notes" placeholder="備註（選填）" className={inputCls} />
+          <CreateBtn />
+        </Row>
+
+        {categoryRows.length > 0 && (
           <List>
-            <Header cols="sm:grid-cols-[1fr_80px_1fr_70px]">
+            <Header cols="sm:grid-cols-[1fr_80px_1fr_120px]">
               <span>分類名稱</span>
               <span>代碼</span>
               <span>註記</span>
               <span></span>
             </Header>
             {categoryRows.map((c) => (
-              <Row key={c.id} action={updateCategoryCodeAction} cols="sm:grid-cols-[1fr_80px_1fr_70px]">
+              <Row key={c.id} action={updateCategoryCodeAction} cols="sm:grid-cols-[1fr_80px_1fr_120px]">
                 <input type="hidden" name="id" value={c.id} />
-                <span className="text-sm">{c.name}</span>
+                <input name="name" defaultValue={c.name} className={inputCls} />
                 <input name="code" defaultValue={c.code ?? ''} maxLength={2} placeholder="A" className={codeCls} />
                 <input name="notes" defaultValue={c.notes ?? ''} placeholder="例：所有上衣商品" className={inputCls} />
-                <SaveBtn />
+                <SaveDeletePair deleteAction={deleteCategoryAction} id={c.id} />
               </Row>
             ))}
           </List>

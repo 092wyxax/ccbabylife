@@ -31,16 +31,54 @@ export async function updateSourceCodeAction(formData: FormData) {
   revalidatePath('/admin/procurement-settings')
 }
 
-// ────────────── 商品分類 code（在 categories 表上） ──────────────
+// ────────────── 商品分類 ──────────────
+function slugify(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/[^\w一-鿿]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60) || `cat-${Date.now()}`
+}
+
+export async function createCategoryAction(formData: FormData) {
+  await requireRole([...ALLOWED])
+  const name = String(formData.get('name') ?? '').trim()
+  const code = String(formData.get('code') ?? '').trim().toUpperCase().slice(0, 2) || null
+  const notes = String(formData.get('notes') ?? '').trim() || null
+  if (!name) return
+  await db.insert(categories).values({
+    orgId: DEFAULT_ORG_ID,
+    slug: slugify(name) + '-' + Math.random().toString(36).slice(2, 6),
+    name,
+    code,
+    notes,
+  })
+  revalidatePath('/admin/procurement-settings')
+}
+
 export async function updateCategoryCodeAction(formData: FormData) {
   await requireRole([...ALLOWED])
   const id = String(formData.get('id') ?? '')
+  const name = String(formData.get('name') ?? '').trim()
   const code = (String(formData.get('code') ?? '')).trim().toUpperCase().slice(0, 2) || null
   const notes = String(formData.get('notes') ?? '').trim() || null
   if (!id) return
+  const patch: { name?: string; code: string | null; notes: string | null } = { code, notes }
+  if (name) patch.name = name
   await db
     .update(categories)
-    .set({ code, notes })
+    .set(patch)
+    .where(and(eq(categories.orgId, DEFAULT_ORG_ID), eq(categories.id, id)))
+  revalidatePath('/admin/procurement-settings')
+}
+
+export async function deleteCategoryAction(formData: FormData) {
+  await requireRole(['owner', 'manager'])
+  const id = String(formData.get('id') ?? '')
+  if (!id) return
+  await db
+    .delete(categories)
     .where(and(eq(categories.orgId, DEFAULT_ORG_ID), eq(categories.id, id)))
   revalidatePath('/admin/procurement-settings')
 }
