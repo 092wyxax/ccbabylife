@@ -16,8 +16,12 @@ import {
   purchaseStatusBadge,
   SUPPLIER_TYPE_LABEL,
 } from '@/lib/purchase-status'
-import { formatJpy } from '@/lib/format'
+import { formatJpy, formatTwd } from '@/lib/format'
 import { removePurchaseItemAction } from '@/server/actions/purchases'
+import {
+  publishPurchaseItemAction,
+  publishAllPurchaseItemsAction,
+} from '@/server/actions/publish-purchase-items'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -77,19 +81,36 @@ export default async function PurchaseDetailPage({ params }: Props) {
       <div className="grid lg:grid-cols-[1fr_320px] gap-8">
         <div className="space-y-8">
           <section>
-            <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-3">
-              採購項目（{items.length} 筆）
-            </h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-xs uppercase tracking-widest text-ink-soft">
+                採購項目（{items.length} 筆）
+              </h2>
+              {items.some((it) => !it.productId) && (
+                <form
+                  action={async () => {
+                    'use server'
+                    await publishAllPurchaseItemsAction(purchase.id)
+                  }}
+                >
+                  <button
+                    type="submit"
+                    className="bg-ink text-cream text-xs px-3 py-1 rounded hover:bg-accent"
+                  >
+                    全部上架（建商品 + 入庫）
+                  </button>
+                </form>
+              )}
+            </div>
             <div className="bg-white border border-line rounded-lg overflow-hidden">
               <table className="w-full text-sm">
                 <thead className="bg-cream-100 text-ink-soft">
                   <tr>
                     <th className="text-left px-4 py-2 font-normal">品名</th>
-                    <th className="text-right px-4 py-2 font-normal">單價</th>
-                    <th className="text-right px-4 py-2 font-normal">實際單價</th>
+                    <th className="text-right px-4 py-2 font-normal">日幣單價</th>
                     <th className="text-right px-4 py-2 font-normal">數量</th>
-                    <th className="text-right px-4 py-2 font-normal">小計</th>
-                    <th className="text-left px-4 py-2 font-normal w-16"></th>
+                    <th className="text-right px-4 py-2 font-normal">建議售價</th>
+                    <th className="text-right px-4 py-2 font-normal">總成本</th>
+                    <th className="text-left px-4 py-2 font-normal w-32">狀態 / 動作</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -101,45 +122,70 @@ export default async function PurchaseDetailPage({ params }: Props) {
                     </tr>
                   ) : (
                     items.map((it) => {
-                      const lineTotal = it.quantity * (it.actualUnitJpy ?? it.unitJpy)
+                      const displayName = it.nameZh ?? it.productNameSnapshot
                       return (
-                        <tr key={it.id} className="border-t border-line">
+                        <tr key={it.id} className="border-t border-line align-top">
                           <td className="px-4 py-2">
-                            <p>{it.productNameSnapshot}</p>
-                            {it.notes && (
-                              <p className="text-xs text-ink-soft mt-0.5">{it.notes}</p>
+                            <p>{displayName}</p>
+                            {it.nameJp && (
+                              <p className="text-xs text-ink-soft mt-0.5">{it.nameJp}</p>
+                            )}
+                            {it.spec && (
+                              <p className="text-xs text-ink-soft mt-0.5 line-clamp-2">{it.spec}</p>
                             )}
                           </td>
-                          <td className="px-4 py-2 text-right text-ink-soft">
+                          <td className="px-4 py-2 text-right text-ink-soft whitespace-nowrap">
                             {formatJpy(it.unitJpy)}
                           </td>
-                          <td className="px-4 py-2 text-right">
-                            {it.actualUnitJpy != null ? (
-                              <span className={it.actualUnitJpy !== it.unitJpy ? 'text-warning' : ''}>
-                                {formatJpy(it.actualUnitJpy)}
-                              </span>
-                            ) : (
-                              <span className="text-ink-soft">—</span>
-                            )}
-                          </td>
                           <td className="px-4 py-2 text-right text-ink-soft">{it.quantity}</td>
-                          <td className="px-4 py-2 text-right font-medium">
-                            {formatJpy(lineTotal)}
+                          <td className="px-4 py-2 text-right font-medium whitespace-nowrap">
+                            {it.suggestedPrice != null
+                              ? formatTwd(it.suggestedPrice)
+                              : '—'}
+                          </td>
+                          <td className="px-4 py-2 text-right text-ink-soft whitespace-nowrap">
+                            {it.landedCostPerUnit != null
+                              ? formatTwd(it.landedCostPerUnit * it.quantity)
+                              : '—'}
                           </td>
                           <td className="px-4 py-2">
-                            <form
-                              action={async () => {
-                                'use server'
-                                await removePurchaseItemAction(it.id, purchase.id)
-                              }}
-                            >
-                              <button
-                                type="submit"
-                                className="text-xs text-ink-soft hover:text-danger underline"
+                            {it.productId ? (
+                              <Link
+                                href={`/admin/products/${it.productId}`}
+                                className="text-xs text-success hover:underline"
                               >
-                                移除
-                              </button>
-                            </form>
+                                ✓ 已上架
+                              </Link>
+                            ) : (
+                              <div className="flex flex-col gap-1">
+                                <form
+                                  action={async () => {
+                                    'use server'
+                                    await publishPurchaseItemAction(it.id)
+                                  }}
+                                >
+                                  <button
+                                    type="submit"
+                                    className="text-xs text-accent hover:underline"
+                                  >
+                                    上架
+                                  </button>
+                                </form>
+                                <form
+                                  action={async () => {
+                                    'use server'
+                                    await removePurchaseItemAction(it.id, purchase.id)
+                                  }}
+                                >
+                                  <button
+                                    type="submit"
+                                    className="text-xs text-ink-soft hover:text-danger"
+                                  >
+                                    移除
+                                  </button>
+                                </form>
+                              </div>
+                            )}
                           </td>
                         </tr>
                       )
