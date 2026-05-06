@@ -1,6 +1,9 @@
+import Link from 'next/link'
 import { sql, eq, desc } from 'drizzle-orm'
 import { db } from '@/db/client'
 import { orders, customers } from '@/db/schema'
+import { purchases } from '@/db/schema/purchases'
+import { paymentMethods } from '@/db/schema/procurement_settings'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { formatTwd } from '@/lib/format'
 import { requireRole } from '@/server/services/AdminAuthService'
@@ -77,6 +80,69 @@ export default async function AdminReportsPage() {
       : 0
 
   const maxRevenue = Math.max(1, ...monthly.map((m) => m.revenue))
+
+  // ─────── Procurement reports ───────
+  const purchaseMonthlyRows = (await db.execute(sql`
+    SELECT
+      to_char(p.purchase_date, 'YYYY-MM') AS month,
+      count(p.id)::int AS purchase_count,
+      coalesce(sum(p.twd_total), 0)::int AS twd_total,
+      coalesce(sum(item_aggs.total_cost), 0)::int AS total_cost,
+      coalesce(sum(item_aggs.total_revenue), 0)::int AS total_revenue
+    FROM ${purchases} p
+    LEFT JOIN (
+      SELECT purchase_id,
+        sum(landed_cost_per_unit * quantity) AS total_cost,
+        sum(suggested_price * quantity) AS total_revenue
+      FROM purchase_items
+      GROUP BY purchase_id
+    ) item_aggs ON item_aggs.purchase_id = p.id
+    WHERE p.org_id = ${DEFAULT_ORG_ID}
+      AND p.purchase_date IS NOT NULL
+    GROUP BY to_char(p.purchase_date, 'YYYY-MM')
+    ORDER BY to_char(p.purchase_date, 'YYYY-MM') DESC
+    LIMIT 12
+  `)) as Array<{
+    month: string
+    purchase_count: number
+    twd_total: number
+    total_cost: number
+    total_revenue: number
+  }>
+
+  const paymentDist = await db
+    .select({
+      methodName: paymentMethods.name,
+      purchaseCount: sql<number>`count(*)::int`,
+      twdTotal: sql<number>`coalesce(sum(${purchases.twdTotal}), 0)::int`,
+    })
+    .from(purchases)
+    .leftJoin(paymentMethods, eq(paymentMethods.id, purchases.paymentMethodId))
+    .where(eq(purchases.orgId, DEFAULT_ORG_ID))
+    .groupBy(paymentMethods.name)
+    .orderBy(desc(sql`coalesce(sum(${purchases.twdTotal}), 0)`))
+
+  const recentPurchases = await db
+    .select({
+      id: purchases.id,
+      batchLabel: purchases.batchLabel,
+      purchaseDate: purchases.purchaseDate,
+      twdTotal: purchases.twdTotal,
+      status: purchases.status,
+    })
+    .from(purchases)
+    .where(eq(purchases.orgId, DEFAULT_ORG_ID))
+    .orderBy(desc(purchases.createdAt))
+    .limit(5)
+
+  const purchaseTotalCost = purchaseMonthlyRows.reduce((s, r) => s + r.total_cost, 0)
+  const purchaseTotalRevenue = purchaseMonthlyRows.reduce((s, r) => s + r.total_revenue, 0)
+  const purchaseTotalMargin = purchaseTotalRevenue - purchaseTotalCost
+  const purchaseMarginPct =
+    purchaseTotalCost > 0
+      ? Math.round((purchaseTotalMargin * 1000) / purchaseTotalCost) / 10
+      : 0
+  const maxPurchaseRevenue = Math.max(1, ...purchaseMonthlyRows.map((m) => m.total_revenue))
 
   return (
     <div className="p-8 max-w-6xl">
@@ -163,6 +229,127 @@ export default async function AdminReportsPage() {
           <p className="text-xs text-ink-soft mt-3 leading-relaxed">
             目標：母嬰產業健康的 90 天回購率落在 30–40%。低於 20% 表示產品 / 心得內容沒有黏性。
           </p>
+        </div>
+      </section>
+
+      {/* ───────── 進貨統計 ───────── */}
+      <header className="mt-12 mb-6 pt-8 border-t border-line">
+        <h2 className="font-serif text-xl mb-1">進貨統計</h2>
+        <p className="text-ink-soft text-sm">
+          採購單成本與預期毛利。資料來自每張採購單儲存當下的 snapshot。
+        </p>
+      </header>
+
+      <section className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        <Stat label="累積進貨成本" value={formatTwd(purchaseTotalCost)} />
+        <Stat label="累積預期營收" value={formatTwd(purchaseTotalRevenue)} />
+        <Stat label="累積預期毛利" value={formatTwd(purchaseTotalMargin)} />
+        <Stat label="預期毛利率" value={`${purchaseMarginPct}%`} />
+      </section>
+
+      <section className="bg-white border border-line rounded-lg p-6 mb-8">
+        <h3 className="text-xs uppercase tracking-widest text-ink-soft mb-4">
+          每月進貨成本與預期營收（近 12 個月）
+        </h3>
+        {purchaseMonthlyRows.length === 0 ? (
+          <p className="text-ink-soft text-sm py-6 text-center">尚無採購資料</p>
+        ) : (
+          <ul className="space-y-2 text-sm">
+            {purchaseMonthlyRows.map((m) => (
+              <li
+                key={m.month}
+                className="grid grid-cols-[80px_1fr_120px_120px_60px] gap-3 items-center"
+              >
+                <span className="text-xs text-ink-soft font-mono">{m.month}</span>
+                <div className="bg-cream-100 rounded-md h-5 relative overflow-hidden">
+                  <div
+                    className="absolute inset-y-0 left-0 bg-success/40"
+                    style={{ width: `${(m.total_cost / maxPurchaseRevenue) * 100}%` }}
+                    title={`成本 ${formatTwd(m.total_cost)}`}
+                  />
+                  <div
+                    className="absolute inset-y-0 left-0 bg-accent/30 mix-blend-multiply"
+                    style={{ width: `${(m.total_revenue / maxPurchaseRevenue) * 100}%` }}
+                    title={`營收 ${formatTwd(m.total_revenue)}`}
+                  />
+                </div>
+                <span className="text-right text-xs">
+                  成本 {formatTwd(m.total_cost)}
+                </span>
+                <span className="text-right text-xs text-accent">
+                  營收 {formatTwd(m.total_revenue)}
+                </span>
+                <span className="text-right text-xs text-ink-soft">
+                  {m.purchase_count} 單
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="grid lg:grid-cols-2 gap-6 mb-8">
+        <div className="bg-white border border-line rounded-lg p-5">
+          <h3 className="text-xs uppercase tracking-widest text-ink-soft mb-3">
+            付款方式分布
+          </h3>
+          {paymentDist.length === 0 ? (
+            <p className="text-sm text-ink-soft py-4 text-center">尚無資料</p>
+          ) : (
+            <ul className="space-y-2 text-sm">
+              {paymentDist.map((p) => (
+                <li
+                  key={p.methodName ?? '__none__'}
+                  className="flex items-center justify-between gap-4 py-1"
+                >
+                  <span className="truncate">
+                    {p.methodName ?? <span className="text-ink-soft italic">未指定</span>}
+                  </span>
+                  <div className="text-right whitespace-nowrap">
+                    <p className="font-medium">{formatTwd(p.twdTotal)}</p>
+                    <p className="text-xs text-ink-soft">{p.purchaseCount} 張</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="bg-white border border-line rounded-lg p-5">
+          <h3 className="text-xs uppercase tracking-widest text-ink-soft mb-3">
+            最近採購單
+          </h3>
+          {recentPurchases.length === 0 ? (
+            <p className="text-sm text-ink-soft py-4 text-center">尚無採購單</p>
+          ) : (
+            <ul className="space-y-2 text-sm">
+              {recentPurchases.map((p) => (
+                <li
+                  key={p.id}
+                  className="flex items-center justify-between gap-4 py-1"
+                >
+                  <div className="min-w-0">
+                    <Link
+                      href={`/admin/purchases/${p.id}`}
+                      className="truncate hover:text-accent block"
+                    >
+                      {p.batchLabel}
+                    </Link>
+                    <p className="text-xs text-ink-soft">
+                      {p.purchaseDate
+                        ? new Date(p.purchaseDate).toLocaleDateString('zh-Hant')
+                        : '未填日期'}
+                    </p>
+                  </div>
+                  <div className="text-right whitespace-nowrap">
+                    <p className="font-medium">
+                      {p.twdTotal != null ? formatTwd(p.twdTotal) : '—'}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </section>
     </div>
