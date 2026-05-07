@@ -6,6 +6,7 @@ import { customers } from '@/db/schema'
 import { getCustomerSession } from '@/lib/customer-session'
 import { NotificationPrefsForm } from '@/components/account/NotificationPrefsForm'
 import { BabyInfoForm } from '@/components/account/BabyInfoForm'
+import { listAddressesForCustomer } from '@/server/services/AddressService'
 
 export const metadata = {
   title: '帳號設定',
@@ -23,6 +24,15 @@ export default async function AccountSettingsPage() {
   if (!customer) redirect('/account')
 
   const prefs = customer.notificationPrefs ?? { line: true, email: true }
+
+  // Fallback phone: customer.phone → default saved address → first saved address
+  let phoneDisplay = customer.phone
+  if (!phoneDisplay) {
+    const addresses = await listAddressesForCustomer(session.customerId)
+    const fallback =
+      addresses.find((a) => a.isDefault)?.phone ?? addresses[0]?.phone ?? null
+    if (fallback) phoneDisplay = fallback
+  }
 
   return (
     <div className="mx-auto max-w-2xl px-4 sm:px-6 py-12">
@@ -55,7 +65,7 @@ export default async function AccountSettingsPage() {
         <h2 className="font-serif text-lg mb-3 tracking-wide">基本資料</h2>
         <Row label="メール · Email" value={customer.email} />
         <Row label="お名前 · 姓名" value={customer.name ?? '未提供'} />
-        <Row label="電話 · 電話" value={customer.phone ?? '未提供'} />
+        <Row label="電話 · 電話" value={phoneDisplay ?? '未提供'} />
         <div className="flex justify-between items-center">
           <span className="font-jp text-ink-soft">LINE</span>
           {customer.lineUserId ? (
