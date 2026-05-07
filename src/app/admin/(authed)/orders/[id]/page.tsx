@@ -228,6 +228,12 @@ export default async function AdminOrderDetailPage({ params }: Props) {
             {order.storeCreditUsed > 0 && (
               <Row label="購物金折抵" value={`−${formatTwd(order.storeCreditUsed)}`} />
             )}
+            {order.couponDiscount > 0 && (
+              <Row
+                label={`優惠券（${order.couponCode ?? ''}）`}
+                value={`−${formatTwd(order.couponDiscount)}`}
+              />
+            )}
             <div className="pt-2 border-t border-line">
               <Row label="總計" value={formatTwd(order.total)} bold />
             </div>

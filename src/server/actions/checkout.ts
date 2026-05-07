@@ -7,10 +7,17 @@ import { z } from 'zod'
 import { and, eq } from 'drizzle-orm'
 import { db } from '@/db/client'
 import { customers, orders, orderItems, products } from '@/db/schema'
+import { customerCoupons } from '@/db/schema/customer_coupons'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { shippingFee } from '@/lib/pricing'
 import { findCustomerByReferralCode } from '@/server/services/ReferralService'
 import { REFERRAL_COOKIE } from '@/lib/referral'
+import {
+  findActiveCouponByCode,
+  incrementCouponUsage,
+  validateCoupon,
+} from '@/server/services/CouponService'
+import { ACTIVE_COUPON_COOKIE } from '@/lib/active-coupon'
 import type { CartItem } from '@/types/cart'
 
 const cartItemSchema = z.object({
@@ -34,6 +41,7 @@ const checkoutSchema = z.object({
   recipientAddress: z.string().min(5, '請填詳細地址'),
   babyAgeMonths: z.coerce.number().int().min(0).max(240).optional(),
   cartJson: z.string().min(2),
+  couponCode: z.string().optional(),
 })
 
 export type CheckoutState = { error?: string; fieldErrors?: Record<string, string> }
@@ -59,6 +67,7 @@ export async function checkoutAction(
     recipientAddress: formData.get('recipientAddress'),
     babyAgeMonths: formData.get('babyAgeMonths') || undefined,
     cartJson: formData.get('cartJson'),
+    couponCode: (formData.get('couponCode') as string) || undefined,
   })
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {}
@@ -107,8 +116,34 @@ export async function checkoutAction(
   const subtotal = lineItems.reduce((s, l) => s + l.lineTotal, 0)
   const totalWeight = lineItems.reduce((s, l) => s + l.weight, 0)
   const ship = shippingFee(totalWeight)
-  const computedShip = ship < 0 ? 0 : ship // > 5kg requires manual quote — for shell, set 0 and flag in notes
-  const total = subtotal + computedShip
+  const computedShipBase = ship < 0 ? 0 : ship // > 5kg requires manual quote — for shell, set 0 and flag in notes
+
+  // Validate coupon (if any) against the actual server-computed subtotal
+  let appliedCouponId: string | null = null
+  let appliedCouponCode: string | null = null
+  let couponDiscount = 0
+  let couponFreeShipping = false
+  if (parsed.data.couponCode && parsed.data.couponCode.trim()) {
+    const candidate = await findActiveCouponByCode(parsed.data.couponCode.trim())
+    if (candidate) {
+      const v = validateCoupon(candidate, subtotal, {
+        cartLines: lineItems.map((l) => ({
+          productId: l.product.id,
+          categorySlug: null,
+          amountTwd: l.lineTotal,
+        })),
+      })
+      if (v.ok) {
+        appliedCouponId = candidate.id
+        appliedCouponCode = candidate.code
+        couponDiscount = v.discountAmount ?? 0
+        couponFreeShipping = Boolean(v.freeShipping)
+      }
+    }
+  }
+
+  const computedShip = couponFreeShipping ? 0 : computedShipBase
+  const total = Math.max(0, subtotal + computedShip - couponDiscount)
 
   // Resolve referral cookie → referredBy customer
   const cookieStore = await cookies()
@@ -171,6 +206,8 @@ export async function checkoutAction(
           shippingFee: computedShip,
           tax: 0,
           storeCreditUsed: 0,
+          couponCode: appliedCouponCode,
+          couponDiscount,
           total,
           shippingAddress: {
             recipientName: parsed.data.recipientName,
@@ -200,10 +237,28 @@ export async function checkoutAction(
         }))
       )
 
+      if (appliedCouponId) {
+        // Mark customer_coupons.usedAt if this coupon was granted to this customer
+        await tx
+          .update(customerCoupons)
+          .set({ usedAt: new Date() })
+          .where(
+            and(
+              eq(customerCoupons.couponId, appliedCouponId),
+              eq(customerCoupons.customerId, customerId)
+            )
+          )
+      }
+
       return order.id
     })
   } catch (e) {
     return { error: e instanceof Error ? e.message : String(e) }
+  }
+
+  if (appliedCouponId) {
+    await incrementCouponUsage(appliedCouponId).catch(() => {})
+    cookieStore.delete(ACTIVE_COUPON_COOKIE)
   }
 
   revalidatePath('/admin/orders')

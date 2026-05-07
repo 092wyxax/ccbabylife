@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { CartIndicator } from './CartIndicator'
 import { MobileNav } from './MobileNav'
+import { CouponBanner } from './CouponBanner'
 import { getCustomerSession } from '@/lib/customer-session'
 
 const NAV_ITEMS = [
@@ -17,6 +18,7 @@ export async function Header() {
   const session = await getCustomerSession()
   return (
     <header className="border-b border-line bg-cream/90 backdrop-blur sticky top-0 z-30">
+      <CouponBanner />
       <div className="mx-auto max-w-6xl px-4 sm:px-6 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-baseline gap-2 text-ink leading-none">
           <span className="font-serif text-xl tracking-wide">熙熙初日</span>

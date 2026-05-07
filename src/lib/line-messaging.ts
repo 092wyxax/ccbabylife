@@ -2,6 +2,7 @@ import 'server-only'
 
 const PUSH_URL = 'https://api.line.me/v2/bot/message/push'
 const MULTICAST_URL = 'https://api.line.me/v2/bot/message/multicast'
+const BROADCAST_URL = 'https://api.line.me/v2/bot/message/broadcast'
 
 export interface LineTextMessage {
   type: 'text'
@@ -79,6 +80,28 @@ export async function multicastText(
     },
     body: JSON.stringify({
       to: lineUserIds,
+      messages: [{ type: 'text', text: text.slice(0, 5000) }],
+    }),
+  })
+
+  if (!res.ok) {
+    const body = await res.text()
+    throw new LineApiError(res.status, body, null)
+  }
+}
+
+/**
+ * Broadcast to ALL OA followers. Costs 1 push per follower.
+ * Use sparingly — once per coupon campaign or major announcement.
+ */
+export async function broadcastText(text: string): Promise<void> {
+  const res = await fetch(BROADCAST_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
       messages: [{ type: 'text', text: text.slice(0, 5000) }],
     }),
   })

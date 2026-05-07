@@ -134,6 +134,13 @@
       "when": 1778159564565,
       "tag": "0018_moaning_molly_hayes",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1778164758812,
+      "tag": "0019_glossy_lockjaw",
+      "breakpoints": true
     }
   ]
 }

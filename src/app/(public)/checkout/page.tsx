@@ -4,6 +4,8 @@ import { customers } from '@/db/schema'
 import { CheckoutForm } from '@/components/checkout/CheckoutForm'
 import { getCustomerSession } from '@/lib/customer-session'
 import { listAddressesForCustomer } from '@/server/services/AddressService'
+import { getActiveCouponCode } from '@/lib/active-coupon'
+import { findActiveCouponByCode } from '@/server/services/CouponService'
 
 export const metadata = {
   title: '結帳',
@@ -38,12 +40,25 @@ export default async function CheckoutPage() {
     }
   }
 
+  const cookieCode = await getActiveCouponCode()
+  let activeCouponCode: string | null = null
+  if (cookieCode) {
+    const coupon = await findActiveCouponByCode(cookieCode)
+    if (coupon && (!coupon.expiresAt || new Date() <= new Date(coupon.expiresAt))) {
+      activeCouponCode = coupon.code
+    }
+  }
+
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-12">
       <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-2">CHECKOUT · ご注文手続き</p>
       <h1 className="font-serif text-3xl mb-8 tracking-wide">結帳</h1>
 
-      <CheckoutForm prefill={prefill} savedAddresses={savedAddresses} />
+      <CheckoutForm
+        prefill={prefill}
+        savedAddresses={savedAddresses}
+        activeCouponCode={activeCouponCode}
+      />
     </div>
   )
 }

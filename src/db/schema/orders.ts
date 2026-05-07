@@ -35,6 +35,8 @@ export const orders = pgTable(
     shippingFee: integer('shipping_fee').notNull().default(0),
     tax: integer('tax').notNull().default(0),
     storeCreditUsed: integer('store_credit_used').notNull().default(0),
+    couponCode: text('coupon_code'),
+    couponDiscount: integer('coupon_discount').notNull().default(0),
     total: integer('total').notNull(),
     ecpayTradeNo: text('ecpay_trade_no').unique(),
     shippingAddress: jsonb('shipping_address').$type<{

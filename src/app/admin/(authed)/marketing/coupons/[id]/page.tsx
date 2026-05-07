@@ -8,6 +8,7 @@ import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { getCouponById } from '@/server/services/CouponService'
 import { CouponForm } from '@/components/admin/CouponForm'
 import { CouponGrantForm } from '@/components/admin/CouponGrantForm'
+import { CouponLineBroadcastButton } from '@/components/admin/CouponLineBroadcastButton'
 import {
   updateCouponAction,
   deleteCouponAction,
@@ -103,6 +104,20 @@ async function renderPage({ id }: { id: string }) {
         action={boundUpdate}
         submitLabel="儲存變更"
       />
+
+      <hr className="my-10 border-line" />
+
+      <section className="space-y-3">
+        <header>
+          <h2 className="font-serif text-xl mb-1">推送到 LINE 官方帳號</h2>
+          <p className="text-ink-soft text-sm">
+            一鍵廣播到所有 OA 好友，訊息含優惠碼 + 一鍵套用連結（
+            <code className="font-mono">/coupon/redeem?code={coupon.code}</code>
+            ）。每位收件人扣 1 push 額度。
+          </p>
+        </header>
+        <CouponLineBroadcastButton couponId={coupon.id} couponCode={coupon.code} isActive={coupon.isActive} />
+      </section>
 
       <hr className="my-10 border-line" />
 

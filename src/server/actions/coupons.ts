@@ -23,6 +23,7 @@ import { rateLimit, getClientIp } from '@/lib/rate-limit'
 import { enqueuePush, queueAndSendLine } from '@/server/services/NotificationService'
 import { getCouponById } from '@/server/services/CouponService'
 import { formatTwd } from '@/lib/format'
+import { broadcastText, isLineConfigured } from '@/lib/line-messaging'
 
 export type CouponActionState = { error?: string; success?: string }
 
@@ -366,6 +367,46 @@ export async function revokeCouponGrantAction(
     )
 
   revalidatePath(`/admin/marketing/coupons/${couponId}`)
+}
+
+export type PushCouponState = { error?: string; success?: string }
+
+export async function pushCouponToLineOaAction(
+  couponId: string,
+  _prev: PushCouponState,
+  _formData: FormData
+): Promise<PushCouponState> {
+  await requireRole(['owner', 'manager', 'editor'])
+
+  if (!isLineConfigured()) {
+    return { error: 'LINE Messaging API 未設定' }
+  }
+
+  const coupon = await getCouponById(couponId)
+  if (!coupon) return { error: '查無此優惠券' }
+  if (!coupon.isActive) return { error: '此優惠券已停用，請先啟用再推送' }
+
+  const desc = describeCouponInline(coupon)
+  const expiresLine = coupon.expiresAt
+    ? `\n有效期限：${new Date(coupon.expiresAt).toLocaleDateString('zh-Hant')}`
+    : ''
+  const minLine =
+    coupon.minOrderTwd > 0
+      ? `\n最低消費：${formatTwd(coupon.minOrderTwd)}`
+      : ''
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ccbabylife.com'
+  const link = `${siteUrl}/coupon/redeem?code=${encodeURIComponent(coupon.code)}`
+
+  const text = `🎁 限時優惠券\n\n代碼：${coupon.code}\n優惠：${desc}${minLine}${expiresLine}\n\n👉 點此一鍵套用：\n${link}`
+
+  try {
+    await broadcastText(text)
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : String(e) }
+  }
+
+  revalidatePath(`/admin/marketing/coupons/${couponId}`)
+  return { success: '已成功推送到 LINE 官方帳號所有好友' }
 }
 
 export async function checkCouponAction(

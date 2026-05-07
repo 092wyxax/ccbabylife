@@ -7,6 +7,11 @@ import { imageUrl } from '@/lib/image'
 import { formatTwd } from '@/lib/format'
 import { shippingFee } from '@/lib/pricing'
 import { checkoutAction, type CheckoutState } from '@/server/actions/checkout'
+import {
+  applyCouponAction,
+  dismissActiveCouponAction,
+  type ApplyCouponState,
+} from '@/server/actions/active-coupon'
 import type { CustomerAddress } from '@/db/schema/customer_addresses'
 
 const initial: CheckoutState = {}
@@ -21,6 +26,7 @@ interface Prefill {
 interface Props {
   prefill: Prefill
   savedAddresses: CustomerAddress[]
+  activeCouponCode: string | null
 }
 
 interface AddressFields {
@@ -41,7 +47,9 @@ function addrToFields(a: CustomerAddress): AddressFields {
   }
 }
 
-export function CheckoutForm({ prefill, savedAddresses }: Props) {
+const couponInitial: ApplyCouponState = {}
+
+export function CheckoutForm({ prefill, savedAddresses, activeCouponCode }: Props) {
   const [mounted, setMounted] = useState(false)
   const items = useCartStore((s) => s.items)
   const totals = useCartStore((s) => s.totals)
@@ -68,6 +76,24 @@ export function CheckoutForm({ prefill, savedAddresses }: Props) {
   const [state, formAction, pending] = useActionState(checkoutAction, initial)
   const errs = state.fieldErrors ?? {}
 
+  const [couponState, couponFormAction, couponPending] = useActionState(
+    applyCouponAction,
+    couponInitial
+  )
+  const [autoTried, setAutoTried] = useState(false)
+
+  // Auto-apply cookie coupon once cart is mounted (so we know subtotal)
+  useEffect(() => {
+    if (!mounted || autoTried || !activeCouponCode) return
+    const subtotal = items.reduce((s, i) => s + i.priceTwd * i.quantity, 0)
+    if (subtotal === 0) return
+    const fd = new FormData()
+    fd.set('code', activeCouponCode)
+    fd.set('subtotalTwd', String(subtotal))
+    couponFormAction(fd)
+    setAutoTried(true)
+  }, [mounted, autoTried, activeCouponCode, items, couponFormAction])
+
   if (!mounted) return <p className="text-ink-soft text-sm">載入中⋯</p>
 
   if (items.length === 0) {
@@ -84,8 +110,19 @@ export function CheckoutForm({ prefill, savedAddresses }: Props) {
   const t = totals()
   const ship = shippingFee(t.totalWeightG)
   const computedShip = ship < 0 ? 0 : ship
-  const total = t.subtotal + computedShip
   const overweight = ship < 0
+
+  // Effective coupon: server result (after apply) overrides initial cookie state
+  const effectiveCode: string | null =
+    couponState.ok && couponState.code
+      ? couponState.code
+      : couponState.error
+        ? null
+        : activeCouponCode
+  const couponDiscount = couponState.ok ? (couponState.discount ?? 0) : 0
+  const couponFreeShipping = couponState.ok && Boolean(couponState.freeShipping)
+  const finalShip = couponFreeShipping ? 0 : computedShip
+  const total = Math.max(0, t.subtotal + finalShip - couponDiscount)
 
   const pickAddress = (id: string | null) => {
     setSelectedAddressId(id)
@@ -104,8 +141,8 @@ export function CheckoutForm({ prefill, savedAddresses }: Props) {
   }
 
   return (
-    <form action={formAction} className="grid lg:grid-cols-[1fr_360px] gap-8">
-      <div className="space-y-8">
+    <div className="grid lg:grid-cols-[1fr_360px] gap-8">
+      <form id="checkout-form" action={formAction} className="space-y-8">
         {state.error && (
           <div className="bg-danger/10 border border-danger/40 text-danger text-sm p-3 rounded-md">
             {state.error}
@@ -243,7 +280,7 @@ export function CheckoutForm({ prefill, savedAddresses }: Props) {
         </Section>
 
         <input type="hidden" name="cartJson" value={JSON.stringify(items)} />
-      </div>
+      </form>
 
       <aside className="bg-white border border-line rounded-lg p-6 h-fit lg:sticky lg:top-20 space-y-4">
         <h2 className="font-serif text-lg">訂單摘要</h2>
@@ -285,8 +322,27 @@ export function CheckoutForm({ prefill, savedAddresses }: Props) {
           </div>
           <div className="flex justify-between">
             <span className="text-ink-soft">國際運費（估算）</span>
-            <span>{overweight ? '個案' : formatTwd(computedShip)}</span>
+            <span>
+              {overweight ? (
+                '個案'
+              ) : couponFreeShipping ? (
+                <>
+                  <span className="line-through text-ink-soft mr-1">
+                    {formatTwd(computedShip)}
+                  </span>
+                  免運
+                </>
+              ) : (
+                formatTwd(computedShip)
+              )}
+            </span>
           </div>
+          {couponDiscount > 0 && (
+            <div className="flex justify-between text-accent">
+              <span>優惠券折抵（{effectiveCode}）</span>
+              <span>−{formatTwd(couponDiscount)}</span>
+            </div>
+          )}
           {overweight && (
             <p className="text-xs text-warning">
               超過 5kg，運費先暫設 0，下單後 24 小時內人工回覆精準金額。
@@ -294,13 +350,29 @@ export function CheckoutForm({ prefill, savedAddresses }: Props) {
           )}
         </div>
 
+        <CouponSection
+          subtotal={t.subtotal}
+          activeCode={effectiveCode}
+          state={couponState}
+          formAction={couponFormAction}
+          pending={couponPending}
+        />
+
         <div className="border-t border-line pt-4 flex justify-between text-base font-medium">
           <span>總計</span>
           <span>{formatTwd(total)}</span>
         </div>
 
+        <input
+          type="hidden"
+          form="checkout-form"
+          name="couponCode"
+          value={effectiveCode ?? ''}
+        />
+
         <button
           type="submit"
+          form="checkout-form"
           disabled={pending}
           className="font-jp w-full bg-ink text-cream py-3 rounded-md hover:bg-accent transition-colors disabled:opacity-50 tracking-wider"
         >
@@ -316,7 +388,73 @@ export function CheckoutForm({ prefill, savedAddresses }: Props) {
           查詢進度。
         </p>
       </aside>
-    </form>
+    </div>
+  )
+}
+
+function CouponSection({
+  subtotal,
+  activeCode,
+  state,
+  formAction,
+  pending,
+}: {
+  subtotal: number
+  activeCode: string | null
+  state: ApplyCouponState
+  formAction: (formData: FormData) => void
+  pending: boolean
+}) {
+  return (
+    <div className="border-t border-line pt-4">
+      <details open={Boolean(activeCode) || Boolean(state.error)}>
+        <summary className="cursor-pointer text-sm font-jp tracking-widest text-ink-soft hover:text-ink select-none">
+          {activeCode ? `🎁 已套用：${activeCode}` : '使用優惠券 / クーポン'}
+        </summary>
+        <div className="mt-3 space-y-2">
+          {/* nested form is fine - submits to its own action */}
+          <form action={formAction} className="flex gap-2">
+            <input type="hidden" name="subtotalTwd" value={subtotal} />
+            <input
+              name="code"
+              defaultValue={activeCode ?? ''}
+              placeholder="輸入優惠碼"
+              className="flex-1 border border-line rounded-md px-3 py-2 text-sm uppercase tracking-wider focus:outline-none focus:border-ink"
+            />
+            <button
+              type="submit"
+              disabled={pending}
+              className="text-sm bg-ink text-cream px-4 rounded-md hover:bg-accent transition-colors disabled:opacity-50"
+            >
+              {pending ? '⋯' : '套用'}
+            </button>
+          </form>
+          {state.error && (
+            <p className="text-xs text-danger">{state.error}</p>
+          )}
+          {state.ok && (
+            <p className="text-xs text-accent">
+              已套用 {state.code}
+              {state.freeShipping
+                ? '：免運'
+                : state.discount
+                  ? `：折抵 ${state.discount.toLocaleString('zh-TW')} 元`
+                  : ''}
+            </p>
+          )}
+          {activeCode && (
+            <form action={dismissActiveCouponAction.bind(null)}>
+              <button
+                type="submit"
+                className="text-xs text-ink-soft hover:text-danger underline-offset-2 hover:underline"
+              >
+                移除優惠券
+              </button>
+            </form>
+          )}
+        </div>
+      </details>
+    </div>
   )
 }
 
