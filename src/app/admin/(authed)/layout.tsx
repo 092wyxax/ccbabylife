@@ -49,7 +49,10 @@ const NAV: NavGroup[] = [
   },
   {
     label: '內部協作',
-    items: [{ href: '/admin/board', label: '公告留言板' }],
+    items: [
+      { href: '/admin/calendar', label: '行事曆 / 待辦' },
+      { href: '/admin/board', label: '公告留言板' },
+    ],
   },
   {
     label: '系統管理',
