@@ -48,7 +48,11 @@ const ENV_KEYS = [
   { key: 'ECPAY_RETURN_URL', group: 'payment', label: '綠界 Return URL', critical: false },
 
   // 監控 / 安全
-  { key: 'SENTRY_DSN', group: 'ops', label: 'Sentry 錯誤監控', critical: false },
+  { key: 'SENTRY_DSN', group: 'ops', label: 'Sentry DSN（伺服器端）', critical: false },
+  { key: 'NEXT_PUBLIC_SENTRY_DSN', group: 'ops', label: 'Sentry DSN（client 端）', critical: false },
+  { key: 'SENTRY_AUTH_TOKEN', group: 'ops', label: 'Sentry build token', critical: false },
+  { key: 'SENTRY_ORG', group: 'ops', label: 'Sentry org slug', critical: false },
+  { key: 'SENTRY_PROJECT', group: 'ops', label: 'Sentry project slug', critical: false },
   { key: 'NEXT_PUBLIC_TURNSTILE_SITE_KEY', group: 'ops', label: 'Cloudflare Turnstile', critical: false },
   { key: 'TURNSTILE_SECRET_KEY', group: 'ops', label: 'Turnstile secret', critical: false },
 ] as const
