@@ -127,5 +127,10 @@ export async function GET(request: NextRequest) {
   }
 
   await setCustomerSession({ customerId, email: customerEmail })
-  return NextResponse.redirect(new URL('/account', request.url))
+
+  const cookieStore = await cookies()
+  const next = cookieStore.get('line_oauth_next')?.value
+  cookieStore.delete('line_oauth_next')
+  const dest = next && next.startsWith('/') ? next : '/account'
+  return NextResponse.redirect(new URL(dest, request.url))
 }

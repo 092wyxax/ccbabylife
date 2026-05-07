@@ -24,6 +24,17 @@ export async function GET(request: NextRequest) {
     path: '/',
   })
 
+  const next = request.nextUrl.searchParams.get('next')
+  if (next && next.startsWith('/')) {
+    store.set('line_oauth_next', next, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 600,
+      path: '/',
+    })
+  }
+
   const params = new URLSearchParams({
     response_type: 'code',
     client_id: channelId,

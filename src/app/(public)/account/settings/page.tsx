@@ -56,10 +56,19 @@ export default async function AccountSettingsPage() {
         <Row label="メール · Email" value={customer.email} />
         <Row label="お名前 · 姓名" value={customer.name ?? '未提供'} />
         <Row label="電話 · 電話" value={customer.phone ?? '未提供'} />
-        <Row
-          label="LINE"
-          value={customer.lineUserId ? '連携済 · 已綁定' : 'LINE Login 待開通'}
-        />
+        <div className="flex justify-between items-center">
+          <span className="font-jp text-ink-soft">LINE</span>
+          {customer.lineUserId ? (
+            <span className="text-success">連携済 · 已綁定 ✓</span>
+          ) : (
+            <Link
+              href="/auth/line/start?next=/account/settings"
+              className="font-jp text-xs bg-[#06C755] text-white px-3 py-1.5 rounded-md hover:opacity-90 transition-opacity tracking-wider"
+            >
+              用 LINE 連結帳號
+            </Link>
+          )}
+        </div>
 
         {customer.babyBirthDate ? (
           <Row
@@ -78,7 +87,8 @@ export default async function AccountSettingsPage() {
         <p className="text-xs text-ink-soft mt-3 leading-relaxed">
           基本資料修改：請於下次結帳時更新，或私訊我們的 LINE 客服。
           {customer.babyBirthDate && '寶寶生日設定後無法自行修改，如需更正請聯繫客服。'}
-          LINE 登入功能會在 LINE 帳號審核完成後開放。
+          {!customer.lineUserId &&
+            ' 綁定 LINE 後，訂單狀態與優惠通知會即時推到你的 LINE。'}
         </p>
       </section>
     </div>
