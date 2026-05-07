@@ -5,6 +5,10 @@ import { customers, pushLogs, type Customer } from '@/db/schema'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { listProductsByAge } from '@/server/services/ProductService'
 import { renderTemplate, LINE_TEMPLATES } from '@/lib/line-templates'
+import {
+  findBirthdayCustomersToday,
+  issueAutoCoupons,
+} from '@/server/services/AutoCouponService'
 
 /**
  * Vercel Cron entry: runs daily and finds customers whose baby crosses
@@ -95,9 +99,25 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // Birthday coupon issuance (piggybacks on this daily cron)
+  let birthdayMatched = 0
+  let birthdayIssued = 0
+  try {
+    const birthdayIds = await findBirthdayCustomersToday()
+    birthdayMatched = birthdayIds.length
+    if (birthdayIds.length > 0) {
+      const r = await issueAutoCoupons('birthday', birthdayIds)
+      birthdayIssued = r.issuedCount
+    }
+  } catch (e) {
+    console.error('[baby-age-push] birthday coupon issuance failed:', e)
+  }
+
   return NextResponse.json({
     processedCustomers: due.length,
     queuedPushes: queued,
+    birthdayMatched,
+    birthdayIssued,
     timestamp: now.toISOString(),
   })
 }

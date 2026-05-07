@@ -2,6 +2,7 @@ import { desc, eq } from 'drizzle-orm'
 import { db } from '@/db/client'
 import { restockSubscriptions, products } from '@/db/schema'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
+import { sendRestockNotificationAction } from '@/server/actions/restock'
 
 export default async function RestockSubscribersPage() {
   const rows = await db
@@ -37,6 +38,7 @@ export default async function RestockSubscribersPage() {
                 <th className="text-left px-4 py-3 font-normal">Email</th>
                 <th className="text-left px-4 py-3 font-normal">登記時間</th>
                 <th className="text-left px-4 py-3 font-normal">通知狀態</th>
+                <th className="text-left px-4 py-3 font-normal">動作</th>
               </tr>
             </thead>
             <tbody>
@@ -56,6 +58,19 @@ export default async function RestockSubscribersPage() {
                       <span className="text-xs px-2 py-0.5 rounded-full bg-warning/20 text-ink">
                         待通知
                       </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    {!sub.notified && (
+                      <form action={sendRestockNotificationAction}>
+                        <input type="hidden" name="subId" value={sub.id} />
+                        <button
+                          type="submit"
+                          className="text-xs px-2 py-1 rounded border border-line hover:bg-ink hover:text-cream transition-colors"
+                        >
+                          通知
+                        </button>
+                      </form>
                     )}
                   </td>
                 </tr>

@@ -122,6 +122,17 @@ export async function changeStatus(
   // Fire-and-forget LINE notification. Failure does not roll back status change.
   void sendStatusNotification(order, to)
 
+  // Referral reward: when a referred order first reaches 'paid', issue
+  // referral_complete coupons to the referrer.
+  if (to === 'paid' && order.referredBy && order.status !== 'paid') {
+    const referrerId = order.referredBy
+    void import('./AutoCouponService').then(({ issueAutoCoupons }) =>
+      issueAutoCoupons('referral_complete', [referrerId]).catch((e) =>
+        console.error('[changeStatus] referral coupon issue failed:', e)
+      )
+    )
+  }
+
   return { from: order.status, to }
 }
 

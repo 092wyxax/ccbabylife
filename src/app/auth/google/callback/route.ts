@@ -5,6 +5,7 @@ import { customers } from '@/db/schema'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { setCustomerSession } from '@/lib/customer-session'
+import { issueAutoCoupons } from '@/server/services/AutoCouponService'
 
 function err(req: NextRequest, code: string) {
   return NextResponse.redirect(new URL(`/account?err=${code}`, req.url))
@@ -55,6 +56,9 @@ export async function GET(request: NextRequest) {
       })
       .returning()
     customerId = created.id
+    await issueAutoCoupons('signup', [customerId]).catch((e) => {
+      console.error('[google-callback] signup coupon issue failed:', e)
+    })
   }
 
   await setCustomerSession({ customerId, email })
