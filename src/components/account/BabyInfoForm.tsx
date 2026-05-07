@@ -19,31 +19,27 @@ export function BabyInfoForm({ initialBabyBirthDate }: Props) {
   )
 
   return (
-    <form action={formAction} className="space-y-3">
-      <div>
-        <label htmlFor="babyBirthDate" className="block text-sm mb-1.5">
-          寶寶生日
-        </label>
+    <form action={formAction} className="space-y-2">
+      <div className="flex flex-wrap items-center gap-2">
         <input
           id="babyBirthDate"
           name="babyBirthDate"
           type="date"
+          required
           defaultValue={initialBabyBirthDate ?? ''}
-          className="w-full sm:w-auto border border-line rounded-md px-3 py-2 focus:outline-none focus:border-ink"
+          className="border border-line rounded-md px-3 py-2 focus:outline-none focus:border-ink"
         />
-        <p className="text-xs text-ink-soft mt-1">
-          填了之後我們會在寶寶生日當天送你優惠券 🎁。隨時可以修改或清空。
-        </p>
+        <button
+          type="submit"
+          disabled={pending}
+          className="font-jp text-sm bg-ink text-cream px-4 py-2 rounded-md hover:bg-accent transition-colors disabled:opacity-50 tracking-wider"
+        >
+          {pending ? '儲存中⋯' : '儲存'}
+        </button>
       </div>
-
-      <button
-        type="submit"
-        disabled={pending}
-        className="font-jp text-sm bg-ink text-cream px-4 py-2 rounded-md hover:bg-accent transition-colors disabled:opacity-50 tracking-wider"
-      >
-        {pending ? '保存中⋯' : '保存 · 儲存'}
-      </button>
-
+      <p className="text-xs text-warning leading-relaxed">
+        ⚠️ 此設定僅能填寫一次，無法自行修改。我們會在寶寶生日當天自動送你優惠券 🎁
+      </p>
       {state.error && (
         <p className="text-xs text-danger">{state.error}</p>
       )}

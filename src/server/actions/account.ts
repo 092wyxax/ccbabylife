@@ -135,14 +135,24 @@ export async function updateBabyInfoAction(
   if (!parsed.success) return { error: '日期格式錯誤' }
 
   const value = parsed.data.babyBirthDate || null
-  if (value) {
-    const d = new Date(value)
-    if (isNaN(d.getTime())) return { error: '日期格式錯誤' }
-    const now = new Date()
-    if (d > now) return { error: '寶寶生日不能在未來' }
-    const tooOld = new Date()
-    tooOld.setFullYear(tooOld.getFullYear() - 20)
-    if (d < tooOld) return { error: '寶寶生日不可早於 20 年前' }
+  if (!value) return { error: '請選擇日期' }
+
+  const d = new Date(value)
+  if (isNaN(d.getTime())) return { error: '日期格式錯誤' }
+  const now = new Date()
+  if (d > now) return { error: '寶寶生日不能在未來' }
+  const tooOld = new Date()
+  tooOld.setFullYear(tooOld.getFullYear() - 20)
+  if (d < tooOld) return { error: '寶寶生日不可早於 20 年前' }
+
+  // Refuse if already set — write-once only
+  const [existing] = await db
+    .select({ babyBirthDate: customers.babyBirthDate })
+    .from(customers)
+    .where(eq(customers.id, session.customerId))
+    .limit(1)
+  if (existing?.babyBirthDate) {
+    return { error: '寶寶生日已設定，無法修改。如需更正請聯繫 LINE 客服。' }
   }
 
   await db
@@ -159,5 +169,5 @@ export async function updateBabyInfoAction(
     )
 
   revalidatePath('/account/settings')
-  return { success: value ? '已更新寶寶生日 🎁 我們會在當天送你優惠券' : '已清除寶寶生日' }
+  return { success: '已儲存寶寶生日 🎁 我們會在當天送你優惠券' }
 }

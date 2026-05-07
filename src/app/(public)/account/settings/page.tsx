@@ -48,14 +48,6 @@ export default async function AccountSettingsPage() {
         />
       </section>
 
-      <section className="bg-white border border-line rounded-lg p-6 mb-8">
-        <p className="font-jp text-xs tracking-[0.2em] text-ink-soft mb-1">
-          お子様情報
-        </p>
-        <h2 className="font-serif text-lg mb-4 tracking-wide">寶寶資訊</h2>
-        <BabyInfoForm initialBabyBirthDate={customer.babyBirthDate ?? null} />
-      </section>
-
       <section className="bg-white border border-line rounded-lg p-6 text-sm space-y-2">
         <p className="font-jp text-xs tracking-[0.2em] text-ink-soft mb-1">
           基本情報
@@ -68,8 +60,24 @@ export default async function AccountSettingsPage() {
           label="LINE"
           value={customer.lineUserId ? '連携済 · 已綁定' : 'LINE Login 待開通'}
         />
+
+        {customer.babyBirthDate ? (
+          <Row
+            label="赤ちゃんの誕生日 · 寶寶生日"
+            value={new Date(customer.babyBirthDate).toLocaleDateString('zh-TW')}
+          />
+        ) : (
+          <div className="pt-3 border-t border-line mt-3">
+            <p className="font-jp text-ink-soft mb-2">
+              赤ちゃんの誕生日 · 寶寶生日
+            </p>
+            <BabyInfoForm initialBabyBirthDate={null} />
+          </div>
+        )}
+
         <p className="text-xs text-ink-soft mt-3 leading-relaxed">
           基本資料修改：請於下次結帳時更新，或私訊我們的 LINE 客服。
+          {customer.babyBirthDate && '寶寶生日設定後無法自行修改，如需更正請聯繫客服。'}
           LINE 登入功能會在 LINE 帳號審核完成後開放。
         </p>
       </section>
