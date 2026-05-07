@@ -5,6 +5,7 @@ import { db } from '@/db/client'
 import { customers } from '@/db/schema'
 import { getCustomerSession } from '@/lib/customer-session'
 import { NotificationPrefsForm } from '@/components/account/NotificationPrefsForm'
+import { BabyInfoForm } from '@/components/account/BabyInfoForm'
 
 export const metadata = {
   title: '帳號設定',
@@ -45,6 +46,14 @@ export default async function AccountSettingsPage() {
           initialLine={prefs.line}
           initialEmail={prefs.email}
         />
+      </section>
+
+      <section className="bg-white border border-line rounded-lg p-6 mb-8">
+        <p className="font-jp text-xs tracking-[0.2em] text-ink-soft mb-1">
+          お子様情報
+        </p>
+        <h2 className="font-serif text-lg mb-4 tracking-wide">寶寶資訊</h2>
+        <BabyInfoForm initialBabyBirthDate={customer.babyBirthDate ?? null} />
       </section>
 
       <section className="bg-white border border-line rounded-lg p-6 text-sm space-y-2">

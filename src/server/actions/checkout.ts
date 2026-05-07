@@ -39,7 +39,7 @@ const checkoutSchema = z.object({
   recipientCity: z.string().min(1, '請選擇縣市'),
   recipientZip: z.string().min(3, '請填郵遞區號'),
   recipientAddress: z.string().min(5, '請填詳細地址'),
-  babyAgeMonths: z.coerce.number().int().min(0).max(240).optional(),
+  babyBirthDate: z.string().optional().or(z.literal('')),
   cartJson: z.string().min(2),
   couponCode: z.string().optional(),
 })
@@ -65,7 +65,7 @@ export async function checkoutAction(
     recipientCity: formData.get('recipientCity'),
     recipientZip: formData.get('recipientZip'),
     recipientAddress: formData.get('recipientAddress'),
-    babyAgeMonths: formData.get('babyAgeMonths') || undefined,
+    babyBirthDate: (formData.get('babyBirthDate') as string) || '',
     cartJson: formData.get('cartJson'),
     couponCode: (formData.get('couponCode') as string) || undefined,
   })
@@ -150,6 +150,20 @@ export async function checkoutAction(
   const refCode = cookieStore.get(REFERRAL_COOKIE)?.value
   const referrer = refCode ? await findCustomerByReferralCode(refCode) : null
 
+  // Parse baby birth date once
+  const babyBirthDateStr = parsed.data.babyBirthDate || null
+  let babyAgeMonths: number | null = null
+  if (babyBirthDateStr) {
+    const born = new Date(babyBirthDateStr)
+    if (!isNaN(born.getTime())) {
+      const now = new Date()
+      babyAgeMonths =
+        (now.getFullYear() - born.getFullYear()) * 12 +
+        (now.getMonth() - born.getMonth())
+      if (babyAgeMonths < 0 || babyAgeMonths > 240) babyAgeMonths = null
+    }
+  }
+
   let orderId: string
   try {
     orderId = await db.transaction(async (tx) => {
@@ -177,6 +191,10 @@ export async function checkoutAction(
           .set({
             name: parsed.data.recipientName,
             phone: parsed.data.recipientPhone,
+            // Only set babyBirthDate if it's currently null (don't overwrite a date the customer set explicitly)
+            ...(babyBirthDateStr && !existing[0].babyBirthDate
+              ? { babyBirthDate: babyBirthDateStr }
+              : {}),
             updatedAt: new Date(),
           })
           .where(eq(customers.id, customerId))
@@ -189,6 +207,7 @@ export async function checkoutAction(
             name: parsed.data.recipientName,
             phone: parsed.data.recipientPhone,
             lineUserId: parsed.data.recipientLineId || null,
+            babyBirthDate: babyBirthDateStr,
           })
           .returning()
         customerId = created.id
@@ -218,7 +237,7 @@ export async function checkoutAction(
           },
           recipientLineId: parsed.data.recipientLineId || null,
           recipientEmail: parsed.data.recipientEmail,
-          babyAgeMonths: parsed.data.babyAgeMonths ?? null,
+          babyAgeMonths,
           isPreorder: lineItems.some((l) => l.product.stockType === 'preorder'),
           notes: ship < 0 ? '> 5kg：運費需個案估算，已暫設 0，待人工確認' : null,
           referredBy: referrer && referrer.id !== customerId ? referrer.id : null,

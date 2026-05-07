@@ -115,3 +115,49 @@ export async function updateNotificationPrefsAction(
   revalidatePath('/account/settings')
   return { success: '已更新通知偏好' }
 }
+
+const babyInfoSchema = z.object({
+  babyBirthDate: z.string().optional().or(z.literal('')),
+})
+
+export type BabyInfoState = { error?: string; success?: string }
+
+export async function updateBabyInfoAction(
+  _prev: BabyInfoState,
+  formData: FormData
+): Promise<BabyInfoState> {
+  const session = await getCustomerSession()
+  if (!session) return { error: '請先登入' }
+
+  const parsed = babyInfoSchema.safeParse({
+    babyBirthDate: (formData.get('babyBirthDate') as string) || '',
+  })
+  if (!parsed.success) return { error: '日期格式錯誤' }
+
+  const value = parsed.data.babyBirthDate || null
+  if (value) {
+    const d = new Date(value)
+    if (isNaN(d.getTime())) return { error: '日期格式錯誤' }
+    const now = new Date()
+    if (d > now) return { error: '寶寶生日不能在未來' }
+    const tooOld = new Date()
+    tooOld.setFullYear(tooOld.getFullYear() - 20)
+    if (d < tooOld) return { error: '寶寶生日不可早於 20 年前' }
+  }
+
+  await db
+    .update(customers)
+    .set({
+      babyBirthDate: value,
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(customers.id, session.customerId),
+        eq(customers.orgId, DEFAULT_ORG_ID)
+      )
+    )
+
+  revalidatePath('/account/settings')
+  return { success: value ? '已更新寶寶生日 🎁 我們會在當天送你優惠券' : '已清除寶寶生日' }
+}

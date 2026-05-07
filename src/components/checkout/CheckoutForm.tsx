@@ -270,12 +270,11 @@ export function CheckoutForm({ prefill, savedAddresses, activeCouponCode }: Prop
 
         <Section title="お子様情報 · 寶寶資訊（選填）">
           <Field
-            label="寶寶月齡"
-            name="babyAgeMonths"
-            type="number"
-            placeholder="例：6"
-            hint="幫助我們未來推薦適合的選物。寵物 / 一般商品請留空。"
-            error={errs.babyAgeMonths}
+            label="寶寶生日"
+            name="babyBirthDate"
+            type="date"
+            hint="填了之後我們會在寶寶生日當天送你優惠券 🎁。寵物 / 一般商品請留空。"
+            error={errs.babyBirthDate}
           />
         </Section>
 
