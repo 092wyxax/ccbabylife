@@ -12,7 +12,7 @@ import {
 import {
   CALENDAR_TYPE_COLOR,
   type CalendarEvent,
-} from '@/server/services/CalendarEvents'
+} from '@/lib/calendar-types'
 
 interface Props {
   events: CalendarEvent[]
