@@ -59,6 +59,7 @@ const NAV: NavGroup[] = [
     items: [
       { href: '/admin/admins', label: '管理員', roles: ['owner'] },
       { href: '/admin/audit-logs', label: '稽核紀錄', roles: ['owner', 'manager'] },
+      { href: '/admin/system-health', label: '系統健康', roles: ['owner', 'manager'] },
       { href: '/admin/settings', label: '設定', roles: ['owner'] },
     ],
   },

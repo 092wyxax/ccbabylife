@@ -46,6 +46,13 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
           placeholder="訂單編號 / Email / 客戶姓名"
           hiddenFields={{ status: params.status }}
         />
+        <Link
+          href={`/admin/orders/export${params.status ? `?status=${params.status}` : ''}`}
+          className="text-sm border border-line rounded-md px-3 py-1.5 hover:border-ink"
+          prefetch={false}
+        >
+          匯出 CSV
+        </Link>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-4 pb-4 border-b border-line">

@@ -8,6 +8,8 @@ import { OrderProgressBar } from '@/components/order/OrderProgressBar'
 import { StatusChangeForm } from '@/components/order/StatusChangeForm'
 import { ResendPaymentLinkButton } from '@/components/order/ResendPaymentLinkButton'
 import { CancelRefundForms } from '@/components/order/CancelRefundForms'
+import { TrackingForm } from '@/components/order/TrackingForm'
+import { OrderNotesForm } from '@/components/order/OrderNotesForm'
 import { canTransition } from '@/lib/order-state-machine'
 import { STATUS_LABEL, statusBadgeClass } from '@/lib/order-progress'
 import { formatTwd } from '@/lib/format'
@@ -168,6 +170,27 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               />
             </section>
           )}
+
+          <section className="bg-white border border-line rounded-lg p-5">
+            <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-3">
+              出貨資訊
+            </h2>
+            <TrackingForm
+              orderId={order.id}
+              trackingNumber={order.trackingNumber}
+              shippingProvider={order.shippingProvider}
+            />
+          </section>
+
+          <section className="bg-white border border-line rounded-lg p-5">
+            <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-3">
+              內部備註
+            </h2>
+            <OrderNotesForm
+              orderId={order.id}
+              notes={order.notes}
+            />
+          </section>
 
           <section className="bg-white border border-line rounded-lg p-5">
             <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-3">

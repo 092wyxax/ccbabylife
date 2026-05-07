@@ -265,3 +265,91 @@ export async function refundOrderFormAction(
     return { error: e instanceof Error ? e.message : String(e) }
   }
 }
+
+// ============= Tracking number + internal notes =============
+
+export type UpdateTrackingState = { error?: string; success?: string }
+
+const trackingSchema = z.object({
+  orderId: z.string().uuid(),
+  trackingNumber: z.string().max(80).optional(),
+  shippingProvider: z.string().max(40).optional(),
+})
+
+export async function updateTrackingAction(
+  _prev: UpdateTrackingState,
+  formData: FormData
+): Promise<UpdateTrackingState> {
+  const admin = await requireAdmin()
+  const parsed = trackingSchema.safeParse({
+    orderId: formData.get('orderId'),
+    trackingNumber: formData.get('trackingNumber') || undefined,
+    shippingProvider: formData.get('shippingProvider') || undefined,
+  })
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? '輸入錯誤' }
+
+  await db
+    .update(orders)
+    .set({
+      trackingNumber: parsed.data.trackingNumber?.trim() || null,
+      shippingProvider: parsed.data.shippingProvider?.trim() || null,
+      updatedAt: new Date(),
+    })
+    .where(eq(orders.id, parsed.data.orderId))
+
+  await recordAudit({
+    actorType: 'admin',
+    actorId: admin.id,
+    actorLabel: admin.name,
+    action: 'order.tracking.update',
+    entityType: 'order',
+    entityId: parsed.data.orderId,
+    data: {
+      trackingNumber: parsed.data.trackingNumber,
+      shippingProvider: parsed.data.shippingProvider,
+    },
+  })
+
+  revalidatePath(`/admin/orders/${parsed.data.orderId}`)
+  return { success: '物流資訊已更新' }
+}
+
+export type UpdateNotesState = { error?: string; success?: string }
+
+const notesSchema = z.object({
+  orderId: z.string().uuid(),
+  notes: z.string().max(2000).optional(),
+})
+
+export async function updateOrderNotesAction(
+  _prev: UpdateNotesState,
+  formData: FormData
+): Promise<UpdateNotesState> {
+  const admin = await requireAdmin()
+  const parsed = notesSchema.safeParse({
+    orderId: formData.get('orderId'),
+    notes: formData.get('notes') || undefined,
+  })
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? '輸入錯誤' }
+
+  await db
+    .update(orders)
+    .set({
+      notes: parsed.data.notes?.trim() || null,
+      updatedAt: new Date(),
+    })
+    .where(eq(orders.id, parsed.data.orderId))
+
+  await recordAudit({
+    actorType: 'admin',
+    actorId: admin.id,
+    actorLabel: admin.name,
+    action: 'order.notes.update',
+    entityType: 'order',
+    entityId: parsed.data.orderId,
+    data: {},
+  })
+
+  revalidatePath(`/admin/orders/${parsed.data.orderId}`)
+  return { success: '已儲存' }
+}
