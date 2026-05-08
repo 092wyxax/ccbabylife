@@ -1,6 +1,9 @@
 /**
- * Brand mark — 印章-style stylized 「初」 character set in a square seal,
- * with our seal red color. Use as small icon next to the wordmark.
+ * Brand mark — Japanese ハンコ-style stamp containing the character 「初」
+ * (from 熙熙初日; means "first / beginning").
+ *
+ * Renders the actual character via SVG <text> using our brand serif font
+ * so it's instantly readable at any size and matches the 印章 visual idiom.
  */
 interface Props {
   className?: string
@@ -10,36 +13,28 @@ export function BrandMark({ className = 'w-8 h-8' }: Props) {
   return (
     <svg
       viewBox="0 0 32 32"
-      fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       aria-hidden
     >
-      {/* Seal square frame, slightly rotated for hand-stamped feel */}
-      <g transform="rotate(-2 16 16)">
-        <rect
-          x="2.5"
-          y="2.5"
-          width="27"
-          height="27"
-          rx="2"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          fill="none"
-        />
-        {/* Stylized "初" — simplified strokes */}
-        <g stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none">
-          {/* 衣 part — left radical (clothing) */}
-          <path d="M9 9 L9 22" />
-          <path d="M7 12 L11 12" />
-          <path d="M7 16 L11 16" />
-          <path d="M8 22 L10 22" />
-          {/* 刀 part — right radical (knife) */}
-          <path d="M15 8 L23 8" />
-          <path d="M19 8 L19 18" />
-          <path d="M19 18 Q19 22, 23 22" />
-          <path d="M15 13 L19 13" />
-        </g>
+      {/* Slight tilt for hand-stamped feel */}
+      <g transform="rotate(-3 16 16)">
+        {/* Solid filled square — looks like a real chop print */}
+        <rect x="2" y="2" width="28" height="28" rx="2" fill="currentColor" />
+        {/* The character itself, knocked out to background color */}
+        <text
+          x="16"
+          y="17"
+          textAnchor="middle"
+          dominantBaseline="central"
+          fontFamily="var(--font-display), 'Shippori Mincho', 'Songti TC', serif"
+          fontSize="22"
+          fontWeight="500"
+          fill="#faf7f2"
+          style={{ letterSpacing: 0 }}
+        >
+          初
+        </text>
       </g>
     </svg>
   )
