@@ -342,6 +342,43 @@ export async function updateProduct(
   return row
 }
 
+/**
+ * Up to N related products: prefer same category, fall back to same brand.
+ * Excludes the source product. Used for product detail page bottom strip.
+ */
+export async function listRelatedProducts(
+  productId: string,
+  opts?: { categoryId?: string | null; brandId?: string | null; limit?: number }
+): Promise<ProductListItem[]> {
+  const limit = opts?.limit ?? 8
+  const conds = [
+    eq(products.orgId, DEFAULT_ORG_ID),
+    eq(products.status, 'active'),
+    sql`${products.id} != ${productId}`,
+  ]
+  if (opts?.categoryId) {
+    conds.push(eq(products.categoryId, opts.categoryId))
+  } else if (opts?.brandId) {
+    conds.push(eq(products.brandId, opts.brandId))
+  }
+
+  const rows = await db
+    .select({ product: products, image: productImages })
+    .from(products)
+    .leftJoin(
+      productImages,
+      and(
+        eq(productImages.productId, products.id),
+        eq(productImages.isPrimary, true)
+      )
+    )
+    .where(and(...conds))
+    .orderBy(desc(products.salesCount), desc(products.createdAt))
+    .limit(limit)
+
+  return rows.map((row) => ({ product: row.product, primaryImage: row.image }))
+}
+
 export async function archiveProduct(id: string): Promise<Product> {
   return updateProduct(id, { status: 'archived' })
 }

@@ -4,7 +4,19 @@ import type { Product, ProductImage } from '@/db/schema'
 
 interface ProductGridProps {
   products: Array<{
-    product: Pick<Product, 'id' | 'slug' | 'nameZh' | 'priceTwd' | 'minAgeMonths' | 'maxAgeMonths' | 'stockType' | 'stockQuantity' | 'tags'>
+    product: Pick<
+      Product,
+      | 'id'
+      | 'slug'
+      | 'nameZh'
+      | 'priceTwd'
+      | 'weightG'
+      | 'minAgeMonths'
+      | 'maxAgeMonths'
+      | 'stockType'
+      | 'stockQuantity'
+      | 'tags'
+    >
     primaryImage: Pick<ProductImage, 'cfImageId' | 'altText'> | null
   }>
 }
@@ -25,6 +37,7 @@ export function ProductGrid({ products }: ProductGridProps) {
           key={product.id}
           product={product}
           imageUrl={primaryImage?.cfImageId ? imageUrl(primaryImage.cfImageId) : null}
+          imagePath={primaryImage?.cfImageId ?? null}
         />
       ))}
     </div>

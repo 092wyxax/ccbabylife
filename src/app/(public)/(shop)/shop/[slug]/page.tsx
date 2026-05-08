@@ -1,11 +1,21 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { getProductBySlug } from '@/server/services/ProductService'
+import {
+  getProductBySlug,
+  listRelatedProducts,
+} from '@/server/services/ProductService'
 import { listAddonsForMain } from '@/server/services/PromotionService'
 import { AddonsSection } from '@/components/shop/AddonsSection'
 import { formatTwd, formatJpy, formatAgeRange } from '@/lib/format'
 import { imageUrl } from '@/lib/image'
 import { AddToCartButton } from '@/components/shop/AddToCartButton'
+import { ProductGallery } from '@/components/shop/ProductGallery'
+import { StickyMobileCTA } from '@/components/shop/StickyMobileCTA'
+import { ProductGrid } from '@/components/shop/ProductGrid'
+import {
+  RecentlyViewedRecorder,
+  RecentlyViewedStrip,
+} from '@/components/shop/RecentlyViewed'
 import { RestockForm } from '@/components/shop/RestockForm'
 import { ReviewForm } from '@/components/shop/ReviewForm'
 import {
@@ -42,11 +52,16 @@ export default async function ProductDetailPage({ params }: Props) {
   const ageLabel = formatAgeRange(product.minAgeMonths, product.maxAgeMonths)
   const isPreorder = product.stockType === 'preorder'
 
-  const [reviews, reviewSummary, customerSession, addons] = await Promise.all([
+  const [reviews, reviewSummary, customerSession, addons, related] = await Promise.all([
     listApprovedReviewsForProduct(product.id),
     getProductReviewSummary(product.id),
     getCustomerSession(),
     listAddonsForMain(product.id),
+    listRelatedProducts(product.id, {
+      categoryId: product.categoryId ?? null,
+      brandId: product.brandId ?? null,
+      limit: 8,
+    }),
   ])
 
   const inStock =
@@ -88,39 +103,14 @@ export default async function ProductDetailPage({ params }: Props) {
       </nav>
 
       <div className="grid lg:grid-cols-2 gap-12">
-        <div className="space-y-3">
-          <div className="aspect-square bg-cream-100 border border-line rounded-md overflow-hidden">
-            {images[0] ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={imageUrl(images[0].cfImageId)}
-                alt={images[0].altText ?? product.nameZh}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-ink-soft text-sm">
-                尚無商品圖
-              </div>
-            )}
-          </div>
-          {images.length > 1 && (
-            <div className="grid grid-cols-4 gap-3">
-              {images.slice(1).map((img) => (
-                <div
-                  key={img.id}
-                  className="aspect-square bg-cream-100 border border-line rounded-md overflow-hidden"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={imageUrl(img.cfImageId)}
-                    alt={img.altText ?? product.nameZh}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <ProductGallery
+          images={images.map((i) => ({
+            id: i.id,
+            cfImageId: i.cfImageId,
+            altText: i.altText,
+          }))}
+          productName={product.nameZh}
+        />
 
         <div>
           {brand && (
@@ -274,6 +264,37 @@ export default async function ProductDetailPage({ params }: Props) {
           <ReviewForm productId={product.id} isLoggedIn={!!customerSession} />
         </div>
       </section>
+
+      {related.length > 0 && (
+        <section className="mt-12 pt-8 border-t border-line">
+          <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-4">
+            RELATED · 相關商品
+          </p>
+          <ProductGrid products={related} />
+        </section>
+      )}
+
+      <RecentlyViewedStrip excludeProductId={product.id} />
+      <RecentlyViewedRecorder
+        productId={product.id}
+        slug={product.slug}
+        nameZh={product.nameZh}
+        priceTwd={product.priceTwd}
+        imagePath={images[0]?.cfImageId ?? null}
+      />
+
+      <StickyMobileCTA
+        item={{
+          productId: product.id,
+          slug: product.slug,
+          nameZh: product.nameZh,
+          priceTwd: product.priceTwd,
+          weightG: product.weightG,
+          imagePath: images[0]?.cfImageId ?? null,
+          stockType: product.stockType,
+        }}
+        outOfStock={!inStock && product.stockType === 'in_stock'}
+      />
     </div>
   )
 }
