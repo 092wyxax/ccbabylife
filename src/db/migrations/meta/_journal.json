@@ -148,6 +148,13 @@
       "when": 1778245084007,
       "tag": "0020_fluffy_chimera",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1778245446525,
+      "tag": "0021_natural_luckman",
+      "breakpoints": true
     }
   ]
 }

@@ -2,6 +2,7 @@ import { Header } from '@/components/shared/Header'
 import { Footer } from '@/components/shared/Footer'
 import { CutoffCountdown } from '@/components/shared/CutoffCountdown'
 import { OnboardingWizard } from '@/components/shared/OnboardingWizard'
+import { CartSyncBridge } from '@/components/cart/CartSyncBridge'
 
 export default function PublicLayout({
   children,
@@ -15,6 +16,7 @@ export default function PublicLayout({
       <main className="flex-1">{children}</main>
       <Footer />
       <OnboardingWizard />
+      <CartSyncBridge />
     </div>
   )
 }

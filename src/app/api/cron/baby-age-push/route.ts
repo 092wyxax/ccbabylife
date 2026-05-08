@@ -9,6 +9,7 @@ import {
   findBirthdayCustomersToday,
   issueAutoCoupons,
 } from '@/server/services/AutoCouponService'
+import { dispatchCartRecoveryPushes } from '@/server/services/CartRecovery'
 
 /**
  * Vercel Cron entry: runs daily and finds customers whose baby crosses
@@ -113,11 +114,24 @@ export async function GET(request: NextRequest) {
     console.error('[baby-age-push] birthday coupon issuance failed:', e)
   }
 
+  // Cart abandonment recovery (carts > 4 hr old, not yet pushed)
+  let recoveryMatched = 0
+  let recoveryPushed = 0
+  try {
+    const r = await dispatchCartRecoveryPushes()
+    recoveryMatched = r.matched
+    recoveryPushed = r.pushed
+  } catch (e) {
+    console.error('[baby-age-push] cart recovery failed:', e)
+  }
+
   return NextResponse.json({
     processedCustomers: due.length,
     queuedPushes: queued,
     birthdayMatched,
     birthdayIssued,
+    recoveryMatched,
+    recoveryPushed,
     timestamp: now.toISOString(),
   })
 }

@@ -8,6 +8,7 @@ import { and, eq } from 'drizzle-orm'
 import { db } from '@/db/client'
 import { customers, orders, orderItems, products } from '@/db/schema'
 import { customerCoupons } from '@/db/schema/customer_coupons'
+import { cartSnapshots } from '@/db/schema/cart_snapshots'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { shippingFee } from '@/lib/pricing'
 import { findCustomerByReferralCode } from '@/server/services/ReferralService'
@@ -279,6 +280,13 @@ export async function checkoutAction(
     await incrementCouponUsage(appliedCouponId).catch(() => {})
     cookieStore.delete(ACTIVE_COUPON_COOKIE)
   }
+
+  // Mark cart snapshot as recovered (for analytics) — by customerId or email
+  await db
+    .update(cartSnapshots)
+    .set({ recoveredAt: new Date() })
+    .where(eq(cartSnapshots.email, parsed.data.recipientEmail.toLowerCase()))
+    .catch(() => {})
 
   revalidatePath('/admin/orders')
   revalidatePath('/admin/customers')
