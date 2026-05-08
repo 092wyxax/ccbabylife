@@ -10,16 +10,6 @@ import { imageUrl } from '@/lib/image'
 
 const KANJI_NUM = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
 
-const QUICK_CATEGORIES = [
-  { label: '日本熱賣榜', en: 'Trending', href: '/trending' },
-  { label: '媽媽選書', en: 'Insta Picks', href: '/insta-picks' },
-  { label: '季節限定', en: 'Seasonal', href: '/seasonal' },
-  { label: '彌月送禮', en: 'Gift Guide', href: '/gift-guide' },
-  { label: '日常消耗品', en: 'Daily', href: '/shop?category=baby-essentials' },
-  { label: '寵物用品', en: 'For Pets', href: '/shop?category=pet-supplies' },
-  { label: '所有選物', en: 'All', href: '/shop' },
-  { label: '部落格', en: 'Journal', href: '/journal' },
-]
 
 const VALUE_PROPS = [
   {
@@ -110,40 +100,7 @@ export default async function HomePage() {
 
       <section className="border-b border-line">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-16">
-          {/* Illustrated category showcase (4 main DB categories) */}
           <CategoryShowcase title="依品項分類" />
-
-          {/* Below: secondary quick links (special collections + journal) */}
-          <header className="flex items-baseline justify-between mt-16 mb-6">
-            <div>
-              <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-1">
-                BROWSE · えらぶ
-              </p>
-              <h2 className="font-serif text-xl sm:text-2xl tracking-wide">特色精選</h2>
-            </div>
-            <Link href="/shop" className="text-sm text-ink-soft hover:text-accent">
-              全部 →
-            </Link>
-          </header>
-
-          <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px bg-line border border-line overflow-hidden">
-            {QUICK_CATEGORIES.map((c, i) => (
-              <li key={c.label}>
-                <Link
-                  href={c.href}
-                  className="group block bg-cream hover:bg-cream-100 transition-colors h-full p-5 sm:p-6"
-                >
-                  <p className="font-jp text-3xl text-accent/40 group-hover:text-accent transition-colors mb-2 leading-none">
-                    {KANJI_NUM[i]}
-                  </p>
-                  <p className="font-medium text-base mb-1">{c.label}</p>
-                  <p className="font-jp text-[10px] tracking-[0.2em] uppercase text-ink-soft">
-                    {c.en}
-                  </p>
-                </Link>
-              </li>
-            ))}
-          </ul>
         </div>
       </section>
 
