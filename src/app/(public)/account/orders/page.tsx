@@ -8,6 +8,7 @@ import { getCustomerSession } from '@/lib/customer-session'
 import { logoutAccountAction } from '@/server/actions/account'
 import { STATUS_LABEL, statusBadgeClass } from '@/lib/order-progress'
 import { formatTwd } from '@/lib/format'
+import { EmptyOrdersIllustration } from '@/components/shared/BrandIllustrations'
 import { ensureReferralCode } from '@/server/services/ReferralService'
 
 export const metadata = {
@@ -65,8 +66,23 @@ export default async function MyOrdersPage() {
       </header>
 
       {myOrders.length === 0 ? (
-        <div className="py-16 text-center text-ink-soft border border-dashed border-line rounded-lg">
-          目前沒有訂單。<Link href="/shop" className="underline hover:text-accent ml-2">逛逛選物</Link>
+        <div className="py-20 text-center">
+          <div className="text-sage flex justify-center mb-5">
+            <EmptyOrdersIllustration className="w-44 h-32" />
+          </div>
+          <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-2">
+            NO ORDERS YET
+          </p>
+          <h2 className="font-serif text-xl mb-3 tracking-wide">目前沒有訂單</h2>
+          <p className="text-ink-soft text-sm mb-6">
+            下第一張訂單後，會出現在這裡
+          </p>
+          <Link
+            href="/shop"
+            className="font-jp inline-block bg-ink text-cream px-6 py-3 rounded-md hover:bg-accent transition-colors tracking-[0.15em] text-sm"
+          >
+            去逛逛選物
+          </Link>
         </div>
       ) : (
         <ul className="space-y-3">

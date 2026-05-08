@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { listActiveProducts } from '@/server/services/ProductService'
 import { ProductGrid } from '@/components/shop/ProductGrid'
+import { NotFoundIllustration } from '@/components/shared/BrandIllustrations'
 
 export default async function NotFound() {
   let topProducts: Awaited<ReturnType<typeof listActiveProducts>> = []
@@ -17,8 +18,8 @@ export default async function NotFound() {
           404 · ページが見つかりません
         </p>
 
-        <div className="text-7xl mb-6 select-none" aria-hidden>
-          🍼
+        <div className="text-seal mb-6">
+          <NotFoundIllustration className="w-56 h-44" />
         </div>
 
         <h1 className="font-serif text-3xl sm:text-4xl mb-3 tracking-wide">

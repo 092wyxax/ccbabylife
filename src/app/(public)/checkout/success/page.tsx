@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { ClearCart } from './ClearCart'
 import { getOrderForTracking } from '@/server/services/OrderService'
 import { formatTwd } from '@/lib/format'
+import { OrderSuccessIllustration } from '@/components/shared/BrandIllustrations'
 
 interface Props {
   searchParams: Promise<{ orderId?: string }>
@@ -26,15 +27,18 @@ export default async function CheckoutSuccessPage({ searchParams }: Props) {
       <ClearCart />
 
       <div className="text-center mb-12">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-success/20 flex items-center justify-center text-success text-3xl">
-          ✓
+        <div className="text-seal mb-4 flex justify-center">
+          <OrderSuccessIllustration className="w-48 h-40" />
         </div>
         <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-2">
-          ご注文ありがとうございました
+          ありがとうございました
         </p>
-        <h1 className="font-serif text-3xl mb-2 tracking-wide">訂單已送出</h1>
-        <p className="text-ink-soft text-sm">
-          我們已收到妳的訂單，請保留以下資訊查詢進度。
+        <h1 className="font-serif text-3xl mb-3 tracking-wide">訂單已送出 · 謝謝你</h1>
+        <p className="text-ink-soft text-sm leading-relaxed max-w-md mx-auto">
+          我們已經收到你的訂單。<br />
+          請保留以下資訊查詢進度，
+          <br className="sm:hidden" />
+          並留意 LINE / Email 通知。
         </p>
       </div>
 

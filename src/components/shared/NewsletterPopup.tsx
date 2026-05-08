@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { NewsletterForm } from './NewsletterForm'
+import { NewsletterGiftIllustration } from './BrandIllustrations'
 
 const COOKIE = 'newsletter_popup_dismissed'
 
@@ -48,11 +49,14 @@ export function NewsletterPopup() {
           ×
         </button>
 
+        <div className="text-seal flex justify-center mb-2">
+          <NewsletterGiftIllustration className="w-44 h-32" />
+        </div>
         <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-2 text-center">
           WELCOME · ようこそ
         </p>
         <h2 className="font-serif text-2xl text-center mb-3 leading-snug">
-          首次加入，送你 <span className="text-accent">NT$100</span> 折扣 🎁
+          首次加入，送你 <span className="text-accent">NT$100</span> 折扣
         </h2>
         <p className="text-sm text-ink-soft text-center mb-5 leading-relaxed">
           訂閱電子報，馬上收到專屬折扣碼。

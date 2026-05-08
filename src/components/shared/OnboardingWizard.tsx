@@ -1,28 +1,44 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import Link from 'next/link'
+import {
+  ShopFrontIllustration,
+  ShippingIllustration,
+  MotherBabyIllustration,
+} from './BrandIllustrations'
 
 const COOKIE = 'nihon_onboarded'
 
-const STEPS = [
+interface Step {
+  illustration: ReactNode
+  tone: string
+  eyebrow: string
+  title: string
+  body: string
+}
+
+const STEPS: Step[] = [
   {
-    icon: '🏪',
+    illustration: <ShopFrontIllustration className="w-44 h-32" />,
+    tone: 'text-seal',
     eyebrow: 'いらっしゃいませ',
     title: '歡迎來到熙熙初日',
-    body: '我們是一家娃媽親選日系母嬰／寵物用品的小店。每週日截單、週一日本下單、約 10–14 天到貨。',
+    body: '我們是一家媽媽親選日系母嬰／寵物用品的小店。每週日截單、週一日本下單、約 10–14 天到貨。',
   },
   {
-    icon: '📅',
+    illustration: <ShippingIllustration className="w-44 h-32" />,
+    tone: 'text-sage',
     eyebrow: '予約制について',
     title: '什麼是「予約制 · 預購制」？',
     body: '你下單我們才去日本買 — 沒有囤貨、沒有水貨。週日 23:59 締切是固定節奏，每週一批集運回來。所以下單後請耐心等 10–14 天。',
   },
   {
-    icon: '🇯🇵',
-    eyebrow: '日本のいま',
-    title: '看日本當下流行什麼？',
-    body: '「日本熱賣榜」— 每週更新樂天 / Amazon JP 熱銷榜。「媽媽選書」— 日本 IG 媽媽社群熱議精選。「季節限定」— 各都道府縣四季限定品。',
+    illustration: <MotherBabyIllustration className="w-44 h-32" />,
+    tone: 'text-accent',
+    eyebrow: '本物のレビュー',
+    title: '我們親身試用、誠實分享',
+    body: '我家寶寶日常用著的東西，才會出現在這裡。每件商品都有真實使用心得（含優缺點），不業配、不誇飾。',
   },
 ]
 
@@ -50,7 +66,7 @@ export function OnboardingWizard() {
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-ink/50" onClick={dismiss} />
       <div className="relative bg-cream border border-line rounded-2xl max-w-md w-full p-8 shadow-xl">
-        <div className="text-5xl mb-4 text-center">{s.icon}</div>
+        <div className={`mb-4 flex justify-center ${s.tone}`}>{s.illustration}</div>
         <p className="font-jp text-xs tracking-[0.3em] text-ink-soft text-center mb-2">
           {s.eyebrow}
         </p>

@@ -6,6 +6,7 @@ import { useCartStore } from '@/stores/cartStore'
 import { imageUrl } from '@/lib/image'
 import { formatTwd } from '@/lib/format'
 import { GiftProgress } from './GiftProgress'
+import { EmptyCartIllustration } from '@/components/shared/BrandIllustrations'
 import { FreeShipProgress } from './FreeShipProgress'
 
 export function CartContents() {
@@ -28,8 +29,21 @@ export function CartContents() {
 
   if (items.length === 0) {
     return (
-      <div className="py-16 text-center text-ink-soft border border-dashed border-line rounded-lg">
-        購物車是空的。 <Link href="/shop" className="underline hover:text-accent">逛逛選物</Link>
+      <div className="py-20 text-center">
+        <div className="text-seal flex justify-center mb-5">
+          <EmptyCartIllustration className="w-44 h-32" />
+        </div>
+        <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-2">
+          EMPTY · 空っぽ
+        </p>
+        <h2 className="font-serif text-xl mb-3 tracking-wide">購物車是空的</h2>
+        <p className="text-ink-soft text-sm mb-6">還沒有挑到喜歡的東西嗎？</p>
+        <Link
+          href="/shop"
+          className="font-jp inline-block bg-ink text-cream px-6 py-3 rounded-md hover:bg-accent transition-colors tracking-[0.15em] text-sm"
+        >
+          去逛逛選物
+        </Link>
       </div>
     )
   }

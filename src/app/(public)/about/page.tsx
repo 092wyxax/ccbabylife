@@ -1,10 +1,39 @@
 import Link from 'next/link'
+import {
+  AboutResearchIllustration,
+  AboutSourcingIllustration,
+  AboutPackingIllustration,
+} from '@/components/shared/BrandIllustrations'
 
 export const metadata = {
   title: '關於我們 + 法規誠信宣告',
   description:
     '1 歲娃媽親身試用、嚴選日系好物。我們不販售需查驗登記商品，這是我們選擇難走但合法的路。',
 }
+
+const STORY = [
+  {
+    illustration: <AboutResearchIllustration className="w-32 h-28" />,
+    tone: 'text-seal',
+    eyebrow: '01 · リサーチ',
+    title: '研究選物',
+    body: '每週看日本 Amazon JP / 樂天熱銷榜、媽媽 IG 社群、鄰居推薦。挑出真正設計用心、媽媽真會回購的東西。',
+  },
+  {
+    illustration: <AboutSourcingIllustration className="w-32 h-28" />,
+    tone: 'text-sage',
+    eyebrow: '02 · 仕入れ',
+    title: '日本實地採購',
+    body: '週日 23:59 截單、週一上午由我們的日本端朋友親自到實體店面 / 官網下單。不是水貨倉、不是黑市。',
+  },
+  {
+    illustration: <AboutPackingIllustration className="w-32 h-28" />,
+    tone: 'text-accent',
+    eyebrow: '03 · お届け',
+    title: '溫柔包裝寄出',
+    body: '集運回台灣 → 拆箱檢查 → 重新打包加防撞 → 附上手寫感謝小卡。10–14 天內送到你手上。',
+  },
+]
 
 export default function AboutPage() {
   return (
@@ -17,18 +46,46 @@ export default function AboutPage() {
       <section className="prose prose-stone max-w-none text-ink leading-relaxed space-y-5">
         <p>
           我們是一家三人經營的小選物店：
-          <strong>娃媽（內容＋客服）、爸爸（系統＋物流）、朋友（日本實地採購）</strong>。
+          <strong>媽媽（內容＋客服）、爸爸（系統＋物流）、朋友（日本實地採購）</strong>。
           每週日截單、週一日本下單，10–14 天到貨。
         </p>
         <p>
-          開店的起心動念，是因為自己 1 歲娃用了一堆日本品牌的母嬰用品 ——
+          開店的起心動念，是因為自己寶寶用了一堆日本品牌的母嬰用品 ——
           紗布巾、奶瓶、固齒器、推車涼感扇 —— 覺得設計細節真的細緻。
           但在台灣買，不是缺貨就是價差離譜，又或是來路不明。
         </p>
         <p>
-          所以我們想做一件事：<strong>把娃媽真心試過的日系好物，誠實帶回台灣</strong>。
+          所以我們想做一件事：<strong>把媽媽真心試過的日系好物，誠實帶回台灣</strong>。
           不誇大療效、不主打最便宜、不販售不該賣的東西。
         </p>
+      </section>
+
+      <section className="mt-16">
+        <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-2 text-center">
+          OUR FLOW · 仕事の流れ
+        </p>
+        <h2 className="font-serif text-2xl mb-10 tracking-wide text-center">
+          每週的選物節奏
+        </h2>
+        <div className="space-y-12">
+          {STORY.map((s, i) => (
+            <div
+              key={s.eyebrow}
+              className={`flex flex-col sm:flex-row gap-6 items-center ${
+                i % 2 === 1 ? 'sm:flex-row-reverse' : ''
+              }`}
+            >
+              <div className={`flex-shrink-0 ${s.tone}`}>{s.illustration}</div>
+              <div className="flex-1 text-center sm:text-left">
+                <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-1">
+                  {s.eyebrow}
+                </p>
+                <h3 className="font-serif text-xl mb-2 tracking-wide">{s.title}</h3>
+                <p className="text-ink-soft text-sm leading-relaxed">{s.body}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="mt-16 p-8 border-2 border-accent rounded-lg bg-accent/5">

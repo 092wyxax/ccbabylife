@@ -1,5 +1,22 @@
 import { PROGRESS_STAGES, progressState } from '@/lib/order-progress'
 import type { OrderStatus } from '@/db/schema'
+import {
+  MicroPaidIllustration,
+  MicroSourcingIllustration,
+  MicroReceivedIllustration,
+  MicroShippedIllustration,
+  MicroCompletedIllustration,
+} from '@/components/shared/BrandIllustrations'
+
+const STAGE_ICON: Record<string, React.ComponentType<{ className?: string }>> = {
+  paid: MicroPaidIllustration,
+  sourcing_jp: MicroSourcingIllustration,
+  received_jp: MicroReceivedIllustration,
+  shipping_intl: MicroShippedIllustration,
+  arrived_tw: MicroShippedIllustration,
+  shipped: MicroShippedIllustration,
+  completed: MicroCompletedIllustration,
+}
 
 interface Props {
   status: OrderStatus
@@ -41,10 +58,11 @@ export function OrderProgressBar({ status }: Props) {
     <div className="bg-white border border-line rounded-lg p-6">
       <ol className="relative flex items-start gap-1 overflow-x-auto pb-2">
         {/* Connecting line behind the dots */}
-        <div className="absolute left-4 right-4 top-3 h-px bg-line -z-0" aria-hidden />
+        <div className="absolute left-4 right-4 top-[18px] h-px bg-line -z-0" aria-hidden />
         {PROGRESS_STAGES.map((stage, i) => {
           const isDone = i < currentIdx
           const isCurrent = i === currentIdx
+          const Icon = STAGE_ICON[stage.status] ?? MicroPaidIllustration
           return (
             <li
               key={stage.status}
@@ -52,15 +70,15 @@ export function OrderProgressBar({ status }: Props) {
             >
               <div
                 className={
-                  'w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-medium border-2 transition-colors ' +
+                  'w-9 h-9 rounded-full flex items-center justify-center border-2 transition-colors bg-cream ' +
                   (isCurrent
-                    ? 'bg-accent text-cream border-accent ring-4 ring-accent/15'
+                    ? 'border-accent ring-4 ring-accent/15 text-accent'
                     : isDone
-                      ? 'bg-ink text-cream border-ink'
-                      : 'bg-cream text-ink-soft border-line')
+                      ? 'border-ink text-ink'
+                      : 'border-line text-ink-soft/60')
                 }
               >
-                {isDone ? '✓' : i + 1}
+                <Icon className="w-5 h-5" />
               </div>
               <span
                 className={

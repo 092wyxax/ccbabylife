@@ -6,6 +6,7 @@ import { useCartStore } from '@/stores/cartStore'
 import { toast } from '@/components/shared/Toast'
 import { imageUrl } from '@/lib/image'
 import { formatTwd } from '@/lib/format'
+import { EmptyWishlistIllustration } from '@/components/shared/BrandIllustrations'
 
 export function WishlistContents() {
   const items = useWishlistStore((s) => s.items)
@@ -20,10 +21,22 @@ export function WishlistContents() {
 
   if (items.length === 0) {
     return (
-      <div className="py-16 text-center text-ink-soft border border-dashed border-line rounded-lg">
-        <p className="mb-4">還沒有收藏的商品</p>
-        <Link href="/shop" className="text-accent hover:underline text-sm">
-          去逛逛 →
+      <div className="py-20 text-center">
+        <div className="text-seal flex justify-center mb-5">
+          <EmptyWishlistIllustration className="w-44 h-32" />
+        </div>
+        <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-2">
+          NO FAVORITES YET
+        </p>
+        <h2 className="font-serif text-xl mb-3 tracking-wide">還沒有收藏的商品</h2>
+        <p className="text-ink-soft text-sm mb-6">
+          看到喜歡的商品點 ❤ 就會收藏到這裡
+        </p>
+        <Link
+          href="/shop"
+          className="font-jp inline-block bg-ink text-cream px-6 py-3 rounded-md hover:bg-accent transition-colors tracking-[0.15em] text-sm"
+        >
+          去逛逛
         </Link>
       </div>
     )
