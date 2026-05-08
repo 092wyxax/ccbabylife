@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { asc, eq } from 'drizzle-orm'
 import { db } from '@/db/client'
 import {
@@ -63,18 +64,18 @@ export default async function ProcurementSettingsPage() {
         description="編輯既有「採購商」的簡碼（用於商品 SKU 開頭，例：NSW、NSE、SC）。新增 / 刪除採購來源請到「採購商」頁。"
       >
         <div className="mb-3">
-          <a
+          <Link
             href="/admin/sources/new"
             className="inline-block text-xs bg-ink text-cream px-3 py-1.5 rounded hover:bg-accent"
           >
             + 新增採購來源 →
-          </a>
-          <a
+          </Link>
+          <Link
             href="/admin/sources"
             className="inline-block text-xs text-ink-soft hover:text-ink underline ml-3"
           >
             管理所有來源
-          </a>
+          </Link>
         </div>
         {sourceRows.length === 0 ? (
           <Empty msg="尚未建立採購來源，按上方「+ 新增採購來源」開始。" />
