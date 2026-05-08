@@ -102,6 +102,13 @@ export async function POST(req: NextRequest) {
               console.error('[ecpay/callback] referral coupon failed:', e)
             }
           }
+          // Auto-issue e-invoice (B2C 必開)
+          try {
+            const { issueInvoiceForOrder } = await import('@/server/services/InvoiceService')
+            await issueInvoiceForOrder(order.id)
+          } catch (e) {
+            console.error('[ecpay/callback] invoice issue failed:', e)
+          }
         })()
       } catch (e) {
         console.error('[ecpay/callback] DB update failed:', e)

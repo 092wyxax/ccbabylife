@@ -138,6 +138,7 @@ export async function changeStatus(
   if (to === 'paid' && order.status !== 'paid') {
     const customerId = order.customerId
     const orderTotal = order.total
+    const orderIdLocal = order.id
     void (async () => {
       try {
         await db
@@ -152,6 +153,12 @@ export async function changeStatus(
         await recalcCustomerTier(customerId)
       } catch (e) {
         console.error('[changeStatus] tier recalc failed:', e)
+      }
+      try {
+        const { issueInvoiceForOrder } = await import('./InvoiceService')
+        await issueInvoiceForOrder(orderIdLocal)
+      } catch (e) {
+        console.error('[changeStatus] invoice issue failed:', e)
       }
     })()
   }

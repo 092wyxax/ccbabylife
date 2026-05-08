@@ -169,6 +169,13 @@
       "when": 1778246209830,
       "tag": "0023_nervous_ego",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1778246420973,
+      "tag": "0024_spooky_kang",
+      "breakpoints": true
     }
   ]
 }

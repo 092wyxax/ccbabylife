@@ -13,6 +13,7 @@ import { OrderNotesForm } from '@/components/order/OrderNotesForm'
 import { canTransition } from '@/lib/order-state-machine'
 import { STATUS_LABEL, statusBadgeClass } from '@/lib/order-progress'
 import { formatTwd } from '@/lib/format'
+import { listInvoicesForOrder } from '@/server/services/InvoiceService'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -25,6 +26,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
 
   const { order, customer, items, logs } = detail
   const validNext = listValidNextStatuses(order.status)
+  const orderInvoices = await listInvoicesForOrder(order.id)
 
   return (
     <div className="p-8 max-w-5xl">
@@ -217,6 +219,31 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               <p className="text-ink-soft text-xs">LINE: {customer.lineUserId}</p>
             )}
           </section>
+
+          {orderInvoices.length > 0 && (
+            <section className="bg-white border border-line rounded-lg p-5 text-sm space-y-2">
+              <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-2">
+                電子發票
+              </h2>
+              {orderInvoices.map((inv) => (
+                <div key={inv.id} className="text-xs">
+                  {inv.status === 'issued' ? (
+                    <p>
+                      <span className="font-mono">{inv.invoiceNumber}</span>
+                      {inv.randomNumber && (
+                        <span className="text-ink-soft"> /{inv.randomNumber}</span>
+                      )}
+                      <span className="text-success ml-2">已開立</span>
+                    </p>
+                  ) : (
+                    <p className="text-danger">
+                      開立失敗：{inv.errorMessage ?? '未知錯誤'}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </section>
+          )}
 
           <section className="bg-white border border-line rounded-lg p-5 text-sm space-y-2">
             <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-2">
