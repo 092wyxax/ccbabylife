@@ -39,46 +39,41 @@ export function OrderProgressBar({ status }: Props) {
 
   return (
     <div className="bg-white border border-line rounded-lg p-6">
-      <ol className="flex items-start gap-2 overflow-x-auto pb-2">
+      <ol className="relative flex items-start gap-1 overflow-x-auto pb-2">
+        {/* Connecting line behind the dots */}
+        <div className="absolute left-4 right-4 top-3 h-px bg-line -z-0" aria-hidden />
         {PROGRESS_STAGES.map((stage, i) => {
           const isDone = i < currentIdx
           const isCurrent = i === currentIdx
           return (
             <li
               key={stage.status}
-              className="flex-1 min-w-[68px] flex flex-col items-center text-center"
+              className="relative flex-1 min-w-[68px] flex flex-col items-center text-center z-10"
             >
               <div
                 className={
-                  'w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium ' +
+                  'w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-medium border-2 transition-colors ' +
                   (isCurrent
-                    ? 'bg-accent text-cream ring-4 ring-accent/20'
+                    ? 'bg-accent text-cream border-accent ring-4 ring-accent/15'
                     : isDone
-                    ? 'bg-ink text-cream'
-                    : 'bg-line text-ink-soft')
+                      ? 'bg-ink text-cream border-ink'
+                      : 'bg-cream text-ink-soft border-line')
                 }
               >
                 {isDone ? '✓' : i + 1}
               </div>
               <span
                 className={
-                  'text-[11px] mt-2 leading-tight ' +
+                  'text-[11px] mt-2.5 leading-tight px-1 font-jp tracking-wider ' +
                   (isCurrent
                     ? 'text-ink font-medium'
                     : isDone
-                    ? 'text-ink'
-                    : 'text-ink-soft')
+                      ? 'text-ink'
+                      : 'text-ink-soft')
                 }
               >
                 {stage.label}
               </span>
-              {i < PROGRESS_STAGES.length - 1 && (
-                <div
-                  className={
-                    'absolute h-px hidden ' /* visual line; using siblings below would complicate */
-                  }
-                />
-              )}
             </li>
           )
         })}

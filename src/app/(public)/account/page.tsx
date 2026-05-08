@@ -8,6 +8,7 @@ import { getCustomerSession } from '@/lib/customer-session'
 import { logoutAccountAction } from '@/server/actions/account'
 import { ensureReferralCode } from '@/server/services/ReferralService'
 import { getTierById } from '@/server/services/MemberTierService'
+import { ShoppingBag, MapPin, Ticket, Heart, Settings, Share2 } from 'lucide-react'
 import { STATUS_LABEL, statusBadgeClass } from '@/lib/order-progress'
 import { formatTwd } from '@/lib/format'
 
@@ -196,36 +197,42 @@ async function DashboardView({ customerId }: { customerId: string }) {
           title="ご注文 · 我的訂單"
           value={`${totalOrders} 件`}
           desc="查看所有訂單與進度"
+          icon={<ShoppingBag size={28} strokeWidth={1.25} />}
         />
         <DashCard
           href="/account/addresses"
           title="お届け先 · 常用地址"
-          value="📦"
+          value="管理"
           desc="收件地址管理（家、辦公室）"
+          icon={<MapPin size={28} strokeWidth={1.25} />}
         />
         <DashCard
           href="/account/coupons"
           title="クーポン · 優惠券"
-          value="🎟"
+          value="查看"
           desc="可使用的優惠碼"
+          icon={<Ticket size={28} strokeWidth={1.25} />}
         />
         <DashCard
           href="/account/wishlist"
           title="お気に入り · 收藏"
-          value="❤"
+          value="清單"
           desc="加入收藏的商品"
+          icon={<Heart size={28} strokeWidth={1.25} />}
         />
         <DashCard
           href="/account/settings"
           title="設定 · 帳號設定"
-          value="⚙"
+          value="偏好"
           desc="通知偏好與基本資料"
+          icon={<Settings size={28} strokeWidth={1.25} />}
         />
         <DashCard
           href="#referral"
           title="ご紹介 · 推薦朋友"
           value={referralCode}
           desc="朋友首單妳得購物金"
+          icon={<Share2 size={28} strokeWidth={1.25} />}
         />
       </div>
 
@@ -303,22 +310,29 @@ function DashCard({
   title,
   value,
   desc,
+  icon,
 }: {
   href: string
   title: string
   value: string
   desc: string
+  icon?: React.ReactNode
 }) {
   return (
     <Link
       href={href}
-      className="bg-white border border-line rounded-lg p-5 hover:border-ink transition-colors block"
+      className="group bg-white border border-line rounded-lg p-5 hover:border-ink transition-colors block relative overflow-hidden"
     >
-      <p className="font-jp text-xs tracking-[0.2em] text-ink-soft mb-2">
+      {icon && (
+        <div className="absolute top-4 right-4 text-ink-soft/40 group-hover:text-accent/60 transition-colors">
+          {icon}
+        </div>
+      )}
+      <p className="font-jp text-xs tracking-[0.25em] text-ink-soft mb-2">
         {title}
       </p>
-      <p className="text-lg font-medium font-mono break-all">{value}</p>
-      <p className="text-xs text-ink-soft mt-2">{desc}</p>
+      <p className="text-lg font-serif break-all">{value}</p>
+      <p className="text-xs text-ink-soft mt-2 leading-relaxed">{desc}</p>
     </Link>
   )
 }

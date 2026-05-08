@@ -22,20 +22,22 @@ export function FreeShipProgress({ thresholdTwd, className = '' }: Props) {
   const pct = Math.min(100, Math.round((subtotal / goal) * 100))
 
   return (
-    <div className={`bg-cream-100 border border-line rounded-lg p-3 ${className}`}>
+    <div className={`bg-sage-soft/40 border border-sage/20 rounded-lg p-3.5 ${className}`}>
       {reached ? (
-        <p className="text-sm">
-          🎉 <strong>免運達成！</strong>
-          <span className="text-ink-soft ml-1">運費已歸 0</span>
+        <p className="text-sm flex items-center gap-2">
+          <span className="text-sage" aria-hidden>✓</span>
+          <strong>免運達成</strong>
+          <span className="text-ink-soft text-xs">· 運費已歸零</span>
         </p>
       ) : (
         <p className="text-sm">
-          再加 <strong className="text-accent">{formatTwd(remaining)}</strong> 享免運 🚚
+          再加 <strong className="font-serif text-accent">{formatTwd(remaining)}</strong>{' '}
+          <span className="text-ink-soft">享免運</span>
         </p>
       )}
-      <div className="h-1.5 bg-line rounded-full mt-2 overflow-hidden">
+      <div className="h-1 bg-cream rounded-full mt-2.5 overflow-hidden">
         <div
-          className={`h-full transition-all ${reached ? 'bg-success' : 'bg-accent'}`}
+          className={`h-full transition-all duration-500 ${reached ? 'bg-sage' : 'bg-accent'}`}
           style={{ width: `${pct}%` }}
         />
       </div>

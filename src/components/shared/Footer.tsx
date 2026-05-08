@@ -1,17 +1,36 @@
 import Link from 'next/link'
 import { NewsletterForm } from './NewsletterForm'
+import { BrandMark } from './BrandMark'
 
 export function Footer() {
   return (
-    <footer className="border-t border-line bg-cream-100 mt-16">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 text-sm">
+    <footer className="border-t border-line bg-cream-100 mt-24 relative">
+      {/* Decorative wave at the very top */}
+      <div
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-2 bg-cream"
+        style={{
+          maskImage:
+            'radial-gradient(circle at 20px 0, transparent 8px, black 9px)',
+          WebkitMaskImage:
+            'radial-gradient(circle at 20px 0, transparent 8px, black 9px)',
+          maskSize: '40px 16px',
+          WebkitMaskSize: '40px 16px',
+          maskRepeat: 'repeat-x',
+          WebkitMaskRepeat: 'repeat-x',
+        }}
+      />
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-16 grid gap-10 sm:grid-cols-2 lg:grid-cols-4 text-sm">
         <div>
-          <h3 className="font-serif text-lg mb-1 tracking-wide">熙熙初日</h3>
-          <p className="font-jp text-[11px] tracking-[0.2em] text-ink-soft mb-3">
+          <div className="flex items-center gap-2.5 mb-2">
+            <BrandMark className="w-7 h-7 text-seal" />
+            <h3 className="font-serif text-lg tracking-wide">熙熙初日</h3>
+          </div>
+          <p className="font-jp text-[11px] tracking-[0.25em] text-ink-soft mb-4">
             日系選物店
           </p>
-          <p className="text-ink-soft leading-relaxed mb-4">
-            1 歲娃媽親身試用、嚴選日系好物。<br />
+          <p className="text-ink-soft leading-relaxed mb-5">
+            日本媽媽親身試用、嚴選日系好物。<br />
             予約制：毎週日 23:59 締切。
           </p>
           <p className="font-jp text-xs text-ink-soft mb-2 tracking-[0.3em]">

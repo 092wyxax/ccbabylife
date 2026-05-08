@@ -24,15 +24,19 @@ export function GiftProgress() {
   const next = sortedGifts.find((g) => g.thresholdTwd > subtotal)
 
   return (
-    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+    <div className="bg-blush-soft/50 border border-blush/30 rounded-lg p-4 mb-4">
       {earned.length > 0 && (
         <div className="mb-3">
-          <p className="text-xs font-jp tracking-[0.2em] text-amber-700 mb-1">
-            🎁 GIFTS UNLOCKED · 已達標
+          <p className="text-xs font-jp tracking-[0.25em] text-seal mb-1.5">
+            GIFTS UNLOCKED · 已達標
           </p>
           {earned.map((g) => (
-            <p key={g.id} className="text-sm text-ink mt-0.5">
-              ✓ <strong>{g.giftProductName}</strong> × {g.quantity} 將在出貨時附贈
+            <p key={g.id} className="text-sm text-ink mt-0.5 flex items-start gap-2">
+              <span className="text-sage mt-0.5" aria-hidden>✓</span>
+              <span>
+                <strong>{g.giftProductName}</strong> × {g.quantity}{' '}
+                <span className="text-ink-soft">將在出貨時附贈</span>
+              </span>
             </p>
           ))}
         </div>
@@ -40,13 +44,13 @@ export function GiftProgress() {
 
       {next && (
         <div>
-          <p className="text-xs text-ink-soft mb-1.5">
-            還差 <strong className="text-accent">{formatTwd(next.thresholdTwd - subtotal)}</strong>{' '}
+          <p className="text-xs text-ink-soft mb-2">
+            還差 <strong className="font-serif text-accent">{formatTwd(next.thresholdTwd - subtotal)}</strong>{' '}
             就送 <strong>{next.giftProductName}</strong>
           </p>
-          <div className="h-2 bg-amber-100 rounded-full overflow-hidden">
+          <div className="h-1 bg-cream rounded-full overflow-hidden">
             <div
-              className="h-full bg-amber-500 transition-all"
+              className="h-full bg-blush transition-all duration-500"
               style={{
                 width: `${Math.min(100, (subtotal / next.thresholdTwd) * 100)}%`,
               }}

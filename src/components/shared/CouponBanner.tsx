@@ -1,3 +1,4 @@
+import { Gift } from 'lucide-react'
 import { getActiveCouponCode } from '@/lib/active-coupon'
 import { findActiveCouponByCode } from '@/server/services/CouponService'
 import { formatTwd } from '@/lib/format'
@@ -21,10 +22,11 @@ export async function CouponBanner() {
           : `折抵 ${formatTwd(coupon.value)}`
 
   return (
-    <div className="bg-accent text-cream text-xs sm:text-sm">
+    <div className="bg-blush text-ink text-xs sm:text-sm border-b border-blush">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 py-2 flex items-center justify-between gap-3">
-        <span className="truncate">
-          🎁 優惠券 <strong className="font-mono mx-1">{coupon.code}</strong>
+        <span className="truncate flex items-center gap-2">
+          <Gift size={14} strokeWidth={1.5} aria-hidden />
+          優惠券 <strong className="font-mono mx-1">{coupon.code}</strong>
           已套用 · {desc} · 結帳時自動折抵
         </span>
         <CouponBannerDismiss />
