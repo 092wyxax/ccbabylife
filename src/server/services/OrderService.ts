@@ -122,6 +122,54 @@ export async function changeStatus(
   // Fire-and-forget LINE notification. Failure does not roll back status change.
   void sendStatusNotification(order, to)
 
+  // Web push to all customer's devices (separate from LINE — opt-in via /account/settings)
+  void (async () => {
+    try {
+      const { pushToCustomer, isWebPushConfigured } = await import('./WebPushService')
+      if (!isWebPushConfigured()) return
+      const labels: Partial<Record<typeof to, { title: string; body: string }>> = {
+        paid: {
+          title: '付款完成 ✓',
+          body: `訂單 ${order.orderNumber} 已收到付款，我們會盡快處理。`,
+        },
+        sourcing_jp: {
+          title: '已下單日本',
+          body: `訂單 ${order.orderNumber} 開始日本端採購。`,
+        },
+        received_jp: {
+          title: '日本到貨',
+          body: `訂單 ${order.orderNumber} 商品已收到，準備寄回台灣。`,
+        },
+        shipped: {
+          title: '已出貨 📦',
+          body: `訂單 ${order.orderNumber} 已寄出，請留意收件。`,
+        },
+        completed: {
+          title: '訂單完成 🎉',
+          body: `感謝你購買 ${order.orderNumber}！`,
+        },
+        cancelled: {
+          title: '訂單取消',
+          body: `訂單 ${order.orderNumber} 已取消。`,
+        },
+        refunded: {
+          title: '已退款',
+          body: `訂單 ${order.orderNumber} 已完成退款。`,
+        },
+      }
+      const msg = labels[to]
+      if (!msg) return
+      await pushToCustomer(order.customerId, {
+        ...msg,
+        url: `/track/${order.id}`,
+        tag: `order-${order.id}`,
+        data: { url: `/track/${order.id}`, orderId: order.id },
+      })
+    } catch (e) {
+      console.error('[changeStatus] web push failed:', e)
+    }
+  })()
+
   // Referral reward: when a referred order first reaches 'paid', issue
   // referral_complete coupons to the referrer.
   if (to === 'paid' && order.referredBy && order.status !== 'paid') {

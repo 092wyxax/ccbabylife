@@ -6,6 +6,7 @@ import { customers } from '@/db/schema'
 import { getCustomerSession } from '@/lib/customer-session'
 import { NotificationPrefsForm } from '@/components/account/NotificationPrefsForm'
 import { BabyInfoForm } from '@/components/account/BabyInfoForm'
+import { PushSubscribeToggle } from '@/components/account/PushSubscribeToggle'
 import { listAddressesForCustomer } from '@/server/services/AddressService'
 
 export const metadata = {
@@ -56,6 +57,11 @@ export default async function AccountSettingsPage() {
           initialLine={prefs.line}
           initialEmail={prefs.email}
         />
+        <div className="mt-6 pt-6 border-t border-line">
+          <PushSubscribeToggle
+            vapidPublicKey={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? null}
+          />
+        </div>
       </section>
 
       <section className="bg-white border border-line rounded-lg p-6 text-sm space-y-2">

@@ -7,6 +7,7 @@ import { LineFloatingButton } from '@/components/shared/LineFloatingButton'
 import { ToastViewport } from '@/components/shared/Toast'
 import { NewsletterPopup } from '@/components/shared/NewsletterPopup'
 import { MobileBottomNav } from '@/components/shared/MobileBottomNav'
+import { RegisterServiceWorker } from '@/components/shared/RegisterServiceWorker'
 
 export default function PublicLayout({
   children,
@@ -25,6 +26,7 @@ export default function PublicLayout({
       <ToastViewport />
       <NewsletterPopup />
       <MobileBottomNav />
+      <RegisterServiceWorker />
     </div>
   )
 }
