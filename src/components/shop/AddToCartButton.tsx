@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useCartStore } from '@/stores/cartStore'
+import { toast } from '@/components/shared/Toast'
 import type { CartItem } from '@/types/cart'
 
 interface Props {
@@ -17,6 +18,7 @@ export function AddToCartButton({ item, outOfStock }: Props) {
     if (outOfStock) return
     add(item, 1)
     setAdded(true)
+    toast.success(`已加入購物車：${item.nameZh}`, 2000)
     setTimeout(() => setAdded(false), 1500)
   }
 

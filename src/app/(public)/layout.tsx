@@ -4,6 +4,7 @@ import { CutoffCountdown } from '@/components/shared/CutoffCountdown'
 import { OnboardingWizard } from '@/components/shared/OnboardingWizard'
 import { CartSyncBridge } from '@/components/cart/CartSyncBridge'
 import { LineFloatingButton } from '@/components/shared/LineFloatingButton'
+import { ToastViewport } from '@/components/shared/Toast'
 
 export default function PublicLayout({
   children,
@@ -19,6 +20,7 @@ export default function PublicLayout({
       <OnboardingWizard />
       <CartSyncBridge />
       <LineFloatingButton />
+      <ToastViewport />
     </div>
   )
 }
