@@ -1,16 +1,24 @@
 import type { Metadata, Viewport } from 'next'
-import { Noto_Sans_TC, Noto_Serif_TC, Noto_Serif_JP, Shippori_Mincho } from 'next/font/google'
+import {
+  Noto_Sans_TC,
+  Noto_Serif_TC,
+  Noto_Serif_JP,
+  Shippori_Mincho,
+  Klee_One,
+} from 'next/font/google'
 import './globals.css'
 import { organizationLd, websiteLd, jsonLdScript } from '@/lib/jsonld'
 import { Toaster } from '@/components/shared/Toaster'
 
+// Body text: Noto Sans TC, light → medium for proper rhythm
 const notoSans = Noto_Sans_TC({
   variable: '--font-noto-sans',
   subsets: ['latin'],
-  weight: ['400', '700'],
+  weight: ['300', '400', '500', '700'],
   display: 'swap',
 })
 
+// Headlines (zh): Noto Serif TC fallback
 const notoSerif = Noto_Serif_TC({
   variable: '--font-noto-serif',
   subsets: ['latin'],
@@ -19,18 +27,29 @@ const notoSerif = Noto_Serif_TC({
   preload: false,
 })
 
+// Headlines (jp): Noto Serif JP fallback
 const notoSerifJp = Noto_Serif_JP({
   variable: '--font-noto-serif-jp',
   subsets: ['latin'],
-  weight: ['400', '700'],
+  weight: ['400', '600'],
   display: 'swap',
   preload: false,
 })
 
+// Brand display: Shippori Mincho — used for big serifs / hero / price
 const shippori = Shippori_Mincho({
   variable: '--font-shippori',
   subsets: ['latin'],
-  weight: ['400', '700'],
+  weight: ['400', '500', '700'],
+  display: 'swap',
+  preload: false,
+})
+
+// Hand-written warmth: Klee One — used for jp tags / subtitles / "本日のおすすめ"
+const klee = Klee_One({
+  variable: '--font-klee',
+  subsets: ['latin'],
+  weight: ['400', '600'],
   display: 'swap',
   preload: false,
 })
@@ -41,7 +60,6 @@ export const metadata: Metadata = {
     template: '%s | 熙熙初日｜日系選物店',
   },
   description: '1 歲寶寶媽媽親身試用、嚴選日系好物、不販售需查驗登記商品',
-  manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     title: '熙熙初日',
@@ -65,7 +83,7 @@ export default function RootLayout({
   return (
     <html
       lang="zh-Hant"
-      className={`${notoSans.variable} ${notoSerif.variable} ${notoSerifJp.variable} ${shippori.variable} h-full antialiased`}
+      className={`${notoSans.variable} ${notoSerif.variable} ${notoSerifJp.variable} ${shippori.variable} ${klee.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-cream text-ink">
         <script

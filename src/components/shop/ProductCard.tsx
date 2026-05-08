@@ -29,13 +29,14 @@ export function ProductCard({ product, imageUrl, imagePath }: ProductCardProps) 
   return (
     <div className="group block relative">
       <Link href={`/shop/${product.slug}`} className="block">
-        <div className="aspect-square bg-cream-100 border border-line rounded-md overflow-hidden mb-3 relative">
+        {/* Borderless card — image is the boundary; subtle bg only */}
+        <div className="aspect-square bg-cream-100 rounded-sm overflow-hidden mb-4 relative">
           {imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={imageUrl}
               alt={product.nameZh}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700 ease-out"
               loading="lazy"
             />
           ) : (
@@ -45,13 +46,14 @@ export function ProductCard({ product, imageUrl, imagePath }: ProductCardProps) 
           )}
 
           {product.stockType === 'preorder' && (
-            <span className="font-jp absolute top-2 left-2 bg-cream/95 text-ink text-[11px] px-2 py-0.5 tracking-wider">
-              予約 · 預購
+            <span className="font-jp absolute top-3 left-3 bg-cream/95 text-ink text-[10px] px-2.5 py-1 tracking-[0.2em] rounded-full">
+              予約
             </span>
           )}
           {isOutOfStock && (
-            <span className="font-jp absolute top-2 left-2 bg-danger text-white text-[11px] px-2 py-0.5 tracking-wider">
-              完売 · 售完
+            // Off-tone instead of red — feels less like an error
+            <span className="font-jp absolute top-3 left-3 bg-cream-200 text-ink-soft text-[10px] px-2.5 py-1 tracking-[0.2em] rounded-full">
+              完売
             </span>
           )}
 
@@ -80,14 +82,16 @@ export function ProductCard({ product, imageUrl, imagePath }: ProductCardProps) 
           />
         </div>
 
-        <div className="space-y-1">
+        <div className="space-y-1.5 px-0.5">
           {ageLabel && (
-            <p className="text-xs text-ink-soft tracking-widest">{ageLabel}</p>
+            <p className="font-jp text-[10px] text-ink-soft tracking-[0.25em] uppercase">
+              {ageLabel}
+            </p>
           )}
-          <h3 className="text-sm leading-snug group-hover:text-accent transition-colors line-clamp-2">
+          <h3 className="text-sm leading-relaxed group-hover:text-accent transition-colors line-clamp-2">
             {product.nameZh}
           </h3>
-          <p className="text-base font-medium">{formatTwd(product.priceTwd)}</p>
+          <p className="font-serif text-base">{formatTwd(product.priceTwd)}</p>
         </div>
       </Link>
     </div>

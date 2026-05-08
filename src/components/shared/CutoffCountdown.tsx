@@ -49,11 +49,14 @@ export function CutoffCountdown({ variant = 'banner' }: Props) {
   return (
     <div
       className={
-        'text-center text-sm py-2 px-4 font-jp tracking-wider ' +
-        (isUrgent ? 'bg-warning text-ink' : 'bg-ink text-cream')
+        'text-center text-sm py-2.5 px-4 font-jp tracking-[0.2em] ' +
+        (isUrgent
+          ? 'bg-blush-soft text-ink border-b border-blush'
+          : 'bg-cream-100 text-ink-soft border-b border-line')
       }
     >
-      今週の予約締切まで <strong>{text}</strong>{isUrgent && ' · お早めに' }
+      今週の予約締切まで <strong className="text-ink">{text}</strong>
+      {isUrgent && <span className="text-seal"> · お早めに</span>}
     </div>
   )
 }

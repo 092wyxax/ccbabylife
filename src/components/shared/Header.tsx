@@ -2,7 +2,9 @@ import Link from 'next/link'
 import { CartIndicator } from './CartIndicator'
 import { MobileNav } from './MobileNav'
 import { CouponBanner } from './CouponBanner'
+import { BrandMark } from './BrandMark'
 import { getCustomerSession } from '@/lib/customer-session'
+import { Search } from 'lucide-react'
 
 const NAV_ITEMS = [
   { href: '/shop', label: '選物' },
@@ -17,12 +19,13 @@ const NAV_ITEMS = [
 export async function Header() {
   const session = await getCustomerSession()
   return (
-    <header className="border-b border-line bg-cream/90 backdrop-blur sticky top-0 z-30">
+    <header className="border-b border-line bg-cream/85 backdrop-blur-md sticky top-0 z-30 shadow-[0_1px_0_rgba(0,0,0,0.02)]">
       <CouponBanner />
       <div className="mx-auto max-w-6xl px-4 sm:px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-baseline gap-2 text-ink leading-none">
+        <Link href="/" className="flex items-center gap-2.5 text-ink leading-none group">
+          <BrandMark className="w-7 h-7 text-seal transition-transform group-hover:rotate-[-3deg]" />
           <span className="font-serif text-xl tracking-wide">熙熙初日</span>
-          <span className="hidden sm:inline font-jp text-[11px] tracking-[0.2em] text-ink-soft">
+          <span className="hidden sm:inline font-jp text-[11px] tracking-[0.25em] text-ink-soft">
             日系選物店
           </span>
         </Link>
@@ -41,26 +44,14 @@ export async function Header() {
           <Link
             href="/shop"
             aria-label="搜尋商品"
-            className="text-ink-soft hover:text-ink"
+            className="text-ink-soft hover:text-ink transition-colors"
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.3-4.3" />
-            </svg>
+            <Search size={18} strokeWidth={1.5} />
           </Link>
           <CartIndicator />
           <Link
             href="/account"
-            className="font-jp hidden sm:inline-flex text-sm bg-ink text-cream px-3 py-1.5 rounded-md hover:bg-accent transition-colors tracking-wider"
+            className="font-jp hidden sm:inline-flex text-sm bg-ink text-cream px-3.5 py-1.5 rounded-full hover:bg-accent transition-colors tracking-[0.15em]"
           >
             {session ? '會員中心' : '登入'}
           </Link>
