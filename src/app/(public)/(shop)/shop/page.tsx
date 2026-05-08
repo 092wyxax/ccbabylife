@@ -4,6 +4,7 @@ import {
   listAllCategories,
 } from '@/server/services/ProductService'
 import { ProductGrid } from '@/components/shop/ProductGrid'
+import { MobileFilterSheet } from '@/components/shop/MobileFilterSheet'
 
 export const metadata = {
   title: '所有選物',
@@ -87,7 +88,16 @@ export default async function ShopPage({ searchParams }: Props) {
         </div>
       </form>
 
-      <div className="mb-10 flex flex-wrap items-center gap-2 pb-4 border-b border-line">
+      <div className="mb-6 lg:hidden">
+        <MobileFilterSheet
+          categories={categories.map((c) => ({ slug: c.slug, name: c.name }))}
+          activeCategory={params.category}
+          activeStock={stockType}
+          searchQuery={params.q}
+        />
+      </div>
+
+      <div className="mb-10 hidden lg:flex flex-wrap items-center gap-2 pb-4 border-b border-line">
         <FilterChip href="/shop" active={!params.category} label="全部分類" />
         {categories.map((c) => (
           <FilterChip
