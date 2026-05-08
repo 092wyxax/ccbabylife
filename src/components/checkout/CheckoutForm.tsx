@@ -389,6 +389,27 @@ export function CheckoutForm({ prefill, savedAddresses, activeCouponCode }: Prop
           </Link>{' '}
           查詢進度。
         </p>
+
+        <div className="border-t border-line pt-4 mt-2">
+          <ul className="space-y-2 text-xs text-ink-soft">
+            <li className="flex items-start gap-2">
+              <span aria-hidden>🔒</span>
+              <span>綠界金流 SSL 加密，本店不接觸卡號</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span aria-hidden>📦</span>
+              <span>7 天鑑賞期（預購除外，依消保法）</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span aria-hidden>💬</span>
+              <span>LINE 客服營業日 24 小時內回覆</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span aria-hidden>🇯🇵</span>
+              <span>日本實體店面採購，非水貨</span>
+            </li>
+          </ul>
+        </div>
       </aside>
     </div>
   )

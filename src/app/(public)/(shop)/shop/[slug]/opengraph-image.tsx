@@ -88,7 +88,7 @@ export default async function Image({ params }: Props) {
               borderRadius: 999,
             }}
           >
-            熙熙初日 · 1 歲娃媽嚴選
+            熙熙初日 · 日本媽媽嚴選
           </span>
         </div>
       </div>

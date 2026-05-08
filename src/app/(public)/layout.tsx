@@ -3,6 +3,7 @@ import { Footer } from '@/components/shared/Footer'
 import { CutoffCountdown } from '@/components/shared/CutoffCountdown'
 import { OnboardingWizard } from '@/components/shared/OnboardingWizard'
 import { CartSyncBridge } from '@/components/cart/CartSyncBridge'
+import { LineFloatingButton } from '@/components/shared/LineFloatingButton'
 
 export default function PublicLayout({
   children,
@@ -17,6 +18,7 @@ export default function PublicLayout({
       <Footer />
       <OnboardingWizard />
       <CartSyncBridge />
+      <LineFloatingButton />
     </div>
   )
 }
