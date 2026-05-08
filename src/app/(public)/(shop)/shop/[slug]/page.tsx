@@ -11,6 +11,7 @@ import { imageUrl } from '@/lib/image'
 import { AddToCartButton } from '@/components/shop/AddToCartButton'
 import { ProductGallery } from '@/components/shop/ProductGallery'
 import { StickyMobileCTA } from '@/components/shop/StickyMobileCTA'
+import { WishlistButton } from '@/components/shop/WishlistButton'
 import { ProductGrid } from '@/components/shop/ProductGrid'
 import {
   RecentlyViewedRecorder,
@@ -154,18 +155,32 @@ export default async function ProductDetailPage({ params }: Props) {
           </div>
 
           <div className="mb-4 space-y-3">
-            <AddToCartButton
-              item={{
-                productId: product.id,
-                slug: product.slug,
-                nameZh: product.nameZh,
-                priceTwd: product.priceTwd,
-                weightG: product.weightG,
-                imagePath: images[0]?.cfImageId ?? null,
-                stockType: product.stockType,
-              }}
-              outOfStock={!inStock && product.stockType === 'in_stock'}
-            />
+            <div className="flex gap-3 items-stretch">
+              <div className="flex-1">
+                <AddToCartButton
+                  item={{
+                    productId: product.id,
+                    slug: product.slug,
+                    nameZh: product.nameZh,
+                    priceTwd: product.priceTwd,
+                    weightG: product.weightG,
+                    imagePath: images[0]?.cfImageId ?? null,
+                    stockType: product.stockType,
+                  }}
+                  outOfStock={!inStock && product.stockType === 'in_stock'}
+                />
+              </div>
+              <WishlistButton
+                variant="button"
+                item={{
+                  productId: product.id,
+                  slug: product.slug,
+                  nameZh: product.nameZh,
+                  priceTwd: product.priceTwd,
+                  imagePath: images[0]?.cfImageId ?? null,
+                }}
+              />
+            </div>
             {!inStock && product.stockType === 'in_stock' && (
               <div className="bg-cream-100 border border-line rounded-lg p-4">
                 <p className="text-sm font-medium mb-2">補貨通知</p>

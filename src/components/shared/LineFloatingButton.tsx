@@ -15,7 +15,7 @@ export function LineFloatingButton() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="LINE 客服"
-      className="fixed bottom-6 right-4 sm:bottom-8 sm:right-8 z-40 group"
+      className="fixed bottom-20 right-4 lg:bottom-8 lg:right-8 z-40 group"
     >
       <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 whitespace-nowrap text-xs bg-ink text-cream px-3 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
         LINE 客服

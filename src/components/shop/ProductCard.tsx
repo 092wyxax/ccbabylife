@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { formatTwd, formatAgeRange } from '@/lib/format'
 import type { Product } from '@/db/schema'
 import { QuickViewButton } from './QuickViewButton'
+import { WishlistButton } from './WishlistButton'
 
 interface ProductCardProps {
   product: Pick<
@@ -53,6 +54,16 @@ export function ProductCard({ product, imageUrl, imagePath }: ProductCardProps) 
               完売 · 售完
             </span>
           )}
+
+          <WishlistButton
+            item={{
+              productId: product.id,
+              slug: product.slug,
+              nameZh: product.nameZh,
+              priceTwd: product.priceTwd,
+              imagePath: imagePath ?? null,
+            }}
+          />
 
           <QuickViewButton
             item={{

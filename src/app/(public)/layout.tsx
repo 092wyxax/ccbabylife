@@ -5,6 +5,8 @@ import { OnboardingWizard } from '@/components/shared/OnboardingWizard'
 import { CartSyncBridge } from '@/components/cart/CartSyncBridge'
 import { LineFloatingButton } from '@/components/shared/LineFloatingButton'
 import { ToastViewport } from '@/components/shared/Toast'
+import { NewsletterPopup } from '@/components/shared/NewsletterPopup'
+import { MobileBottomNav } from '@/components/shared/MobileBottomNav'
 
 export default function PublicLayout({
   children,
@@ -15,12 +17,14 @@ export default function PublicLayout({
     <div className="min-h-screen flex flex-col">
       <CutoffCountdown variant="banner" />
       <Header />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 pb-20 lg:pb-0">{children}</main>
       <Footer />
       <OnboardingWizard />
       <CartSyncBridge />
       <LineFloatingButton />
       <ToastViewport />
+      <NewsletterPopup />
+      <MobileBottomNav />
     </div>
   )
 }

@@ -210,6 +210,12 @@ async function DashboardView({ customerId }: { customerId: string }) {
           desc="可使用的優惠碼"
         />
         <DashCard
+          href="/account/wishlist"
+          title="お気に入り · 收藏"
+          value="❤"
+          desc="加入收藏的商品"
+        />
+        <DashCard
           href="/account/settings"
           title="設定 · 帳號設定"
           value="⚙"
