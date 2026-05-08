@@ -61,6 +61,10 @@ export const orders = pgTable(
     cvsStoreAddress: text('cvs_store_address'),
     /** ECPay logistics order number after we create it (separate from payment trade no) */
     ecpayLogisticsId: text('ecpay_logistics_id'),
+    /** ECPay 7-11/全家寄件代碼 (CVSPaymentNo) */
+    cvsPaymentNo: text('cvs_payment_no'),
+    /** ECPay 7-11 驗證碼 (CVSValidationNo) — 7-11 only */
+    cvsValidationNo: text('cvs_validation_no'),
     isPreorder: boolean('is_preorder').notNull().default(true),
     expectedDelivery: date('expected_delivery'),
     cutoffDate: date('cutoff_date'),

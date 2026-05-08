@@ -190,6 +190,13 @@
       "when": 1778252270686,
       "tag": "0026_foamy_robin_chapel",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1778252408209,
+      "tag": "0027_greedy_grim_reaper",
+      "breakpoints": true
     }
   ]
 }

@@ -14,6 +14,7 @@ import { canTransition } from '@/lib/order-state-machine'
 import { STATUS_LABEL, statusBadgeClass } from '@/lib/order-progress'
 import { formatTwd } from '@/lib/format'
 import { listInvoicesForOrder } from '@/server/services/InvoiceService'
+import { CvsLogisticsPanel } from '@/components/order/CvsLogisticsPanel'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -177,11 +178,28 @@ export default async function AdminOrderDetailPage({ params }: Props) {
             <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-3">
               出貨資訊
             </h2>
-            <TrackingForm
-              orderId={order.id}
-              trackingNumber={order.trackingNumber}
-              shippingProvider={order.shippingProvider}
-            />
+            {order.shippingMethod && order.shippingMethod.startsWith('cvs_') ? (
+              <CvsLogisticsPanel
+                orderId={order.id}
+                shippingMethod={order.shippingMethod}
+                cvsStoreName={order.cvsStoreName}
+                cvsStoreId={order.cvsStoreId}
+                ecpayLogisticsId={order.ecpayLogisticsId}
+                cvsPaymentNo={order.cvsPaymentNo}
+                cvsValidationNo={order.cvsValidationNo}
+                canCreate={
+                  order.status === 'paid' ||
+                  order.status === 'received_jp' ||
+                  order.status === 'arrived_tw'
+                }
+              />
+            ) : (
+              <TrackingForm
+                orderId={order.id}
+                trackingNumber={order.trackingNumber}
+                shippingProvider={order.shippingProvider}
+              />
+            )}
           </section>
 
           <section className="bg-white border border-line rounded-lg p-5">

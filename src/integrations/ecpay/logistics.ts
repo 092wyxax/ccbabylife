@@ -145,3 +145,39 @@ export const CVS_LABELS: Record<CvsType, string> = {
   HILIFEC2C: '萊爾富',
   OKMARTC2C: 'OK 超商',
 }
+
+const PRINT_URLS = {
+  sandbox: 'https://logistics-stage.ecpay.com.tw/Express/PrintTradeDocument',
+  production: 'https://logistics.ecpay.com.tw/Express/PrintTradeDocument',
+}
+
+/**
+ * Build the auto-submit form for ECPay's "託運單列印" page.
+ * Caller renders an HTML form that POSTs to ECPay; ECPay returns a printable
+ * page (NOT a PDF — admin clicks browser-print to physical printer).
+ */
+export function buildPrintLabelForm(opts: {
+  allPayLogisticsId: string
+  cvsPaymentNo?: string // 7-11 / 全家 needs this
+  cvsValidationNo?: string // 7-11 needs this
+}): { url: string; fields: Record<string, string> } {
+  const { merchantId, hashKey, hashIv } = ecpayCreds()
+  const url = PRINT_URLS[ecpayMode()]
+
+  const params: Record<string, string | number> = {
+    MerchantID: merchantId,
+    AllPayLogisticsID: opts.allPayLogisticsId,
+  }
+  if (opts.cvsPaymentNo) params.CVSPaymentNo = opts.cvsPaymentNo
+  if (opts.cvsValidationNo) params.CVSValidationNo = opts.cvsValidationNo
+
+  const CheckMacValue = buildCheckMacValue(params, hashKey, hashIv)
+
+  return {
+    url,
+    fields: {
+      ...Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)])),
+      CheckMacValue,
+    },
+  }
+}
