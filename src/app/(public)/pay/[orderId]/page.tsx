@@ -25,7 +25,10 @@ export default async function PaymentRelayPage({ params }: Props) {
 
   if (!order) notFound()
 
-  const ecpayConfigured = Boolean(process.env.ECPAY_MERCHANT_ID)
+  // In sandbox mode we always show the form; in production check creds
+  const ecpayConfigured =
+    process.env.ECPAY_MODE !== 'production' ||
+    Boolean(process.env.ECPAY_MERCHANT_ID && process.env.ECPAY_HASH_KEY && process.env.ECPAY_HASH_IV)
 
   return (
     <div className="mx-auto max-w-xl px-4 sm:px-6 py-16">
@@ -63,17 +66,16 @@ export default async function PaymentRelayPage({ params }: Props) {
       ) : ecpayConfigured ? (
         <section className="bg-cream-100 border border-line rounded-lg p-6">
           <p className="text-sm leading-relaxed mb-5">
-            點擊下方按鈕將跳轉至綠界金流頁面完成付款。
-            付款方式包含信用卡、ATM 轉帳、超商代碼、超商條碼。
+            選擇付款方式，將跳轉至綠界完成付款。
           </p>
-          <form action={`/api/ecpay/create/${order.id}`} method="POST">
-            <button
-              type="submit"
-              className="font-jp w-full bg-ink text-cream py-3 hover:bg-accent transition-colors tracking-wider"
-            >
-              お支払いへ進む · 前往付款
-            </button>
-          </form>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <PayMethodButton orderId={order.id} method="ALL" label="顯示全部" emoji="💳" />
+            <PayMethodButton orderId={order.id} method="Credit" label="信用卡" emoji="💳" />
+            <PayMethodButton orderId={order.id} method="ApplePay" label="Apple Pay" emoji="🍎" />
+            <PayMethodButton orderId={order.id} method="TWQR" label="LINE Pay" emoji="💚" />
+            <PayMethodButton orderId={order.id} method="ATM" label="ATM 轉帳" emoji="🏦" />
+            <PayMethodButton orderId={order.id} method="CVS" label="超商代碼" emoji="🏪" />
+          </div>
           <p className="text-xs text-ink-soft mt-4 leading-relaxed">
             付款連結每次點擊都會重新產生，無有效期問題。
             如果跳轉失敗，請重新點擊或聯繫 LINE 客服。
@@ -98,6 +100,31 @@ export default async function PaymentRelayPage({ params }: Props) {
         </Link>
       </p>
     </div>
+  )
+}
+
+function PayMethodButton({
+  orderId,
+  method,
+  label,
+  emoji,
+}: {
+  orderId: string
+  method: string
+  label: string
+  emoji: string
+}) {
+  return (
+    <form action={`/api/ecpay/create/${orderId}`} method="POST">
+      <input type="hidden" name="method" value={method} />
+      <button
+        type="submit"
+        className="w-full text-sm border border-line bg-white hover:border-ink hover:bg-cream-50 transition-colors px-3 py-2.5 rounded-md flex flex-col items-center gap-1"
+      >
+        <span className="text-lg">{emoji}</span>
+        <span className="font-jp tracking-wider text-xs">{label}</span>
+      </button>
+    </form>
   )
 }
 

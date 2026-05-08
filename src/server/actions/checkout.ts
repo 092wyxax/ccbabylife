@@ -307,5 +307,7 @@ export async function checkoutAction(
 
   revalidatePath('/admin/orders')
   revalidatePath('/admin/customers')
-  redirect(`/checkout/success?orderId=${orderId}`)
+  // Redirect to the payment relay page; if ECPay isn't configured the relay
+  // page shows a "manual payment" notice instead.
+  redirect(`/pay/${orderId}`)
 }
