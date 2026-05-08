@@ -5,7 +5,7 @@ import { useActionState, useEffect, useState } from 'react'
 import { useCartStore } from '@/stores/cartStore'
 import { imageUrl } from '@/lib/image'
 import { formatTwd } from '@/lib/format'
-import { shippingFee } from '@/lib/pricing'
+import { shippingFee, FREE_SHIP_THRESHOLD_TWD } from '@/lib/pricing'
 import { checkoutAction, type CheckoutState } from '@/server/actions/checkout'
 import {
   applyCouponAction,
@@ -14,6 +14,7 @@ import {
 } from '@/server/actions/active-coupon'
 import type { CustomerAddress } from '@/db/schema/customer_addresses'
 import { ShippingMethodPicker } from './ShippingMethodPicker'
+import { AddressLinkedFields } from './AddressLinkedFields'
 
 const initial: CheckoutState = {}
 
@@ -122,7 +123,8 @@ export function CheckoutForm({ prefill, savedAddresses, activeCouponCode }: Prop
         : activeCouponCode
   const couponDiscount = couponState.ok ? (couponState.discount ?? 0) : 0
   const couponFreeShipping = couponState.ok && Boolean(couponState.freeShipping)
-  const finalShip = couponFreeShipping ? 0 : computedShip
+  const reachedFreeShipThreshold = t.subtotal >= FREE_SHIP_THRESHOLD_TWD
+  const finalShip = couponFreeShipping || reachedFreeShipThreshold ? 0 : computedShip
   const total = Math.max(0, t.subtotal + finalShip - couponDiscount)
 
   const pickAddress = (id: string | null) => {
@@ -240,26 +242,13 @@ export function CheckoutForm({ prefill, savedAddresses, activeCouponCode }: Prop
               </p>
             </div>
           )}
-          <Row>
-            <Field
-              label="縣市"
-              name="recipientCity"
-              required
-              placeholder="例：台北市"
-              error={errs.recipientCity}
-              value={fields.recipientCity}
-              onChange={(v) => setFields((f) => ({ ...f, recipientCity: v }))}
-            />
-            <Field
-              label="郵遞區號"
-              name="recipientZip"
-              required
-              placeholder="例：106"
-              error={errs.recipientZip}
-              value={fields.recipientZip}
-              onChange={(v) => setFields((f) => ({ ...f, recipientZip: v }))}
-            />
-          </Row>
+          <AddressLinkedFields
+            initialCity={fields.recipientCity}
+            initialZip={fields.recipientZip}
+            cityError={errs.recipientCity}
+            zipError={errs.recipientZip}
+            syncKey={selectedAddressId ?? 'manual'}
+          />
           <Field
             label="詳細地址"
             name="recipientAddress"
@@ -327,12 +316,12 @@ export function CheckoutForm({ prefill, savedAddresses, activeCouponCode }: Prop
             <span>
               {overweight ? (
                 '個案'
-              ) : couponFreeShipping ? (
+              ) : couponFreeShipping || reachedFreeShipThreshold ? (
                 <>
                   <span className="line-through text-ink-soft mr-1">
                     {formatTwd(computedShip)}
                   </span>
-                  免運
+                  <span className="text-success">免運 🎉</span>
                 </>
               ) : (
                 formatTwd(computedShip)

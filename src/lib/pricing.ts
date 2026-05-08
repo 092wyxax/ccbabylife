@@ -26,6 +26,9 @@ export function profitRate(category: PriceCategory): number {
   return PRICE_CATEGORIES.find((c) => c.value === category)?.rate ?? 0.30
 }
 
+/** Cart subtotal at or above this triggers free shipping (default tier). */
+export const FREE_SHIP_THRESHOLD_TWD = 2000
+
 export function shippingFee(weightG: number, mode: 'sea' | 'air' = 'sea'): number {
   if (weightG < 500) return mode === 'sea' ? 80 : 150
   if (weightG < 1000) return mode === 'sea' ? 130 : 260

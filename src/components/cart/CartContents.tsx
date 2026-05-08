@@ -6,6 +6,7 @@ import { useCartStore } from '@/stores/cartStore'
 import { imageUrl } from '@/lib/image'
 import { formatTwd } from '@/lib/format'
 import { GiftProgress } from './GiftProgress'
+import { FreeShipProgress } from './FreeShipProgress'
 
 export function CartContents() {
   const [mounted, setMounted] = useState(false)
@@ -123,6 +124,7 @@ export function CartContents() {
           </div>
         </div>
 
+        <FreeShipProgress />
         <GiftProgress />
 
         <p className="text-xs text-ink-soft mb-4 leading-relaxed">

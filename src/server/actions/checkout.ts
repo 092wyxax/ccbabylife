@@ -11,7 +11,7 @@ import { customerCoupons } from '@/db/schema/customer_coupons'
 import { cartSnapshots } from '@/db/schema/cart_snapshots'
 import { findEligibleGifts } from '@/server/services/PromotionService'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
-import { shippingFee } from '@/lib/pricing'
+import { shippingFee, FREE_SHIP_THRESHOLD_TWD } from '@/lib/pricing'
 import { findCustomerByReferralCode } from '@/server/services/ReferralService'
 import { REFERRAL_COOKIE } from '@/lib/referral'
 import {
@@ -152,7 +152,9 @@ export async function checkoutAction(
     }
   }
 
-  const computedShip = couponFreeShipping ? 0 : computedShipBase
+  const reachedFreeShipThreshold = subtotal >= FREE_SHIP_THRESHOLD_TWD
+  const computedShip =
+    couponFreeShipping || reachedFreeShipThreshold ? 0 : computedShipBase
   const total = Math.max(0, subtotal + computedShip - couponDiscount)
 
   // Resolve referral cookie → referredBy customer
