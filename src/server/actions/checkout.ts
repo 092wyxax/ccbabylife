@@ -44,6 +44,10 @@ const checkoutSchema = z.object({
   babyBirthDate: z.string().optional().or(z.literal('')),
   cartJson: z.string().min(2),
   couponCode: z.string().optional(),
+  shippingMethod: z.enum(['home', 'cvs_711', 'cvs_family', 'cvs_hilife', 'cvs_okmart']).default('home'),
+  cvsStoreId: z.string().optional(),
+  cvsStoreName: z.string().optional(),
+  cvsStoreAddress: z.string().optional(),
 })
 
 export type CheckoutState = { error?: string; fieldErrors?: Record<string, string> }
@@ -68,6 +72,10 @@ export async function checkoutAction(
     recipientZip: formData.get('recipientZip'),
     recipientAddress: formData.get('recipientAddress'),
     babyBirthDate: (formData.get('babyBirthDate') as string) || '',
+    shippingMethod: (formData.get('shippingMethod') as string) || 'home',
+    cvsStoreId: (formData.get('cvsStoreId') as string) || undefined,
+    cvsStoreName: (formData.get('cvsStoreName') as string) || undefined,
+    cvsStoreAddress: (formData.get('cvsStoreAddress') as string) || undefined,
     cartJson: formData.get('cartJson'),
     couponCode: (formData.get('couponCode') as string) || undefined,
   })
@@ -239,6 +247,10 @@ export async function checkoutAction(
           },
           recipientLineId: parsed.data.recipientLineId || null,
           recipientEmail: parsed.data.recipientEmail,
+          shippingMethod: parsed.data.shippingMethod,
+          cvsStoreId: parsed.data.cvsStoreId ?? null,
+          cvsStoreName: parsed.data.cvsStoreName ?? null,
+          cvsStoreAddress: parsed.data.cvsStoreAddress ?? null,
           babyAgeMonths,
           isPreorder: lineItems.some((l) => l.product.stockType === 'preorder'),
           notes: ship < 0 ? '> 5kg：運費需個案估算，已暫設 0，待人工確認' : null,

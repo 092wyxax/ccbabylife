@@ -53,6 +53,14 @@ export const orders = pgTable(
     trackingNumber: text('tracking_number'),
     shippingProvider: text('shipping_provider'),
     shippedAt: timestamp('shipped_at', { withTimezone: true }),
+    /** 'home' (宅配) | 'cvs_711' (7-11) | 'cvs_family' (全家) | 'cvs_hilife' (萊爾富) | 'cvs_okmart' (OK) */
+    shippingMethod: text('shipping_method'),
+    /** ECPay store id when CVS pickup */
+    cvsStoreId: text('cvs_store_id'),
+    cvsStoreName: text('cvs_store_name'),
+    cvsStoreAddress: text('cvs_store_address'),
+    /** ECPay logistics order number after we create it (separate from payment trade no) */
+    ecpayLogisticsId: text('ecpay_logistics_id'),
     isPreorder: boolean('is_preorder').notNull().default(true),
     expectedDelivery: date('expected_delivery'),
     cutoffDate: date('cutoff_date'),

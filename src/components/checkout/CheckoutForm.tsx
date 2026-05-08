@@ -13,6 +13,7 @@ import {
   type ApplyCouponState,
 } from '@/server/actions/active-coupon'
 import type { CustomerAddress } from '@/db/schema/customer_addresses'
+import { ShippingMethodPicker } from './ShippingMethodPicker'
 
 const initial: CheckoutState = {}
 
@@ -186,6 +187,8 @@ export function CheckoutForm({ prefill, savedAddresses, activeCouponCode }: Prop
             defaultValue={prefill.lineUserId}
           />
         </Section>
+
+        <ShippingMethodPicker />
 
         <Section title="お届け先 · 寄送地址">
           {savedAddresses.length > 0 && (
