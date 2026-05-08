@@ -3,6 +3,7 @@ import {
   dispatchQueuedPushes,
   requeueOldFailures,
 } from '@/server/services/NotificationService'
+import { dispatchCutoffReminders } from '@/server/services/CutoffReminder'
 
 /**
  * Cron entry: dispatch all queued LINE pushes.
@@ -24,10 +25,22 @@ export async function GET(request: NextRequest) {
     olderThanMs: 60 * 60 * 1000,
     limit: 50,
   })
+
+  // Cutoff reminder fires self-only when within 6h of next Sunday 23:59 TPE.
+  // Cron runs daily at 21:00 TPE → on Sundays we're 2h59m from cutoff = inside window.
+  let cutoffPushed = 0
+  try {
+    const r = await dispatchCutoffReminders()
+    cutoffPushed = r.pushed
+  } catch (e) {
+    console.error('[dispatch-pushes] cutoff reminder failed:', e)
+  }
+
   const result = await dispatchQueuedPushes({ limit: 200 })
 
   return NextResponse.json({
     requeued,
+    cutoffPushed,
     ...result,
     timestamp: new Date().toISOString(),
   })

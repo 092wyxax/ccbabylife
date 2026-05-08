@@ -10,6 +10,7 @@ import {
   issueAutoCoupons,
 } from '@/server/services/AutoCouponService'
 import { dispatchCartRecoveryPushes } from '@/server/services/CartRecovery'
+import { alertLowStock } from '@/server/services/LowStockAlert'
 
 /**
  * Vercel Cron entry: runs daily and finds customers whose baby crosses
@@ -125,6 +126,16 @@ export async function GET(request: NextRequest) {
     console.error('[baby-age-push] cart recovery failed:', e)
   }
 
+  // Low-stock alert (multicast to admin LINE userIds)
+  let lowStockAlerted = 0
+  try {
+    const r = await alertLowStock()
+    lowStockAlerted = r.matched
+  } catch (e) {
+    console.error('[baby-age-push] low stock alert failed:', e)
+  }
+
+
   return NextResponse.json({
     processedCustomers: due.length,
     queuedPushes: queued,
@@ -132,6 +143,7 @@ export async function GET(request: NextRequest) {
     birthdayIssued,
     recoveryMatched,
     recoveryPushed,
+    lowStockAlerted,
     timestamp: now.toISOString(),
   })
 }

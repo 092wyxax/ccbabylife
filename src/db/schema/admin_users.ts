@@ -18,6 +18,8 @@ export const adminUsers = pgTable(
     role: text('role', { enum: adminRoleEnum }).notNull(),
     status: text('status', { enum: adminStatusEnum }).notNull().default('active'),
     mustChangePassword: boolean('must_change_password').notNull().default(false),
+    /** Optional LINE userId for receiving low-stock / cutoff alerts */
+    lineUserId: text('line_user_id'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },

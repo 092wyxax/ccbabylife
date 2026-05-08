@@ -1,0 +1,1 @@
+ALTER TABLE "admin_users" ADD COLUMN "line_user_id" text;

@@ -197,6 +197,13 @@
       "when": 1778252408209,
       "tag": "0027_greedy_grim_reaper",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1778259701084,
+      "tag": "0028_wooden_blob",
+      "breakpoints": true
     }
   ]
 }

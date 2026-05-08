@@ -12,6 +12,7 @@ import {
   dismissActiveCouponAction,
   type ApplyCouponState,
 } from '@/server/actions/active-coupon'
+import { setGuestEmailAction } from '@/server/actions/cart-snapshot'
 import type { CustomerAddress } from '@/db/schema/customer_addresses'
 import { ShippingMethodPicker } from './ShippingMethodPicker'
 import { AddressLinkedFields } from './AddressLinkedFields'
@@ -181,6 +182,12 @@ export function CheckoutForm({ prefill, savedAddresses, activeCouponCode }: Prop
             hint="訂單通知 + Email 備援會寄到這"
             error={errs.recipientEmail}
             defaultValue={prefill.email}
+            onBlur={(v) => {
+              if (v && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+                // Best-effort guest cookie — supports cart abandonment recovery
+                setGuestEmailAction(v).catch(() => {})
+              }
+            }}
           />
           <Field
             label="LINE ID（選填）"
@@ -497,6 +504,7 @@ interface FieldProps {
   value?: string
   defaultValue?: string
   onChange?: (v: string) => void
+  onBlur?: (v: string) => void
 }
 
 function Field({
@@ -510,6 +518,7 @@ function Field({
   value,
   defaultValue,
   onChange,
+  onBlur,
 }: FieldProps) {
   return (
     <div>
@@ -526,6 +535,7 @@ function Field({
         value={value}
         defaultValue={defaultValue}
         onChange={onChange ? (e) => onChange(e.target.value) : undefined}
+        onBlur={onBlur ? (e) => onBlur(e.target.value) : undefined}
         className="w-full border border-line rounded-md px-3 py-2 focus:outline-none focus:border-ink"
       />
       {hint && !error && <p className="text-xs text-ink-soft mt-1">{hint}</p>}
