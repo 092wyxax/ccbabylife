@@ -18,6 +18,7 @@ export const customers = pgTable(
     referredBy: uuid('referred_by'),
     totalSpent: integer('total_spent').notNull().default(0),
     totalOrders: integer('total_orders').notNull().default(0),
+    tierId: uuid('tier_id'),
     tags: text('tags').array(),
     isBlacklisted: boolean('is_blacklisted').notNull().default(false),
     notificationPrefs: jsonb('notification_prefs')

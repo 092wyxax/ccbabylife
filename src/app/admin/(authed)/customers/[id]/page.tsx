@@ -4,6 +4,7 @@ import {
   getCustomerDetail,
   babyAgeMonths,
 } from '@/server/services/CustomerService'
+import { getTierById } from '@/server/services/MemberTierService'
 import { STATUS_LABEL, statusBadgeClass } from '@/lib/order-progress'
 import { formatTwd } from '@/lib/format'
 import {
@@ -24,6 +25,7 @@ export default async function AdminCustomerDetailPage({ params }: Props) {
 
   const { customer, orders, totalSpent } = detail
   const ageM = babyAgeMonths(customer.babyBirthDate)
+  const tier = customer.tierId ? await getTierById(customer.tierId) : null
 
   return (
     <div className="p-8 max-w-5xl">
@@ -121,6 +123,14 @@ export default async function AdminCustomerDetailPage({ params }: Props) {
               金額
             </h2>
             <Row label="LTV（已完成訂單）" value={formatTwd(totalSpent)} bold />
+            <Row
+              label="會員等級"
+              value={
+                tier
+                  ? `${tier.name}${tier.discountBp > 0 ? ` (${(tier.discountBp / 100).toFixed(tier.discountBp % 100 === 0 ? 0 : 1)}%)` : ''}`
+                  : '—'
+              }
+            />
           </section>
 
           <section className="bg-white border border-line rounded-lg p-5">

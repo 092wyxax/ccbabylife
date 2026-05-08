@@ -7,6 +7,7 @@ import { SocialLoginButtons } from '@/components/account/SocialLoginButtons'
 import { getCustomerSession } from '@/lib/customer-session'
 import { logoutAccountAction } from '@/server/actions/account'
 import { ensureReferralCode } from '@/server/services/ReferralService'
+import { getTierById } from '@/server/services/MemberTierService'
 import { STATUS_LABEL, statusBadgeClass } from '@/lib/order-progress'
 import { formatTwd } from '@/lib/format'
 
@@ -108,6 +109,7 @@ async function DashboardView({ customerId }: { customerId: string }) {
   ])
 
   const adminRole = adminMatch[0]?.role ?? null
+  const tier = customer.tierId ? await getTierById(customer.tierId) : null
 
   const totalOrders = allOrders.length
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
@@ -133,6 +135,41 @@ async function DashboardView({ customerId }: { customerId: string }) {
           </button>
         </form>
       </header>
+
+      {tier && (
+        <div
+          className="mb-6 rounded-lg p-5 flex items-center justify-between border-2"
+          style={{
+            backgroundColor: tier.color ? `${tier.color}15` : '#fffbe6',
+            borderColor: tier.color ?? '#e5d27e',
+          }}
+        >
+          <div>
+            <p
+              className="text-xs uppercase tracking-widest mb-1 opacity-70"
+              style={tier.color ? { color: tier.color } : undefined}
+            >
+              {tier.nameJp ?? 'MEMBER TIER'}
+            </p>
+            <p className="font-serif text-xl">
+              {tier.name}
+              {tier.discountBp > 0 && (
+                <span className="ml-2 text-sm text-ink-soft">
+                  · 全店 {(tier.discountBp / 100).toFixed(tier.discountBp % 100 === 0 ? 0 : 1)}% 折扣
+                </span>
+              )}
+            </p>
+            <p className="text-xs text-ink-soft mt-1">
+              累積消費 {formatTwd(customer.totalSpent)}
+            </p>
+          </div>
+          {tier.perks && (
+            <div className="hidden sm:block text-xs text-ink-soft whitespace-pre-line max-w-xs text-right leading-relaxed">
+              {tier.perks}
+            </div>
+          )}
+        </div>
+      )}
 
       {adminRole && (
         <div className="mb-8 bg-ink text-cream rounded-lg p-5 flex items-center justify-between">

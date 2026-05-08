@@ -133,6 +133,29 @@ export async function changeStatus(
     )
   }
 
+  // Member tier: when an order first reaches 'paid', accumulate to totalSpent
+  // and recompute tier. Other transitions don't move totalSpent.
+  if (to === 'paid' && order.status !== 'paid') {
+    const customerId = order.customerId
+    const orderTotal = order.total
+    void (async () => {
+      try {
+        await db
+          .update(customers)
+          .set({
+            totalSpent: sql`${customers.totalSpent} + ${orderTotal}`,
+            totalOrders: sql`${customers.totalOrders} + 1`,
+            updatedAt: new Date(),
+          })
+          .where(eq(customers.id, customerId))
+        const { recalcCustomerTier } = await import('./MemberTierService')
+        await recalcCustomerTier(customerId)
+      } catch (e) {
+        console.error('[changeStatus] tier recalc failed:', e)
+      }
+    })()
+  }
+
   return { from: order.status, to }
 }
 

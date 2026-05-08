@@ -141,6 +141,13 @@
       "when": 1778164758812,
       "tag": "0019_glossy_lockjaw",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1778245084007,
+      "tag": "0020_fluffy_chimera",
+      "breakpoints": true
     }
   ]
 }
