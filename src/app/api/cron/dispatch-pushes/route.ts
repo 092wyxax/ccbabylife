@@ -4,6 +4,7 @@ import {
   requeueOldFailures,
 } from '@/server/services/NotificationService'
 import { dispatchCutoffReminders } from '@/server/services/CutoffReminder'
+import { processDueSubscriptions } from '@/server/services/SubscriptionService'
 
 /**
  * Cron entry: dispatch all queued LINE pushes.
@@ -36,11 +37,21 @@ export async function GET(request: NextRequest) {
     console.error('[dispatch-pushes] cutoff reminder failed:', e)
   }
 
+  // Process due subscriptions (fires only when nextRunAt has passed)
+  let subsOrdered = 0
+  try {
+    const r = await processDueSubscriptions()
+    subsOrdered = r.ordered
+  } catch (e) {
+    console.error('[dispatch-pushes] subscription processing failed:', e)
+  }
+
   const result = await dispatchQueuedPushes({ limit: 200 })
 
   return NextResponse.json({
     requeued,
     cutoffPushed,
+    subsOrdered,
     ...result,
     timestamp: new Date().toISOString(),
   })

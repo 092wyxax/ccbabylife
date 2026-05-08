@@ -14,6 +14,7 @@ import { StickyMobileCTA } from '@/components/shop/StickyMobileCTA'
 import { WishlistButton } from '@/components/shop/WishlistButton'
 import { ProductGrid } from '@/components/shop/ProductGrid'
 import { ProductTrustStrip } from '@/components/shop/ProductTrustStrip'
+import { SubscribeButton } from '@/components/shop/SubscribeButton'
 import {
   RecentlyViewedRecorder,
   RecentlyViewedStrip,
@@ -187,6 +188,14 @@ export default async function ProductDetailPage({ params }: Props) {
                 <p className="text-sm font-medium mb-2">補貨通知</p>
                 <RestockForm productId={product.id} />
               </div>
+            )}
+
+            {/* Subscribe-to-recurring (only for in-stock items, hidden on out-of-stock) */}
+            {product.stockType === 'in_stock' && inStock && (
+              <SubscribeButton
+                productId={product.id}
+                isLoggedIn={!!customerSession}
+              />
             )}
           </div>
 

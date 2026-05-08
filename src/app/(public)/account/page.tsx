@@ -8,7 +8,7 @@ import { getCustomerSession } from '@/lib/customer-session'
 import { logoutAccountAction } from '@/server/actions/account'
 import { ensureReferralCode } from '@/server/services/ReferralService'
 import { getTierById } from '@/server/services/MemberTierService'
-import { ShoppingBag, MapPin, Ticket, Heart, Settings, Share2 } from 'lucide-react'
+import { ShoppingBag, MapPin, Ticket, Heart, Settings, Share2, Repeat } from 'lucide-react'
 import {
   TierBronzeIllustration,
   TierSilverIllustration,
@@ -241,6 +241,13 @@ async function DashboardView({ customerId }: { customerId: string }) {
           value="清單"
           desc="加入收藏的商品"
           icon={<Heart size={28} strokeWidth={1.25} />}
+        />
+        <DashCard
+          href="/account/subscriptions"
+          title="定期便 · 訂閱配送"
+          value="管理"
+          desc="耗品自動配送（可暫停）"
+          icon={<Repeat size={28} strokeWidth={1.25} />}
         />
         <DashCard
           href="/account/settings"
