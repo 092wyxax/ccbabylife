@@ -5,6 +5,7 @@ import { listPublishedPosts } from '@/server/services/JournalService'
 import { ProductGrid } from '@/components/shop/ProductGrid'
 import { NewsletterForm } from '@/components/shared/NewsletterForm'
 import { SectionDivider } from '@/components/shared/SectionDivider'
+import { CategoryShowcase } from '@/components/shared/CategoryShowcase'
 import { imageUrl } from '@/lib/image'
 
 const KANJI_NUM = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
@@ -108,13 +109,17 @@ export default async function HomePage() {
       </section>
 
       <section className="border-b border-line">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-12">
-          <header className="flex items-baseline justify-between mb-8">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-16">
+          {/* Illustrated category showcase (4 main DB categories) */}
+          <CategoryShowcase title="依品項分類" />
+
+          {/* Below: secondary quick links (special collections + journal) */}
+          <header className="flex items-baseline justify-between mt-16 mb-6">
             <div>
               <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-1">
                 BROWSE · えらぶ
               </p>
-              <h2 className="font-serif text-xl sm:text-2xl tracking-wide">依需求快速逛</h2>
+              <h2 className="font-serif text-xl sm:text-2xl tracking-wide">特色精選</h2>
             </div>
             <Link href="/shop" className="text-sm text-ink-soft hover:text-accent">
               全部 →
