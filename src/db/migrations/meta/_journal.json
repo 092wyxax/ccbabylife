@@ -183,6 +183,13 @@
       "when": 1778251863917,
       "tag": "0025_polite_magma",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1778252270686,
+      "tag": "0026_foamy_robin_chapel",
+      "breakpoints": true
     }
   ]
 }

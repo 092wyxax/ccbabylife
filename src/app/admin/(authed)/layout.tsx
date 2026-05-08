@@ -15,6 +15,7 @@ const NAV: NavGroup[] = [
     label: '訂單與客戶',
     items: [
       { href: '/admin/orders', label: '訂單', roles: ['owner', 'manager', 'ops', 'buyer'] },
+      { href: '/admin/returns', label: '退換貨', roles: ['owner', 'manager', 'ops'] },
       { href: '/admin/invoices', label: '電子發票', roles: ['owner', 'manager', 'ops'] },
       { href: '/admin/customers', label: '客戶', roles: ['owner', 'manager', 'ops'] },
       { href: '/admin/member-tiers', label: '會員分級', roles: ['owner', 'manager'] },

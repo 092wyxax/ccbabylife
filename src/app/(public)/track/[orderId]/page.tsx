@@ -4,6 +4,10 @@ import { getOrderForTracking } from '@/server/services/OrderService'
 import { OrderProgressBar } from '@/components/order/OrderProgressBar'
 import { STATUS_LABEL, statusBadgeClass } from '@/lib/order-progress'
 import { formatTwd } from '@/lib/format'
+import {
+  canRequestReturn,
+  listReturnsForOrder,
+} from '@/server/services/ReturnService'
 
 interface Props {
   params: Promise<{ orderId: string }>
@@ -19,6 +23,8 @@ export default async function TrackPage({ params }: Props) {
   if (!detail) notFound()
 
   const { order, items } = detail
+  const existingReturns = await listReturnsForOrder(order.id)
+  const canReturn = canRequestReturn(order) && existingReturns.length === 0
 
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 py-12">
@@ -101,9 +107,44 @@ export default async function TrackPage({ params }: Props) {
           或查看 <Link href="/faq" className="underline hover:text-accent">常見問題</Link>。
         </p>
       </section>
+
+      {existingReturns.length > 0 && (
+        <section className="mt-4 bg-warning/10 border border-warning/40 rounded-lg p-4 text-sm">
+          <p className="font-medium mb-1">退換貨申請紀錄</p>
+          {existingReturns.map((r) => (
+            <p key={r.id} className="text-xs text-ink-soft">
+              <span className="font-mono">{r.requestNumber}</span> ·{' '}
+              {RETURN_STATUS_LABEL[r.status as keyof typeof RETURN_STATUS_LABEL] ?? r.status} ·{' '}
+              {new Date(r.createdAt).toLocaleDateString('zh-TW')}
+            </p>
+          ))}
+        </section>
+      )}
+
+      {/* 隱蔽的退換貨入口：只有訂單已出貨/到貨/完成才顯示，灰字小字 */}
+      {canReturn && (
+        <p className="mt-8 text-center text-xs text-ink-soft">
+          商品有問題？{' '}
+          <Link
+            href={`/track/${order.id}/return`}
+            className="underline hover:text-accent"
+          >
+            申請退換貨
+          </Link>
+        </p>
+      )}
     </div>
   )
 }
+
+const RETURN_STATUS_LABEL = {
+  pending: '審核中',
+  approved: '已同意 · 等待寄回',
+  rejected: '已拒絕',
+  received: '已收到退回',
+  refunded: '已完成退款 / 換貨',
+  cancelled: '已取消',
+} as const
 
 function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
   return (
