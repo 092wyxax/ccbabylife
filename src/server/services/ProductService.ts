@@ -26,6 +26,7 @@ export async function listActiveProducts(opts?: {
   limit?: number
   categorySlug?: string
   stockType?: 'preorder' | 'in_stock'
+  q?: string
 }): Promise<ProductListItem[]> {
   const limit = opts?.limit ?? 60
 
@@ -51,6 +52,19 @@ export async function listActiveProducts(opts?: {
 
   if (opts?.stockType) {
     conditions.push(eq(products.stockType, opts.stockType))
+  }
+
+  // Keyword search across product name, jp name, brand name, category
+  const q = opts?.q?.trim()
+  if (q) {
+    const like = `%${q}%`
+    conditions.push(
+      or(
+        ilike(products.nameZh, like),
+        ilike(products.nameJp, like),
+        ilike(products.description, like)
+      )!
+    )
   }
 
   const rows = await db

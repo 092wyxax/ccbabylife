@@ -14,6 +14,7 @@ interface Props {
   searchParams: Promise<{
     category?: string
     stock?: string
+    q?: string
   }>
 }
 
@@ -29,6 +30,7 @@ export default async function ShopPage({ searchParams }: Props) {
       limit: 60,
       categorySlug: params.category,
       stockType,
+      q: params.q,
     }),
     listAllCategories(),
   ])
@@ -39,11 +41,51 @@ export default async function ShopPage({ searchParams }: Props) {
         <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-2">
           SHOP · 全商品一覧
         </p>
-        <h1 className="font-serif text-3xl sm:text-4xl tracking-wide">所有選物</h1>
+        <h1 className="font-serif text-3xl sm:text-4xl tracking-wide">
+          {params.q ? `「${params.q}」搜尋結果` : '所有選物'}
+        </h1>
         <p className="text-ink-soft mt-2 text-sm">
-          現在 <span className="font-jp">{items.length} 點</span> · 予約制 · 毎週日 23:59 締切
+          現在 <span className="font-jp">{items.length} 點</span>
+          {!params.q && ' · 予約制 · 毎週日 23:59 締切'}
         </p>
       </header>
+
+      <form action="/shop" method="get" className="mb-6">
+        {params.category && <input type="hidden" name="category" value={params.category} />}
+        {stockType && <input type="hidden" name="stock" value={stockType} />}
+        <div className="relative max-w-md">
+          <input
+            type="search"
+            name="q"
+            defaultValue={params.q ?? ''}
+            placeholder="搜尋商品、品牌、關鍵字…"
+            className="w-full pl-10 pr-3 py-2.5 border border-line rounded-md focus:outline-none focus:border-ink text-sm bg-white"
+          />
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-soft pointer-events-none"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+          {params.q && (
+            <Link
+              href={`/shop${params.category ? `?category=${params.category}` : ''}${stockType ? `${params.category ? '&' : '?'}stock=${stockType}` : ''}`}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-ink-soft hover:text-ink px-2 py-1 rounded"
+              aria-label="清除搜尋"
+            >
+              ✕
+            </Link>
+          )}
+        </div>
+      </form>
 
       <div className="mb-10 flex flex-wrap items-center gap-2 pb-4 border-b border-line">
         <FilterChip href="/shop" active={!params.category} label="全部分類" />
