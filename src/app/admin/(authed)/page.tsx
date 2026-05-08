@@ -18,6 +18,8 @@ import {
 } from '@/lib/purchase-status'
 import { formatTwd, formatJpy } from '@/lib/format'
 
+export const dynamic = 'force-dynamic'
+
 const PENDING_SHIP_STATUSES = [
   'paid',
   'sourcing_jp',
