@@ -9,6 +9,7 @@ import { db } from '@/db/client'
 import { customers, orders, orderItems, products } from '@/db/schema'
 import { customerCoupons } from '@/db/schema/customer_coupons'
 import { cartSnapshots } from '@/db/schema/cart_snapshots'
+import { findEligibleGifts } from '@/server/services/PromotionService'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { shippingFee } from '@/lib/pricing'
 import { findCustomerByReferralCode } from '@/server/services/ReferralService'
@@ -256,6 +257,22 @@ export async function checkoutAction(
           lineTotal: l.lineTotal,
         }))
       )
+
+      // Threshold gifts: auto-append as 0-priced order items
+      const eligibleGifts = await findEligibleGifts(subtotal)
+      if (eligibleGifts.length > 0) {
+        await tx.insert(orderItems).values(
+          eligibleGifts.map((g) => ({
+            orgId: DEFAULT_ORG_ID,
+            orderId: order.id,
+            productId: g.product.id,
+            productNameSnapshot: `${g.product.nameZh}（贈品 · ${g.gift.name}）`,
+            priceTwdSnapshot: 0,
+            quantity: g.gift.quantity,
+            lineTotal: 0,
+          }))
+        )
+      }
 
       if (appliedCouponId) {
         // Mark customer_coupons.usedAt if this coupon was granted to this customer

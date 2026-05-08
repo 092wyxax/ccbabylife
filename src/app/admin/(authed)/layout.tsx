@@ -37,6 +37,7 @@ const NAV: NavGroup[] = [
     items: [
       { href: '/admin/journal', label: '部落格', roles: ['owner', 'manager', 'editor'] },
       { href: '/admin/marketing', label: '行銷活動', roles: ['owner', 'manager', 'editor'] },
+      { href: '/admin/promotions', label: '滿額贈 / 加購', roles: ['owner', 'manager', 'editor'] },
       { href: '/admin/newsletter', label: '電子報', roles: ['owner', 'manager', 'editor'] },
       { href: '/admin/experiments', label: 'A/B 測試', roles: ['owner', 'manager'] },
     ],

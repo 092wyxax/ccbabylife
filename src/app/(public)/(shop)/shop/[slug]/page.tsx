@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getProductBySlug } from '@/server/services/ProductService'
+import { listAddonsForMain } from '@/server/services/PromotionService'
+import { AddonsSection } from '@/components/shop/AddonsSection'
 import { formatTwd, formatJpy, formatAgeRange } from '@/lib/format'
 import { imageUrl } from '@/lib/image'
 import { AddToCartButton } from '@/components/shop/AddToCartButton'
@@ -40,10 +42,11 @@ export default async function ProductDetailPage({ params }: Props) {
   const ageLabel = formatAgeRange(product.minAgeMonths, product.maxAgeMonths)
   const isPreorder = product.stockType === 'preorder'
 
-  const [reviews, reviewSummary, customerSession] = await Promise.all([
+  const [reviews, reviewSummary, customerSession, addons] = await Promise.all([
     listApprovedReviewsForProduct(product.id),
     getProductReviewSummary(product.id),
     getCustomerSession(),
+    listAddonsForMain(product.id),
   ])
 
   const inStock =
@@ -180,6 +183,22 @@ export default async function ProductDetailPage({ params }: Props) {
               </div>
             )}
           </div>
+
+          {addons.length > 0 && (
+            <AddonsSection
+              addons={addons.map((a) => ({
+                addonId: a.addon.id,
+                productId: a.product.id,
+                slug: a.product.slug,
+                nameZh: a.product.nameZh,
+                originalPrice: a.product.priceTwd,
+                addonPrice: a.addon.addonPriceTwd,
+                weightG: a.product.weightG,
+                stockType: a.product.stockType,
+                maxAddonQty: a.addon.maxAddonQty,
+              }))}
+            />
+          )}
 
           {product.description && (
             <section className="mt-10 pt-8 border-t border-line">

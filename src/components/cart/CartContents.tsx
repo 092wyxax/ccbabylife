@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { useCartStore } from '@/stores/cartStore'
 import { imageUrl } from '@/lib/image'
 import { formatTwd } from '@/lib/format'
+import { GiftProgress } from './GiftProgress'
 
 export function CartContents() {
   const [mounted, setMounted] = useState(false)
@@ -121,6 +122,8 @@ export function CartContents() {
             <span>{formatTwd(t.subtotal)}</span>
           </div>
         </div>
+
+        <GiftProgress />
 
         <p className="text-xs text-ink-soft mb-4 leading-relaxed">
           結帳時將計算實際國際運費（依重量），並寄送 LINE 通知。預購商品依當週批次出貨，
