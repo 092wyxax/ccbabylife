@@ -2,6 +2,20 @@ import Link from 'next/link'
 import { listTiers } from '@/server/services/MemberTierService'
 import { deleteTierAction } from '@/server/actions/member-tiers'
 import { formatTwd } from '@/lib/format'
+import {
+  TierBronzeIllustration,
+  TierSilverIllustration,
+  TierGoldIllustration,
+} from '@/components/shared/BrandIllustrations'
+
+function pickBadge(name: string, threshold: number) {
+  if (/金|gold/i.test(name)) return TierGoldIllustration
+  if (/銀|silver/i.test(name)) return TierSilverIllustration
+  if (/銅|bronze/i.test(name)) return TierBronzeIllustration
+  if (threshold >= 30000) return TierGoldIllustration
+  if (threshold >= 5000) return TierSilverIllustration
+  return TierBronzeIllustration
+}
 
 export const dynamic = 'force-dynamic'
 
@@ -43,21 +57,22 @@ export default async function MemberTiersPage() {
               </tr>
             </thead>
             <tbody>
-              {tiers.map((t) => (
+              {tiers.map((t) => {
+                const Badge = pickBadge(t.name, t.thresholdTwd)
+                return (
                 <tr key={t.id} className="border-t border-line">
                   <td className="px-4 py-3">
                     <span
-                      className="inline-flex items-center gap-2"
+                      className="inline-flex items-center gap-3"
                       style={t.color ? { color: t.color } : undefined}
                     >
-                      <span
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: t.color ?? '#888' }}
-                      />
-                      {t.name}
-                      {t.nameJp && (
-                        <span className="text-ink-soft text-xs">{t.nameJp}</span>
-                      )}
+                      <Badge className="w-7 h-9 flex-shrink-0" />
+                      <span>
+                        {t.name}
+                        {t.nameJp && (
+                          <span className="text-ink-soft text-xs ml-2">{t.nameJp}</span>
+                        )}
+                      </span>
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">{formatTwd(t.thresholdTwd)}</td>
@@ -90,7 +105,8 @@ export default async function MemberTiersPage() {
                     </form>
                   </td>
                 </tr>
-              ))}
+                )
+              })}
             </tbody>
           </table>
         </div>

@@ -13,6 +13,7 @@ import { ProductGallery } from '@/components/shop/ProductGallery'
 import { StickyMobileCTA } from '@/components/shop/StickyMobileCTA'
 import { WishlistButton } from '@/components/shop/WishlistButton'
 import { ProductGrid } from '@/components/shop/ProductGrid'
+import { ProductTrustStrip } from '@/components/shop/ProductTrustStrip'
 import {
   RecentlyViewedRecorder,
   RecentlyViewedStrip,
@@ -188,6 +189,8 @@ export default async function ProductDetailPage({ params }: Props) {
               </div>
             )}
           </div>
+
+          <ProductTrustStrip />
 
           {addons.length > 0 && (
             <AddonsSection

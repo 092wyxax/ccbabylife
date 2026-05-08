@@ -1,8 +1,21 @@
 import Link from 'next/link'
+import {
+  FaqPreorderIllustration,
+  FaqPaymentIllustration,
+  FaqReturnsIllustration,
+  FaqRegulationsIllustration,
+} from '@/components/shared/BrandIllustrations'
 
 export const metadata = {
   title: '常見問題',
   description: '預購流程、付款、退換貨、法規限制等常見問題',
+}
+
+const SECTION_ICON: Record<string, { Icon: React.ComponentType<{ className?: string }>; tone: string }> = {
+  預購流程: { Icon: FaqPreorderIllustration, tone: 'text-seal' },
+  付款: { Icon: FaqPaymentIllustration, tone: 'text-sage' },
+  退換貨: { Icon: FaqReturnsIllustration, tone: 'text-accent' },
+  法規: { Icon: FaqRegulationsIllustration, tone: 'text-seal' },
 }
 
 const FAQS = [
@@ -82,24 +95,33 @@ export default function FaqPage() {
       <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-3">FAQ · よくある質問</p>
       <h1 className="font-serif text-4xl mb-8 tracking-wide">常見問題</h1>
 
-      <div className="space-y-12">
-        {FAQS.map((sec) => (
-          <section key={sec.section}>
-            <h2 className="font-serif text-xl mb-4 pb-2 border-b border-line tracking-wide">
-              {sec.section}
-            </h2>
-            <div className="space-y-6">
-              {sec.items.map((item) => (
-                <div key={item.q}>
-                  <h3 className="font-medium mb-2">Q. {item.q}</h3>
-                  <p className="text-sm leading-relaxed text-ink-soft whitespace-pre-wrap">
-                    {item.a}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </section>
-        ))}
+      <div className="space-y-14">
+        {FAQS.map((sec) => {
+          const meta = SECTION_ICON[sec.section]
+          const Icon = meta?.Icon
+          return (
+            <section key={sec.section}>
+              <header className="flex items-center gap-3 mb-5 pb-3 border-b border-line">
+                {Icon && (
+                  <span className={meta.tone}>
+                    <Icon className="w-10 h-10" />
+                  </span>
+                )}
+                <h2 className="font-serif text-xl tracking-wide">{sec.section}</h2>
+              </header>
+              <div className="space-y-6">
+                {sec.items.map((item) => (
+                  <div key={item.q}>
+                    <h3 className="font-medium mb-2">Q. {item.q}</h3>
+                    <p className="text-sm leading-relaxed text-ink-soft whitespace-pre-wrap">
+                      {item.a}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )
+        })}
       </div>
 
       <section className="mt-16 p-6 bg-cream-100 border border-line rounded-lg text-sm">

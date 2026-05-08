@@ -9,6 +9,22 @@ import { logoutAccountAction } from '@/server/actions/account'
 import { ensureReferralCode } from '@/server/services/ReferralService'
 import { getTierById } from '@/server/services/MemberTierService'
 import { ShoppingBag, MapPin, Ticket, Heart, Settings, Share2 } from 'lucide-react'
+import {
+  TierBronzeIllustration,
+  TierSilverIllustration,
+  TierGoldIllustration,
+} from '@/components/shared/BrandIllustrations'
+
+function pickTierBadge(tierName: string, threshold: number) {
+  // Match by name keyword first
+  if (/金|gold/i.test(tierName)) return TierGoldIllustration
+  if (/銀|silver/i.test(tierName)) return TierSilverIllustration
+  if (/銅|bronze/i.test(tierName)) return TierBronzeIllustration
+  // Fall back to threshold
+  if (threshold >= 30000) return TierGoldIllustration
+  if (threshold >= 5000) return TierSilverIllustration
+  return TierBronzeIllustration
+}
 import { STATUS_LABEL, statusBadgeClass } from '@/lib/order-progress'
 import { formatTwd } from '@/lib/format'
 
@@ -137,40 +153,46 @@ async function DashboardView({ customerId }: { customerId: string }) {
         </form>
       </header>
 
-      {tier && (
-        <div
-          className="mb-6 rounded-lg p-5 flex items-center justify-between border-2"
-          style={{
-            backgroundColor: tier.color ? `${tier.color}15` : '#fffbe6',
-            borderColor: tier.color ?? '#e5d27e',
-          }}
-        >
-          <div>
-            <p
-              className="text-xs uppercase tracking-widest mb-1 opacity-70"
-              style={tier.color ? { color: tier.color } : undefined}
-            >
-              {tier.nameJp ?? 'MEMBER TIER'}
-            </p>
-            <p className="font-serif text-xl">
-              {tier.name}
-              {tier.discountBp > 0 && (
-                <span className="ml-2 text-sm text-ink-soft">
-                  · 全店 {(tier.discountBp / 100).toFixed(tier.discountBp % 100 === 0 ? 0 : 1)}% 折扣
-                </span>
-              )}
-            </p>
-            <p className="text-xs text-ink-soft mt-1">
-              累積消費 {formatTwd(customer.totalSpent)}
-            </p>
-          </div>
-          {tier.perks && (
-            <div className="hidden sm:block text-xs text-ink-soft whitespace-pre-line max-w-xs text-right leading-relaxed">
-              {tier.perks}
+      {tier && (() => {
+        const TierBadge = pickTierBadge(tier.name, tier.thresholdTwd)
+        return (
+          <div
+            className="mb-6 rounded-lg p-5 flex items-center gap-5 border-2"
+            style={{
+              backgroundColor: tier.color ? `${tier.color}15` : '#fffbe6',
+              borderColor: tier.color ?? '#e5d27e',
+            }}
+          >
+            <div className="flex-shrink-0">
+              <TierBadge className="w-14 h-18" />
             </div>
-          )}
-        </div>
-      )}
+            <div className="flex-1 min-w-0">
+              <p
+                className="text-xs uppercase tracking-widest mb-1 opacity-70"
+                style={tier.color ? { color: tier.color } : undefined}
+              >
+                {tier.nameJp ?? 'MEMBER TIER'}
+              </p>
+              <p className="font-serif text-xl">
+                {tier.name}
+                {tier.discountBp > 0 && (
+                  <span className="ml-2 text-sm text-ink-soft">
+                    · 全店 {(tier.discountBp / 100).toFixed(tier.discountBp % 100 === 0 ? 0 : 1)}% 折扣
+                  </span>
+                )}
+              </p>
+              <p className="text-xs text-ink-soft mt-1">
+                累積消費 {formatTwd(customer.totalSpent)}
+              </p>
+            </div>
+            {tier.perks && (
+              <div className="hidden sm:block text-xs text-ink-soft whitespace-pre-line max-w-xs text-right leading-relaxed">
+                {tier.perks}
+              </div>
+            )}
+          </div>
+        )
+      })()}
 
       {adminRole && (
         <div className="mb-8 bg-ink text-cream rounded-lg p-5 flex items-center justify-between">

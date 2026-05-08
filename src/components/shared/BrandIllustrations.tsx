@@ -542,6 +542,154 @@ export function AboutSourcingIllustration({ className, fill }: Props) {
   )
 }
 
+/* ──────────────────────────────────────────────────────────
+   FAQ section icons (48×48)
+   ────────────────────────────────────────────────────────── */
+function faqSvg(className?: string) {
+  return {
+    viewBox: '0 0 48 48',
+    fill: 'none',
+    xmlns: 'http://www.w3.org/2000/svg',
+    className: className ?? 'w-10 h-10',
+    'aria-hidden': true as const,
+  }
+}
+
+export function FaqPreorderIllustration({ className, fill }: Props) {
+  return (
+    <svg {...faqSvg(className)}>
+      <circle cx="24" cy="24" r="18" fill={fill ?? '#e8d9b9'} fillOpacity="0.4" />
+      <g {...STROKE}>
+        <rect x="11" y="13" width="26" height="22" rx="2" />
+        <path d="M11 19 L37 19" />
+        <path d="M16 10 L16 15" />
+        <path d="M32 10 L32 15" />
+        <circle cx="24" cy="27" r="3" />
+      </g>
+    </svg>
+  )
+}
+
+export function FaqPaymentIllustration({ className, fill }: Props) {
+  return (
+    <svg {...faqSvg(className)}>
+      <circle cx="24" cy="24" r="18" fill={fill ?? '#9ca893'} fillOpacity="0.3" />
+      <g {...STROKE}>
+        <rect x="9" y="15" width="30" height="20" rx="2" />
+        <path d="M9 21 L39 21" />
+        <path d="M14 28 L20 28" />
+        <path d="M14 31 L24 31" opacity="0.5" />
+        <circle cx="33" cy="33" r="5" fill="#faf7f2" />
+        <circle cx="33" cy="33" r="5" />
+        <text x="33" y="36" textAnchor="middle" fontSize="6" fontFamily="serif" fill="currentColor" fontWeight="500">$</text>
+      </g>
+    </svg>
+  )
+}
+
+export function FaqReturnsIllustration({ className, fill }: Props) {
+  return (
+    <svg {...faqSvg(className)}>
+      <circle cx="24" cy="24" r="18" fill={fill ?? '#e7c4c0'} fillOpacity="0.3" />
+      <g {...STROKE}>
+        <rect x="13" y="17" width="22" height="18" rx="1" />
+        <path d="M13 23 L35 23" />
+        <path d="M24 17 L24 35" />
+        <path d="M30 11 L36 11 Q38 11, 38 13 L38 18" />
+        <path d="M36 14 L38 18 L40 14" />
+      </g>
+    </svg>
+  )
+}
+
+export function FaqRegulationsIllustration({ className, fill }: Props) {
+  return (
+    <svg {...faqSvg(className)}>
+      <circle cx="24" cy="24" r="18" fill={fill ?? '#b85a4a'} fillOpacity="0.15" />
+      <g {...STROKE}>
+        <rect x="13" y="11" width="22" height="26" rx="1" />
+        <path d="M17 17 L31 17" opacity="0.5" />
+        <path d="M17 21 L29 21" opacity="0.5" />
+        <path d="M17 25 L31 25" opacity="0.5" />
+        <rect x="22" y="28" width="10" height="6" rx="0.5" transform="rotate(-3 27 31)" fill={fill ?? '#b85a4a'} fillOpacity="0.4" />
+        <text x="27" y="33" textAnchor="middle" fontSize="4" fontFamily="serif" fill="currentColor" transform="rotate(-3 27 31)">承認</text>
+      </g>
+    </svg>
+  )
+}
+
+/* ──────────────────────────────────────────────────────────
+   Tier badges — 3 levels (bronze/silver/gold) — Japanese 御札 style
+   ────────────────────────────────────────────────────────── */
+function tierSvg(className?: string) {
+  return {
+    viewBox: '0 0 64 80',
+    fill: 'none',
+    xmlns: 'http://www.w3.org/2000/svg',
+    className: className ?? 'w-12 h-16',
+    'aria-hidden': true as const,
+  }
+}
+
+interface TierBadgeProps extends Props {
+  /** Character to print on the badge — defaults by level */
+  char?: string
+}
+
+function TierBadgeBase({
+  className,
+  fill,
+  bg,
+  char,
+  rotation = -2,
+}: TierBadgeProps & { bg: string; rotation?: number }) {
+  return (
+    <svg {...tierSvg(className)}>
+      <g transform={`rotate(${rotation} 32 40)`}>
+        {/* Ofuda body — paper strip */}
+        <path
+          d="M22 8 L42 8 L46 16 L46 64 Q46 70, 40 72 L24 72 Q18 70, 18 64 L18 16 Z"
+          fill={bg}
+          stroke={fill ?? 'currentColor'}
+          strokeWidth="1.5"
+        />
+        {/* top decorative band */}
+        <path d="M22 16 L42 16" stroke={fill ?? 'currentColor'} strokeWidth="1.5" />
+        <path d="M24 18 L40 18" stroke={fill ?? 'currentColor'} strokeWidth="1" opacity="0.5" />
+        {/* hanging tassel */}
+        <path d="M32 8 L32 4" stroke={fill ?? 'currentColor'} strokeWidth="1.5" strokeLinecap="round" />
+        <circle cx="32" cy="3" r="1.5" fill={fill ?? 'currentColor'} />
+        {/* big character */}
+        <text
+          x="32"
+          y="48"
+          textAnchor="middle"
+          fontSize="24"
+          fontFamily="var(--font-display), 'Shippori Mincho', serif"
+          fill={fill ?? 'currentColor'}
+          fontWeight="500"
+        >
+          {char}
+        </text>
+        {/* bottom small decoration */}
+        <circle cx="32" cy="62" r="2" stroke={fill ?? 'currentColor'} strokeWidth="1" fill="none" opacity="0.6" />
+      </g>
+    </svg>
+  )
+}
+
+export function TierBronzeIllustration(props: Props) {
+  return <TierBadgeBase {...props} bg="#d8c0a3" fill="#8a6e4a" char="銅" rotation={-2} />
+}
+
+export function TierSilverIllustration(props: Props) {
+  return <TierBadgeBase {...props} bg="#dadde0" fill="#5a6470" char="銀" rotation={1} />
+}
+
+export function TierGoldIllustration(props: Props) {
+  return <TierBadgeBase {...props} bg="#f0d895" fill="#9c7a25" char="金" rotation={-1} />
+}
+
 export function AboutPackingIllustration({ className, fill }: Props) {
   return (
     <svg viewBox="0 0 160 140" {...svgProps(className ?? 'w-32 h-28')}>
