@@ -7,12 +7,14 @@ import {
   productImages,
   brands,
   categories,
+  orderItems,
   type Product,
   type NewProduct,
   type ProductImage,
   type Brand,
   type Category,
 } from '@/db/schema'
+import { purchaseItems } from '@/db/schema/purchases'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 
 export interface ProductListItem {
@@ -328,6 +330,37 @@ export async function updateProduct(
 
 export async function archiveProduct(id: string): Promise<Product> {
   return updateProduct(id, { status: 'archived' })
+}
+
+export class ProductHasReferencesError extends Error {
+  constructor(public readonly orderCount: number, public readonly purchaseCount: number) {
+    super('Product is referenced by orders or purchase items')
+    this.name = 'ProductHasReferencesError'
+  }
+}
+
+/**
+ * Hard-delete a product. Fails if any order_items or purchase_items reference
+ * this product (those FKs are not cascade by design). Cascade-deletes
+ * product_images, product_variants, restock_subscriptions, reviews.
+ */
+export async function deleteProduct(id: string): Promise<void> {
+  const orderRefs = await db
+    .select({ id: orderItems.id })
+    .from(orderItems)
+    .where(eq(orderItems.productId, id))
+    .limit(1)
+  const purchaseRefs = await db
+    .select({ id: purchaseItems.id })
+    .from(purchaseItems)
+    .where(eq(purchaseItems.productId, id))
+    .limit(1)
+
+  if (orderRefs.length > 0 || purchaseRefs.length > 0) {
+    throw new ProductHasReferencesError(orderRefs.length, purchaseRefs.length)
+  }
+
+  await db.delete(products).where(eq(products.id, id))
 }
 
 /**

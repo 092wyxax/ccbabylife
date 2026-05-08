@@ -16,6 +16,7 @@ import {
   type ProductFormState,
 } from '@/server/actions/products'
 import { ProductForm } from '@/components/admin/ProductForm'
+import { ProductDeleteButton } from '@/components/admin/ProductDeleteButton'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -80,16 +81,19 @@ export default async function EditProductPage({ params }: Props) {
             </Link>
           </p>
         </div>
-        {product.status !== 'archived' && (
-          <form action={boundArchive}>
-            <button
-              type="submit"
-              className="text-sm text-ink-soft hover:text-danger underline"
-            >
-              封存此商品
-            </button>
-          </form>
-        )}
+        <div className="flex items-start gap-4 flex-col sm:flex-row sm:items-center">
+          {product.status !== 'archived' && (
+            <form action={boundArchive}>
+              <button
+                type="submit"
+                className="text-sm text-ink-soft hover:text-danger underline"
+              >
+                封存此商品
+              </button>
+            </form>
+          )}
+          <ProductDeleteButton productId={id} productName={product.nameZh} />
+        </div>
       </div>
 
       <StatusBanner status={product.status} hasImages={imageUrls.length > 0} hasDescription={Boolean(product.description)} />

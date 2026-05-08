@@ -8,7 +8,9 @@ import {
   createProduct,
   updateProduct,
   archiveProduct,
+  deleteProduct,
   setProductImages,
+  ProductHasReferencesError,
 } from '@/server/services/ProductService'
 import { uploadProductImage, deleteProductImage } from '@/lib/supabase/storage'
 import { productStockTypeEnum, productStatusEnum } from '@/db/schema'
@@ -191,6 +193,30 @@ export async function updateProductAction(
 export async function archiveProductAction(productId: string) {
   await requireAdmin()
   await archiveProduct(productId)
+  revalidatePath('/admin/products')
+  revalidatePath('/shop')
+  redirect('/admin/products')
+}
+
+export type DeleteProductState = { error?: string }
+
+export async function deleteProductAction(
+  productId: string,
+  _prev: DeleteProductState,
+  _formData: FormData
+): Promise<DeleteProductState> {
+  await requireAdmin()
+  try {
+    await deleteProduct(productId)
+  } catch (e) {
+    if (e instanceof ProductHasReferencesError) {
+      return {
+        error:
+          '此商品已被訂單或進貨單引用，無法永久刪除。請改用「封存」隱藏商品。',
+      }
+    }
+    return { error: e instanceof Error ? e.message : String(e) }
+  }
   revalidatePath('/admin/products')
   revalidatePath('/shop')
   redirect('/admin/products')
