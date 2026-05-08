@@ -122,7 +122,28 @@ export function AdminShell({ admin, roleLabel, navGroups, children }: Props) {
         </div>
       </aside>
 
-      <div className="flex-1 min-w-0">{children}</div>
+      <div className="flex-1 min-w-0">
+        <div className="sticky top-0 lg:top-0 z-20 bg-cream-50/95 backdrop-blur border-b border-line px-4 sm:px-6 py-2 flex items-center justify-end gap-3 text-xs">
+          <Link
+            href="/"
+            target="_blank"
+            className="font-jp tracking-wider text-ink-soft hover:text-ink inline-flex items-center gap-1"
+          >
+            ← 回到前台
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden>
+              <path d="M14 3h7v7M21 3l-9 9M5 3h4M3 5v14a2 2 0 002 2h14a2 2 0 002-2v-4" />
+            </svg>
+          </Link>
+          <span className="text-ink-soft/40">·</span>
+          <Link
+            href="/admin"
+            className="font-jp tracking-wider text-ink-soft hover:text-ink"
+          >
+            回到後台首頁
+          </Link>
+        </div>
+        {children}
+      </div>
     </div>
   )
 }
