@@ -4,9 +4,9 @@ import { ProductGrid } from '@/components/shop/ProductGrid'
 import { NotFoundIllustration } from '@/components/shared/BrandIllustrations'
 
 export default async function NotFound() {
-  let topProducts: Awaited<ReturnType<typeof listActiveProducts>> = []
+  let topProducts: Awaited<ReturnType<typeof listActiveProducts>>['items'] = []
   try {
-    topProducts = (await listActiveProducts({ limit: 4 })).slice(0, 4)
+    topProducts = (await listActiveProducts({ limit: 4 })).items
   } catch {
     // DB unavailable during build — render without recommendations
   }

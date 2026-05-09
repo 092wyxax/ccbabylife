@@ -22,13 +22,22 @@ export interface ProductListItem {
   primaryImage: ProductImage | null
 }
 
+export type ProductSort = 'popular' | 'newest' | 'price-asc' | 'price-desc'
+
 export async function listActiveProducts(opts?: {
   limit?: number
+  offset?: number
   categorySlug?: string
   stockType?: 'preorder' | 'in_stock'
   q?: string
-}): Promise<ProductListItem[]> {
-  const limit = opts?.limit ?? 60
+  brandSlug?: string
+  ageBucket?: 'newborn' | '0-6m' | '6-12m' | '1y+' // optional age filter
+  priceMin?: number
+  priceMax?: number
+  sort?: ProductSort
+}): Promise<{ items: ProductListItem[]; total: number }> {
+  const limit = opts?.limit ?? 24
+  const offset = opts?.offset ?? 0
 
   const conditions = [
     eq(products.orgId, DEFAULT_ORG_ID),
@@ -47,14 +56,47 @@ export async function listActiveProducts(opts?: {
       )
       .limit(1)
     if (cat[0]) conditions.push(eq(products.categoryId, cat[0].id))
-    else return []
+    else return { items: [], total: 0 }
+  }
+
+  if (opts?.brandSlug) {
+    const [b] = await db
+      .select()
+      .from(brands)
+      .where(and(eq(brands.orgId, DEFAULT_ORG_ID), eq(brands.slug, opts.brandSlug)))
+      .limit(1)
+    if (b) conditions.push(eq(products.brandId, b.id))
+    else return { items: [], total: 0 }
   }
 
   if (opts?.stockType) {
     conditions.push(eq(products.stockType, opts.stockType))
   }
 
-  // Keyword search across product name, jp name, brand name, category
+  if (opts?.priceMin != null) {
+    conditions.push(gte(products.priceTwd, opts.priceMin))
+  }
+  if (opts?.priceMax != null) {
+    conditions.push(lte(products.priceTwd, opts.priceMax))
+  }
+
+  // Age filter (overlap with min/max age range)
+  if (opts?.ageBucket) {
+    const ranges: Record<string, [number, number]> = {
+      newborn: [0, 1],
+      '0-6m': [0, 6],
+      '6-12m': [6, 12],
+      '1y+': [12, 240],
+    }
+    const r = ranges[opts.ageBucket]
+    if (r) {
+      conditions.push(
+        sql`coalesce(${products.minAgeMonths}, 0) <= ${r[1]} and coalesce(${products.maxAgeMonths}, 240) >= ${r[0]}`
+      )
+    }
+  }
+
+  // Keyword search across product name, jp name, brand name, description
   const q = opts?.q?.trim()
   if (q) {
     const like = `%${q}%`
@@ -66,6 +108,28 @@ export async function listActiveProducts(opts?: {
       )!
     )
   }
+
+  // Sort
+  const sortClause = (() => {
+    switch (opts?.sort) {
+      case 'newest':
+        return [desc(products.createdAt)]
+      case 'price-asc':
+        return [asc(products.priceTwd)]
+      case 'price-desc':
+        return [desc(products.priceTwd)]
+      case 'popular':
+      default:
+        return [desc(products.salesCount), desc(products.createdAt)]
+    }
+  })()
+
+  // Total count
+  const [countRow] = await db
+    .select({ c: sql<number>`count(*)::int` })
+    .from(products)
+    .where(and(...conditions))
+  const total = countRow?.c ?? 0
 
   const rows = await db
     .select({
@@ -81,13 +145,17 @@ export async function listActiveProducts(opts?: {
       )
     )
     .where(and(...conditions))
-    .orderBy(desc(products.salesCount), desc(products.createdAt))
+    .orderBy(...sortClause)
     .limit(limit)
+    .offset(offset)
 
-  return rows.map((row) => ({
-    product: row.product,
-    primaryImage: row.image,
-  }))
+  return {
+    items: rows.map((row) => ({
+      product: row.product,
+      primaryImage: row.image,
+    })),
+    total,
+  }
 }
 
 export interface ProductDetail {

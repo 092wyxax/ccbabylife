@@ -146,11 +146,15 @@ export default async function ProductDetailPage({ params }: Props) {
               </span>
             )}
             {isPreorder ? (
-              <span className="font-jp text-xs bg-warning/20 text-ink px-3 py-1 tracking-wider">
+              <span className="font-jp text-xs bg-blush-soft text-ink px-3 py-1 tracking-wider rounded-full">
                 予約 · 約 10–14 日でお届け
               </span>
+            ) : product.stockQuantity <= 3 && product.stockQuantity > 0 ? (
+              <span className="font-jp text-xs bg-seal text-cream px-3 py-1 tracking-wider rounded-full animate-pulse">
+                ⚡ 僅剩 {product.stockQuantity} 件
+              </span>
             ) : (
-              <span className="font-jp text-xs bg-success/20 text-ink px-3 py-1 tracking-wider">
+              <span className="font-jp text-xs bg-sage-soft text-ink px-3 py-1 tracking-wider rounded-full">
                 在庫 {product.stockQuantity} 點
               </span>
             )}

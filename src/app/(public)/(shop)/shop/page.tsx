@@ -2,13 +2,24 @@ import Link from 'next/link'
 import {
   listActiveProducts,
   listAllCategories,
+  type ProductSort,
 } from '@/server/services/ProductService'
 import { ProductGrid } from '@/components/shop/ProductGrid'
 import { MobileFilterSheet } from '@/components/shop/MobileFilterSheet'
+import { LiveSearchBar } from '@/components/shop/LiveSearchBar'
 
 export const metadata = {
   title: '所有選物',
   description: '日本母嬰、寵物選物，每週預購批次',
+}
+
+const PAGE_SIZE = 24
+
+const SORT_LABEL: Record<ProductSort, string> = {
+  popular: '熱賣優先',
+  newest: '新上架',
+  'price-asc': '價格低到高',
+  'price-desc': '價格高到低',
 }
 
 interface Props {
@@ -16,6 +27,11 @@ interface Props {
     category?: string
     stock?: string
     q?: string
+    sort?: string
+    age?: string
+    pmin?: string
+    pmax?: string
+    page?: string
   }>
 }
 
@@ -25,16 +41,58 @@ export default async function ShopPage({ searchParams }: Props) {
     params.stock === 'preorder' || params.stock === 'in_stock'
       ? params.stock
       : undefined
+  const sort: ProductSort = (
+    ['popular', 'newest', 'price-asc', 'price-desc'] as const
+  ).includes(params.sort as ProductSort)
+    ? (params.sort as ProductSort)
+    : 'popular'
+  const ageBucket = (
+    ['newborn', '0-6m', '6-12m', '1y+'] as const
+  ).includes(params.age as 'newborn' | '0-6m' | '6-12m' | '1y+')
+    ? (params.age as 'newborn' | '0-6m' | '6-12m' | '1y+')
+    : undefined
 
-  const [items, categories] = await Promise.all([
+  const priceMin = params.pmin ? Number(params.pmin) : undefined
+  const priceMax = params.pmax ? Number(params.pmax) : undefined
+  const page = Math.max(1, Number(params.page ?? 1))
+
+  const [{ items, total }, categories] = await Promise.all([
     listActiveProducts({
-      limit: 60,
+      limit: PAGE_SIZE,
+      offset: (page - 1) * PAGE_SIZE,
       categorySlug: params.category,
       stockType,
       q: params.q,
+      sort,
+      ageBucket,
+      priceMin,
+      priceMax,
     }),
     listAllCategories(),
   ])
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+
+  // Helper for building urls with current params
+  const buildHref = (overrides: Record<string, string | number | undefined>) => {
+    const sp = new URLSearchParams()
+    const merged = {
+      category: params.category,
+      stock: stockType,
+      q: params.q,
+      sort: sort === 'popular' ? undefined : sort,
+      age: ageBucket,
+      pmin: priceMin,
+      pmax: priceMax,
+      page: page > 1 ? page : undefined,
+      ...overrides,
+    }
+    for (const [k, v] of Object.entries(merged)) {
+      if (v !== undefined && v !== null && v !== '') sp.set(k, String(v))
+    }
+    const qs = sp.toString()
+    return qs ? `/shop?${qs}` : '/shop'
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-16">
@@ -46,48 +104,20 @@ export default async function ShopPage({ searchParams }: Props) {
           {params.q ? `「${params.q}」搜尋結果` : '所有選物'}
         </h1>
         <p className="text-ink-soft mt-2 text-sm">
-          現在 <span className="font-jp">{items.length} 點</span>
+          共 <span className="font-jp">{total} 件</span>
           {!params.q && ' · 予約制 · 毎週日 23:59 締切'}
         </p>
       </header>
 
-      <form action="/shop" method="get" className="mb-6">
-        {params.category && <input type="hidden" name="category" value={params.category} />}
-        {stockType && <input type="hidden" name="stock" value={stockType} />}
-        <div className="relative max-w-md">
-          <input
-            type="search"
-            name="q"
-            defaultValue={params.q ?? ''}
-            placeholder="搜尋商品、品牌、關鍵字…"
-            className="w-full pl-10 pr-3 py-2.5 border border-line rounded-md focus:outline-none focus:border-ink text-sm bg-white"
-          />
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-soft pointer-events-none"
-          >
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.3-4.3" />
-          </svg>
-          {params.q && (
-            <Link
-              href={`/shop${params.category ? `?category=${params.category}` : ''}${stockType ? `${params.category ? '&' : '?'}stock=${stockType}` : ''}`}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-ink-soft hover:text-ink px-2 py-1 rounded"
-              aria-label="清除搜尋"
-            >
-              ✕
-            </Link>
-          )}
-        </div>
-      </form>
+      {/* Live search bar (autocomplete + recent) */}
+      <div className="mb-6">
+        <LiveSearchBar
+          initialQuery={params.q ?? ''}
+          buildHrefForQuery={(q) => buildHref({ q: q || undefined, page: undefined })}
+        />
+      </div>
 
+      {/* Mobile filter trigger */}
       <div className="mb-6 lg:hidden">
         <MobileFilterSheet
           categories={categories.map((c) => ({ slug: c.slug, name: c.name }))}
@@ -97,12 +127,13 @@ export default async function ShopPage({ searchParams }: Props) {
         />
       </div>
 
-      <div className="mb-10 hidden lg:flex flex-wrap items-center gap-2 pb-4 border-b border-line">
-        <FilterChip href="/shop" active={!params.category} label="全部分類" />
+      {/* Desktop chip rail */}
+      <div className="mb-6 hidden lg:flex flex-wrap items-center gap-2 pb-4 border-b border-line">
+        <FilterChip href={buildHref({ category: undefined, page: undefined })} active={!params.category} label="全部分類" />
         {categories.map((c) => (
           <FilterChip
             key={c.id}
-            href={`/shop?category=${c.slug}${stockType ? `&stock=${stockType}` : ''}`}
+            href={buildHref({ category: c.slug, page: undefined })}
             active={params.category === c.slug}
             label={c.name}
           />
@@ -111,23 +142,100 @@ export default async function ShopPage({ searchParams }: Props) {
         <span className="mx-2 h-4 w-px bg-line" />
 
         <FilterChip
-          href={`/shop${params.category ? `?category=${params.category}` : ''}`}
+          href={buildHref({ stock: undefined, page: undefined })}
           active={!stockType}
           label="全部"
         />
         <FilterChip
-          href={`/shop?stock=preorder${params.category ? `&category=${params.category}` : ''}`}
+          href={buildHref({ stock: 'preorder', page: undefined })}
           active={stockType === 'preorder'}
           label="予約 · 預購"
         />
         <FilterChip
-          href={`/shop?stock=in_stock${params.category ? `&category=${params.category}` : ''}`}
+          href={buildHref({ stock: 'in_stock', page: undefined })}
           active={stockType === 'in_stock'}
           label="在庫 · 現貨"
         />
       </div>
 
+      {/* Age buckets + price + sort row */}
+      <div className="hidden lg:flex flex-wrap items-center gap-2 mb-10 text-xs">
+        <span className="text-ink-soft pr-2 font-jp tracking-widest">年齡</span>
+        <FilterChip href={buildHref({ age: undefined, page: undefined })} active={!ageBucket} label="全部" />
+        <FilterChip href={buildHref({ age: 'newborn', page: undefined })} active={ageBucket === 'newborn'} label="新生兒" />
+        <FilterChip href={buildHref({ age: '0-6m', page: undefined })} active={ageBucket === '0-6m'} label="0–6 個月" />
+        <FilterChip href={buildHref({ age: '6-12m', page: undefined })} active={ageBucket === '6-12m'} label="6–12 個月" />
+        <FilterChip href={buildHref({ age: '1y+', page: undefined })} active={ageBucket === '1y+'} label="1 歲以上" />
+
+        <span className="mx-2 h-4 w-px bg-line" />
+
+        <span className="text-ink-soft pr-2 font-jp tracking-widest">價格</span>
+        <FilterChip href={buildHref({ pmin: undefined, pmax: undefined, page: undefined })} active={priceMin == null && priceMax == null} label="全部" />
+        <FilterChip href={buildHref({ pmin: 0, pmax: 500, page: undefined })} active={priceMin === 0 && priceMax === 500} label="< 500" />
+        <FilterChip href={buildHref({ pmin: 500, pmax: 1000, page: undefined })} active={priceMin === 500 && priceMax === 1000} label="500–1k" />
+        <FilterChip href={buildHref({ pmin: 1000, pmax: 3000, page: undefined })} active={priceMin === 1000 && priceMax === 3000} label="1k–3k" />
+        <FilterChip href={buildHref({ pmin: 3000, pmax: undefined, page: undefined })} active={priceMin === 3000} label="3k 以上" />
+
+        <span className="ml-auto text-ink-soft pr-2 font-jp tracking-widest">排序</span>
+        <select
+          defaultValue={sort}
+          onChange={undefined}
+          className="bg-cream border border-line rounded-md px-3 py-1.5 text-xs focus:outline-none focus:border-ink"
+          aria-label="排序"
+        >
+          {(Object.keys(SORT_LABEL) as ProductSort[]).map((k) => (
+            <option key={k} value={k}>
+              {SORT_LABEL[k]}
+            </option>
+          ))}
+        </select>
+        {/* Sort uses links because <select> server-side change isn't trivial without JS */}
+        <span className="hidden sm:inline-flex gap-1.5 ml-2">
+          {(Object.keys(SORT_LABEL) as ProductSort[]).map((k) => (
+            <FilterChip
+              key={k}
+              href={buildHref({ sort: k === 'popular' ? undefined : k, page: undefined })}
+              active={sort === k}
+              label={SORT_LABEL[k]}
+            />
+          ))}
+        </span>
+      </div>
+
       <ProductGrid products={items} />
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <nav className="mt-12 flex items-center justify-center gap-2 text-sm">
+          {page > 1 ? (
+            <Link
+              href={buildHref({ page: page - 1 })}
+              className="px-3 py-2 border border-line rounded-md hover:border-ink"
+            >
+              ← 上一頁
+            </Link>
+          ) : (
+            <span className="px-3 py-2 border border-line rounded-md text-ink-soft/50 cursor-not-allowed">
+              ← 上一頁
+            </span>
+          )}
+          <span className="font-jp text-xs text-ink-soft px-3">
+            {page} / {totalPages}
+          </span>
+          {page < totalPages ? (
+            <Link
+              href={buildHref({ page: page + 1 })}
+              className="px-3 py-2 border border-line rounded-md hover:border-ink"
+            >
+              下一頁 →
+            </Link>
+          ) : (
+            <span className="px-3 py-2 border border-line rounded-md text-ink-soft/50 cursor-not-allowed">
+              下一頁 →
+            </span>
+          )}
+        </nav>
+      )}
     </div>
   )
 }

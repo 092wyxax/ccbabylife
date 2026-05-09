@@ -5,10 +5,11 @@ import { listPublishedPosts } from '@/server/services/JournalService'
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ccbabylife.com'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [products, posts] = await Promise.all([
+  const [productResult, posts] = await Promise.all([
     listActiveProducts({ limit: 500 }),
     listPublishedPosts(),
   ])
+  const products = productResult.items
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/`, changeFrequency: 'daily', priority: 1.0 },

@@ -31,10 +31,11 @@ const VALUE_PROPS = [
 ]
 
 export default async function HomePage() {
-  const [featured, latestPosts] = await Promise.all([
+  const [featuredResult, latestPosts] = await Promise.all([
     listActiveProducts({ limit: 8 }),
     listPublishedPosts(),
   ])
+  const featured = featuredResult.items
   const journalPosts = latestPosts.slice(0, 3)
 
   return (
