@@ -36,7 +36,23 @@ interface Props {
 }
 
 export default async function ShopPage({ searchParams }: Props) {
-  const params = await searchParams
+  try {
+    return await renderShop(await searchParams)
+  } catch (err) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-16">
+        <h1 className="font-serif text-2xl mb-4">商品列表（診斷模式）</h1>
+        <div className="bg-red-50 border border-red-200 rounded p-4">
+          <pre className="text-xs text-red-800 whitespace-pre-wrap break-all leading-relaxed">
+{err instanceof Error ? `${err.name}: ${err.message}\n\n${err.stack ?? '(no stack)'}` : String(err)}
+          </pre>
+        </div>
+      </div>
+    )
+  }
+}
+
+async function renderShop(params: Awaited<Props['searchParams']>) {
   const stockType =
     params.stock === 'preorder' || params.stock === 'in_stock'
       ? params.stock
@@ -177,29 +193,14 @@ export default async function ShopPage({ searchParams }: Props) {
         <FilterChip href={buildHref({ pmin: 3000, pmax: undefined, page: undefined })} active={priceMin === 3000} label="3k 以上" />
 
         <span className="ml-auto text-ink-soft pr-2 font-jp tracking-widest">排序</span>
-        <select
-          defaultValue={sort}
-          onChange={undefined}
-          className="bg-cream border border-line rounded-md px-3 py-1.5 text-xs focus:outline-none focus:border-ink"
-          aria-label="排序"
-        >
-          {(Object.keys(SORT_LABEL) as ProductSort[]).map((k) => (
-            <option key={k} value={k}>
-              {SORT_LABEL[k]}
-            </option>
-          ))}
-        </select>
-        {/* Sort uses links because <select> server-side change isn't trivial without JS */}
-        <span className="hidden sm:inline-flex gap-1.5 ml-2">
-          {(Object.keys(SORT_LABEL) as ProductSort[]).map((k) => (
-            <FilterChip
-              key={k}
-              href={buildHref({ sort: k === 'popular' ? undefined : k, page: undefined })}
-              active={sort === k}
-              label={SORT_LABEL[k]}
-            />
-          ))}
-        </span>
+        {(Object.keys(SORT_LABEL) as ProductSort[]).map((k) => (
+          <FilterChip
+            key={k}
+            href={buildHref({ sort: k === 'popular' ? undefined : k, page: undefined })}
+            active={sort === k}
+            label={SORT_LABEL[k]}
+          />
+        ))}
       </div>
 
       <ProductGrid products={items} />
