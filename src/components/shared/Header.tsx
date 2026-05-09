@@ -8,10 +8,9 @@ import { Search } from 'lucide-react'
 
 const NAV_ITEMS = [
   { href: '/shop', label: '選物' },
+  { href: '/recommend', label: '月齡推薦' },
   { href: '/brand', label: '品牌' },
   { href: '/trending', label: '日本熱賣榜' },
-  { href: '/insta-picks', label: '媽媽選書' },
-  { href: '/seasonal', label: '季節限定' },
   { href: '/journal', label: '部落格' },
   { href: '/about', label: '關於我們' },
 ]

@@ -17,6 +17,7 @@ interface ProductCardProps {
     | 'stockType'
     | 'stockQuantity'
     | 'tags'
+    | 'useExperience'
   >
   imageUrl?: string | null
   imagePath?: string | null
@@ -92,6 +93,13 @@ export function ProductCard({ product, imageUrl, imagePath }: ProductCardProps) 
             {product.nameZh}
           </h3>
           <p className="font-serif text-base">{formatTwd(product.priceTwd)}</p>
+          {product.useExperience && (
+            <p className="text-[11px] text-ink-soft leading-snug line-clamp-2 italic pt-1 border-t border-line/60">
+              <span className="text-seal not-italic mr-1" aria-hidden>“</span>
+              {product.useExperience.replace(/^[「『""]+|[」』""]+$/g, '').slice(0, 60)}
+              {product.useExperience.length > 60 ? '…' : ''}
+            </p>
+          )}
         </div>
       </Link>
     </div>

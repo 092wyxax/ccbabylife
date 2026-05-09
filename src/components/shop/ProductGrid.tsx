@@ -16,6 +16,7 @@ interface ProductGridProps {
       | 'stockType'
       | 'stockQuantity'
       | 'tags'
+      | 'useExperience'
     >
     primaryImage: Pick<ProductImage, 'cfImageId' | 'altText'> | null
   }>

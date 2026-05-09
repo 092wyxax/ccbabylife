@@ -53,9 +53,9 @@ export function MobileBottomNav() {
         }
       />
       <NavItem
-        href="/cart"
-        active={pathname === '/cart'}
-        label="購物車"
+        href={cartCount > 0 ? '/cart' : '/shop'}
+        active={pathname === '/cart' || (cartCount === 0 && pathname === '/shop')}
+        label={cartCount > 0 ? '購物車' : '逛選物'}
         badge={cartCount > 0 ? cartCount : undefined}
         icon={
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

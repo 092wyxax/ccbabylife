@@ -65,22 +65,54 @@ export default async function HomePage() {
             <div className="mt-8 flex flex-wrap gap-2 text-sm">
               <Link
                 href="/shop"
-                className="bg-ink text-cream px-5 py-2.5 hover:bg-accent transition-colors"
+                className="bg-ink text-cream px-5 py-2.5 rounded-md hover:bg-accent transition-colors"
               >
                 逛逛這週選物
               </Link>
               <Link
                 href="/trending"
-                className="border border-line px-5 py-2.5 hover:border-ink transition-colors"
+                className="border border-line px-5 py-2.5 rounded-md hover:border-ink transition-colors"
               >
                 日本熱賣榜
               </Link>
               <Link
                 href="/gift-guide"
-                className="border border-line px-5 py-2.5 hover:border-ink transition-colors"
+                className="border border-line px-5 py-2.5 rounded-md hover:border-ink transition-colors"
               >
                 彌月禮指南
               </Link>
+            </div>
+
+            {/* First-order welcome banner — drives newsletter signup */}
+            <div className="mt-6 max-w-md p-4 rounded-lg bg-blush-soft/60 border border-blush/40 flex items-start gap-3">
+              <span className="text-2xl flex-shrink-0" aria-hidden>
+                🎁
+              </span>
+              <div className="flex-1 text-sm">
+                <p className="font-medium mb-1">新朋友首單享 NT$100 折扣</p>
+                <p className="text-xs text-ink-soft mb-3 leading-relaxed">
+                  訂閱電子報或加 LINE，立刻收到專屬折扣碼。每月 1–2 封新品 / 截單預告，不轟炸。
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    href="#newsletter"
+                    className="font-jp bg-seal text-cream text-xs px-3 py-2 rounded-md tracking-[0.15em] hover:opacity-90 transition-opacity"
+                  >
+                    🎁 訂閱電子報領折扣
+                  </Link>
+                  <a
+                    href={
+                      process.env.NEXT_PUBLIC_LINE_OA_URL ??
+                      'https://line.me/R/ti/p/@ccbabylife'
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-jp bg-[#06C755] text-white text-xs px-3 py-2 rounded-md tracking-[0.15em] hover:opacity-90 transition-opacity"
+                  >
+                    💚 加 LINE 享優惠
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -295,16 +327,42 @@ export default async function HomePage() {
         </section>
       )}
 
-      <section className="border-t border-line bg-cream-100">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-16 text-center">
+      <section id="newsletter" className="border-t border-line bg-cream-100 scroll-mt-20">
+        <div className="mx-auto max-w-2xl px-4 sm:px-6 py-16 text-center">
           <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-3">NEWSLETTER · お便り</p>
-          <h2 className="font-serif text-2xl sm:text-3xl mb-3 tracking-wide">新選物上架先收到</h2>
+          <h2 className="font-serif text-2xl sm:text-3xl mb-3 tracking-wide">
+            新朋友首單享 <span className="text-seal">NT$100</span> 折扣
+          </h2>
           <p className="text-ink-soft text-sm sm:text-base leading-relaxed mb-6">
-            每週新到貨直送 Email。完全不會發行銷垃圾信。
+            每週新到貨直送 Email，完全不發行銷垃圾信。
           </p>
+
+          <ul className="text-sm text-ink mb-6 space-y-2 inline-block text-left">
+            <li className="flex items-start gap-2">
+              <span className="text-sage mt-0.5" aria-hidden>✓</span>
+              <span>新品上架第一個收到</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-sage mt-0.5" aria-hidden>✓</span>
+              <span>寶寶月齡專屬推薦</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-sage mt-0.5" aria-hidden>✓</span>
+              <span>截單前 6 小時提醒</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-sage mt-0.5" aria-hidden>✓</span>
+              <span>訂閱即送 <strong>NT$100 首單折扣碼</strong></span>
+            </li>
+          </ul>
+
           <div className="max-w-md mx-auto">
             <NewsletterForm source="home-bottom" />
           </div>
+
+          <p className="text-[11px] text-ink-soft mt-4">
+            🔒 我們不會把你的 email 給任何人。隨時可以一鍵退訂。
+          </p>
         </div>
       </section>
     </>

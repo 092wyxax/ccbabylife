@@ -84,6 +84,8 @@ export function Footer() {
             <li><Link href="/about" className="hover:text-accent">品牌故事 + 法規誠信</Link></li>
             <li><Link href="/faq" className="hover:text-accent">常見問題</Link></li>
             <li><Link href="/journal" className="hover:text-accent">娃媽真心話</Link></li>
+            <li><Link href="/recommend" className="hover:text-accent">月齡選物器</Link></li>
+            <li><Link href="/calculator" className="hover:text-accent">透明定價試算</Link></li>
           </ul>
         </div>
       </div>

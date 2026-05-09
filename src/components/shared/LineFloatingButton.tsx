@@ -17,8 +17,12 @@ export function LineFloatingButton() {
       aria-label="LINE 客服"
       className="fixed bottom-20 right-4 lg:bottom-8 lg:right-8 z-40 group"
     >
+      {/* Persistent label badge above the bubble — tells visitors it's worth tapping */}
+      <span className="absolute -top-8 right-0 whitespace-nowrap text-[10px] bg-ink text-cream px-2 py-1 rounded-md tracking-wider shadow-md before:content-[''] before:absolute before:top-full before:right-3 before:border-4 before:border-transparent before:border-t-ink">
+        🎁 首單 NT$100
+      </span>
       <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 whitespace-nowrap text-xs bg-ink text-cream px-3 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-        LINE 客服
+        加 LINE 享優惠
       </span>
       <span className="flex items-center justify-center w-14 h-14 rounded-full bg-[#06C755] text-white shadow-lg hover:scale-105 active:scale-95 transition-transform">
         <svg
