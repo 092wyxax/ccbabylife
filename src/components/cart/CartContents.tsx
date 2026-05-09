@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useCartStore } from '@/stores/cartStore'
+import { useWishlistStore } from '@/stores/wishlistStore'
+import { toast } from '@/components/shared/Toast'
 import { imageUrl } from '@/lib/image'
 import { formatTwd } from '@/lib/format'
 import { GiftProgress } from './GiftProgress'
@@ -16,6 +18,17 @@ export function CartContents() {
   const remove = useCartStore((s) => s.remove)
   const clear = useCartStore((s) => s.clear)
   const totals = useCartStore((s) => s.totals)
+  const saveForLater = useWishlistStore((s) => {
+    return (item: {
+      productId: string
+      slug: string
+      nameZh: string
+      priceTwd: number
+      imagePath: string | null
+    }) => {
+      if (!s.has(item.productId)) s.toggle(item)
+    }
+  })
 
   useEffect(() => setMounted(true), [])
 
@@ -77,24 +90,45 @@ export function CartContents() {
                 {formatTwd(it.priceTwd)} / 點
               </p>
 
-              <div className="mt-3 flex items-center gap-3">
-                <div className="flex items-center border border-line rounded-md">
+              <div className="mt-3 flex items-center gap-3 flex-wrap">
+                <div className="flex items-center border border-line rounded-md bg-white">
                   <button
                     type="button"
+                    aria-label="減少 1"
                     onClick={() => setQuantity(it.productId, it.quantity - 1)}
-                    className="w-8 h-8 hover:bg-cream-100"
+                    className="w-10 h-10 sm:w-9 sm:h-9 hover:bg-cream-100 flex items-center justify-center text-base"
                   >
                     −
                   </button>
-                  <span className="w-10 text-center text-sm">{it.quantity}</span>
+                  <span className="w-10 sm:w-9 text-center text-sm font-medium">
+                    {it.quantity}
+                  </span>
                   <button
                     type="button"
+                    aria-label="增加 1"
                     onClick={() => setQuantity(it.productId, it.quantity + 1)}
-                    className="w-8 h-8 hover:bg-cream-100"
+                    className="w-10 h-10 sm:w-9 sm:h-9 hover:bg-cream-100 flex items-center justify-center text-base"
                   >
                     +
                   </button>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    saveForLater({
+                      productId: it.productId,
+                      slug: it.slug,
+                      nameZh: it.nameZh,
+                      priceTwd: it.priceTwd,
+                      imagePath: it.imagePath,
+                    })
+                    remove(it.productId)
+                    toast.info(`已移到收藏：${it.nameZh}`, 1500)
+                  }}
+                  className="text-xs text-ink-soft hover:text-ink underline-offset-2 hover:underline"
+                >
+                  ❤ 移到收藏
+                </button>
                 <button
                   type="button"
                   onClick={() => remove(it.productId)}

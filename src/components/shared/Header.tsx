@@ -19,7 +19,7 @@ const NAV_ITEMS = [
 export async function Header() {
   const session = await getCustomerSession()
   return (
-    <header className="border-b border-line bg-cream/85 backdrop-blur-md sticky top-0 z-30 shadow-[0_1px_0_rgba(0,0,0,0.02)]">
+    <header className="site-header border-b border-line bg-cream/85 backdrop-blur-md sticky top-0 z-30 shadow-[0_1px_0_rgba(0,0,0,0.02)]">
       <CouponBanner />
       <div className="mx-auto max-w-6xl px-4 sm:px-6 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5 text-ink leading-none group">

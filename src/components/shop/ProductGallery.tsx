@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { imageUrl } from '@/lib/image'
 
 interface Image {
@@ -17,6 +17,20 @@ interface Props {
 export function ProductGallery({ images, productName }: Props) {
   const [active, setActive] = useState(0)
   const [zoomOpen, setZoomOpen] = useState(false)
+  const touchStartX = useRef<number | null>(null)
+
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0]?.clientX ?? null
+  }
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (touchStartX.current === null || images.length <= 1) return
+    const dx = (e.changedTouches[0]?.clientX ?? 0) - touchStartX.current
+    if (Math.abs(dx) > 50) {
+      if (dx < 0) setActive((active + 1) % images.length)
+      else setActive((active - 1 + images.length) % images.length)
+    }
+    touchStartX.current = null
+  }
 
   useEffect(() => {
     if (!zoomOpen) return
@@ -47,8 +61,10 @@ export function ProductGallery({ images, productName }: Props) {
         <button
           type="button"
           onClick={() => setZoomOpen(true)}
-          className="block w-full aspect-square bg-cream-100 border border-line rounded-md overflow-hidden cursor-zoom-in group"
-          aria-label="點擊放大"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          className="block w-full aspect-square bg-cream-100 border border-line rounded-md overflow-hidden cursor-zoom-in group select-none"
+          aria-label="點擊放大，左右滑動切換"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img

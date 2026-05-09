@@ -8,6 +8,7 @@ import { ToastViewport } from '@/components/shared/Toast'
 import { NewsletterPopup } from '@/components/shared/NewsletterPopup'
 import { MobileBottomNav } from '@/components/shared/MobileBottomNav'
 import { RegisterServiceWorker } from '@/components/shared/RegisterServiceWorker'
+import { HeaderScrollHide } from '@/components/shared/HeaderScrollHide'
 
 export default function PublicLayout({
   children,
@@ -27,6 +28,7 @@ export default function PublicLayout({
       <NewsletterPopup />
       <MobileBottomNav />
       <RegisterServiceWorker />
+      <HeaderScrollHide />
     </div>
   )
 }

@@ -224,6 +224,18 @@ button:focus-visible {
   }
 }
 
+/* Mobile-only: collapse sticky header on scroll-down via data attribute.
+   HeaderScrollHide client component sets html[data-header-hidden='true']. */
+@media (max-width: 1023px) {
+  header.site-header {
+    transition: transform 220ms ease;
+    will-change: transform;
+  }
+  html[data-header-hidden='true'] header.site-header {
+    transform: translateY(-100%);
+  }
+}
+
 /* Page transition fade — when next/navigation pushes a new route, the old
    page fades out + new one fades in via the View Transitions API */
 @view-transition {
