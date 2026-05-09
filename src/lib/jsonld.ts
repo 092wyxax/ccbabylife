@@ -46,10 +46,23 @@ interface ProductLdInput {
   brand?: string | null
   imageUrls: string[]
   inStock: boolean
+  /** Optional aggregate rating from approved reviews */
+  rating?: {
+    avg: number // 1–5 (decimal allowed)
+    count: number
+  } | null
+  /** Optional sample reviews to embed (max 3 recommended) */
+  reviews?: Array<{
+    rating: number // 1–5
+    title?: string | null
+    body: string
+    author?: string | null
+    createdAt: Date
+  }>
 }
 
 export function productLd(p: ProductLdInput) {
-  return {
+  const out: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: p.nameZh,
@@ -71,6 +84,34 @@ export function productLd(p: ProductLdInput) {
       seller: { '@type': 'Organization', name: ORG.name },
     },
   }
+
+  if (p.rating && p.rating.count > 0) {
+    out.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: p.rating.avg.toFixed(2),
+      reviewCount: p.rating.count,
+      bestRating: 5,
+      worstRating: 1,
+    }
+  }
+
+  if (p.reviews && p.reviews.length > 0) {
+    out.review = p.reviews.slice(0, 3).map((r) => ({
+      '@type': 'Review',
+      reviewRating: {
+        '@type': 'Rating',
+        ratingValue: r.rating,
+        bestRating: 5,
+        worstRating: 1,
+      },
+      name: r.title || undefined,
+      reviewBody: r.body,
+      datePublished: r.createdAt.toISOString(),
+      author: { '@type': 'Person', name: r.author ?? '匿名' },
+    }))
+  }
+
+  return out
 }
 
 interface ArticleLdInput {

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useCartStore } from '@/stores/cartStore'
 import { toast } from '@/components/shared/Toast'
+import { flyToCart } from '@/lib/fly-to-cart'
 import type { CartItem } from '@/types/cart'
 
 interface Props {
@@ -14,8 +15,13 @@ export function AddToCartButton({ item, outOfStock }: Props) {
   const add = useCartStore((s) => s.add)
   const [added, setAdded] = useState(false)
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (outOfStock) return
+    // Look for product image on PDP — closest .grid container has the gallery
+    const main = document.querySelector(
+      'button[aria-label*="放大"] img, button[aria-label*="zoom"] img'
+    )
+    flyToCart(main ?? e.currentTarget)
     add(item, 1)
     setAdded(true)
     toast.success(`已加入購物車：${item.nameZh}`, 2000)

@@ -14,7 +14,8 @@ export function CartIndicator() {
   return (
     <Link
       href="/cart"
-      className="relative text-sm text-ink-soft hover:text-ink"
+      data-cart-icon
+      className="relative text-sm text-ink-soft hover:text-ink inline-block"
       aria-label="購物車"
     >
       購物車

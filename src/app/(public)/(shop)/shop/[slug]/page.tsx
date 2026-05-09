@@ -78,6 +78,17 @@ export default async function ProductDetailPage({ params }: Props) {
     brand: brand?.nameZh ?? null,
     imageUrls: images.map((i) => imageUrl(i.cfImageId)),
     inStock,
+    rating:
+      reviewSummary.count > 0
+        ? { avg: reviewSummary.average, count: reviewSummary.count }
+        : null,
+    reviews: reviews.slice(0, 3).map((r) => ({
+      rating: r.rating,
+      title: r.title,
+      body: r.body,
+      author: null,
+      createdAt: r.createdAt,
+    })),
   })
   const crumbs = breadcrumbLd([
     { name: '首頁', href: '/' },

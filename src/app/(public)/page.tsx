@@ -91,6 +91,8 @@ export default async function HomePage() {
                 alt="熙熙初日｜日系選物店"
                 fill
                 priority
+                fetchPriority="high"
+                quality={85}
                 sizes="(max-width: 1024px) 100vw, 400px"
                 className="object-cover"
               />

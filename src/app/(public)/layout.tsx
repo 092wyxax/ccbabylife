@@ -1,14 +1,29 @@
+import dynamic from 'next/dynamic'
 import { Header } from '@/components/shared/Header'
 import { Footer } from '@/components/shared/Footer'
 import { CutoffCountdown } from '@/components/shared/CutoffCountdown'
-import { OnboardingWizard } from '@/components/shared/OnboardingWizard'
 import { CartSyncBridge } from '@/components/cart/CartSyncBridge'
-import { LineFloatingButton } from '@/components/shared/LineFloatingButton'
 import { ToastViewport } from '@/components/shared/Toast'
-import { NewsletterPopup } from '@/components/shared/NewsletterPopup'
 import { MobileBottomNav } from '@/components/shared/MobileBottomNav'
-import { RegisterServiceWorker } from '@/components/shared/RegisterServiceWorker'
 import { HeaderScrollHide } from '@/components/shared/HeaderScrollHide'
+
+// Lazy-load non-critical UI to keep initial JS bundle small
+const OnboardingWizard = dynamic(
+  () => import('@/components/shared/OnboardingWizard').then((m) => m.OnboardingWizard),
+  { ssr: false }
+)
+const LineFloatingButton = dynamic(
+  () => import('@/components/shared/LineFloatingButton').then((m) => m.LineFloatingButton),
+  { ssr: false }
+)
+const NewsletterPopup = dynamic(
+  () => import('@/components/shared/NewsletterPopup').then((m) => m.NewsletterPopup),
+  { ssr: false }
+)
+const RegisterServiceWorker = dynamic(
+  () => import('@/components/shared/RegisterServiceWorker').then((m) => m.RegisterServiceWorker),
+  { ssr: false }
+)
 
 export default function PublicLayout({
   children,
@@ -21,14 +36,14 @@ export default function PublicLayout({
       <Header />
       <main className="flex-1 pb-20 lg:pb-0">{children}</main>
       <Footer />
-      <OnboardingWizard />
-      <CartSyncBridge />
-      <LineFloatingButton />
       <ToastViewport />
-      <NewsletterPopup />
       <MobileBottomNav />
-      <RegisterServiceWorker />
       <HeaderScrollHide />
+      <CartSyncBridge />
+      <OnboardingWizard />
+      <LineFloatingButton />
+      <NewsletterPopup />
+      <RegisterServiceWorker />
     </div>
   )
 }

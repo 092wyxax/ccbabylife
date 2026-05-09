@@ -8,6 +8,8 @@ import { getCustomerSession } from '@/lib/customer-session'
 import { logoutAccountAction } from '@/server/actions/account'
 import { ensureReferralCode } from '@/server/services/ReferralService'
 import { getTierById } from '@/server/services/MemberTierService'
+import { getCustomerActivity } from '@/server/services/CustomerActivity'
+import { ActivityTimeline } from '@/components/account/ActivityTimeline'
 import { ShoppingBag, MapPin, Ticket, Heart, Settings, Share2, Repeat } from 'lucide-react'
 import {
   TierBronzeIllustration,
@@ -127,6 +129,7 @@ async function DashboardView({ customerId }: { customerId: string }) {
 
   const adminRole = adminMatch[0]?.role ?? null
   const tier = customer.tierId ? await getTierById(customer.tierId) : null
+  const activityEvents = await getCustomerActivity(customerId, 8)
 
   const totalOrders = allOrders.length
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
@@ -312,6 +315,20 @@ async function DashboardView({ customerId }: { customerId: string }) {
             ))}
           </ul>
         )}
+      </section>
+
+      <section className="mb-10">
+        <header className="mb-4">
+          <h2 className="font-serif text-xl tracking-wide">
+            <span className="font-jp text-xs tracking-[0.3em] text-ink-soft mr-3">
+              ACTIVITY · あしあと
+            </span>
+            活動紀錄
+          </h2>
+        </header>
+        <div className="bg-white border border-line rounded-lg p-6">
+          <ActivityTimeline events={activityEvents} />
+        </div>
       </section>
 
       <section
