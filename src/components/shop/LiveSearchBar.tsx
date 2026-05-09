@@ -12,11 +12,27 @@ const MAX_RECENT = 5
 
 interface Props {
   initialQuery: string
-  /** Called by component to compute the URL when user picks "see all" / hits enter */
-  buildHrefForQuery: (q: string) => string
+  /** Plain serializable params from server — preserves filters when q changes */
+  preserveParams?: Record<string, string | undefined>
 }
 
-export function LiveSearchBar({ initialQuery, buildHrefForQuery }: Props) {
+function buildHref(
+  preserve: Record<string, string | undefined> | undefined,
+  q: string
+): string {
+  const sp = new URLSearchParams()
+  if (preserve) {
+    for (const [k, v] of Object.entries(preserve)) {
+      if (v) sp.set(k, v)
+    }
+  }
+  if (q) sp.set('q', q)
+  sp.delete('page')
+  const qs = sp.toString()
+  return qs ? `/shop?${qs}` : '/shop'
+}
+
+export function LiveSearchBar({ initialQuery, preserveParams }: Props) {
   const [q, setQ] = useState(initialQuery)
   const [open, setOpen] = useState(false)
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([])
@@ -73,7 +89,7 @@ export function LiveSearchBar({ initialQuery, buildHrefForQuery }: Props) {
       } catch {}
     }
     setOpen(false)
-    router.push(buildHrefForQuery(trimmed))
+    router.push(buildHref(preserveParams, trimmed))
   }
 
   function clearRecents() {

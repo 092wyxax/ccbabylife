@@ -129,7 +129,14 @@ async function renderShop(params: Awaited<Props['searchParams']>) {
       <div className="mb-6">
         <LiveSearchBar
           initialQuery={params.q ?? ''}
-          buildHrefForQuery={(q) => buildHref({ q: q || undefined, page: undefined })}
+          preserveParams={{
+            category: params.category,
+            stock: stockType,
+            age: ageBucket,
+            sort: sort === 'popular' ? undefined : sort,
+            pmin: priceMin != null ? String(priceMin) : undefined,
+            pmax: priceMax != null ? String(priceMax) : undefined,
+          }}
         />
       </div>
 
