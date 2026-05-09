@@ -4,6 +4,7 @@ import { ClearCart } from './ClearCart'
 import { getOrderForTracking } from '@/server/services/OrderService'
 import { formatTwd } from '@/lib/format'
 import { OrderSuccessIllustration } from '@/components/shared/BrandIllustrations'
+import { SuccessConfetti } from '@/components/checkout/SuccessConfetti'
 
 interface Props {
   searchParams: Promise<{ orderId?: string }>
@@ -25,6 +26,7 @@ export default async function CheckoutSuccessPage({ searchParams }: Props) {
   return (
     <div className="mx-auto max-w-2xl px-4 sm:px-6 py-16">
       <ClearCart />
+      <SuccessConfetti />
 
       <div className="text-center mb-12">
         <div className="text-seal mb-4 flex justify-center">

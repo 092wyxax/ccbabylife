@@ -36,6 +36,8 @@ const nextConfig: NextConfig = {
       // each comfortably fit.
       bodySizeLimit: '40mb',
     },
+    // CSS View Transitions API — soft fade between routes in supported browsers
+    viewTransition: true,
   },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }]

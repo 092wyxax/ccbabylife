@@ -224,6 +224,26 @@ button:focus-visible {
   }
 }
 
+/* Page transition fade — when next/navigation pushes a new route, the old
+   page fades out + new one fades in via the View Transitions API */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: 220ms cubic-bezier(0.4, 0, 0.2, 1) both fadeOut;
+}
+
+::view-transition-new(root) {
+  animation: 280ms cubic-bezier(0.4, 0, 0.2, 1) 60ms both fadeIn;
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+  }
+}
+
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
@@ -234,9 +254,14 @@ button:focus-visible {
 }
 
 .skeleton {
-  background: linear-gradient(90deg, var(--color-cream-100) 25%, var(--color-line) 50%, var(--color-cream-100) 75%);
+  background: linear-gradient(
+    90deg,
+    var(--color-cream-100) 0%,
+    var(--color-blush-soft) 50%,
+    var(--color-cream-100) 100%
+  );
   background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+  animation: shimmer 1.8s ease-in-out infinite;
 }
 
 @keyframes fadeIn {
