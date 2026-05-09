@@ -23,12 +23,40 @@ export function AddonsSection({ addons }: Props) {
   const add = useCartStore((s) => s.add)
 
   return (
-    <section className="mt-8 p-5 bg-amber-50 border border-amber-200 rounded-lg">
-      <div className="mb-3">
-        <p className="font-jp text-xs tracking-[0.2em] text-amber-700 mb-1">
-          ADD-ON · 加購商品
-        </p>
-        <h3 className="font-serif text-lg">加購省更多 🎁</h3>
+    <section className="mt-8 p-5 bg-blush-soft/40 border border-blush/30 rounded-lg">
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <div>
+          <p className="font-jp text-xs tracking-[0.2em] text-seal mb-1">
+            BUNDLE · 經常一起被買
+          </p>
+          <h3 className="font-serif text-lg">加購省更多</h3>
+        </div>
+        {addons.length > 1 && (
+          <button
+            type="button"
+            onClick={() => {
+              for (const a of addons) {
+                add({
+                  productId: a.productId,
+                  slug: a.slug,
+                  nameZh: a.nameZh,
+                  priceTwd: a.addonPrice,
+                  weightG: a.weightG,
+                  imagePath: null,
+                  stockType: a.stockType,
+                })
+              }
+              if (typeof window !== 'undefined') {
+                import('@/components/shared/Toast').then(({ toast }) =>
+                  toast.success(`已加入 ${addons.length} 件加購商品`, 1800)
+                )
+              }
+            }}
+            className="font-jp text-xs bg-ink text-cream px-3 py-2 rounded-md hover:bg-accent tracking-[0.15em] whitespace-nowrap"
+          >
+            全部加入
+          </button>
+        )}
       </div>
 
       <div className="space-y-2">
