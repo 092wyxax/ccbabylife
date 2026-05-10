@@ -3,24 +3,30 @@
 import { and, eq } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { db } from '@/db/client'
-import { rhythmCompletions } from '@/db/schema/rhythm'
+import { rhythmCompletions, rhythmTasks } from '@/db/schema/rhythm'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { requireAdmin } from '@/server/services/AdminAuthService'
-import { findTask, periodStartFor } from '@/lib/weekly-rhythm'
+import { isoWeekStart, toDateStr, todayDateStr } from '@/lib/weekly-rhythm'
 
 /**
- * Toggle a rhythm task's completion for the current admin in the current
- * period (today for daily tasks; this week for weekly tasks).
- *
- * Uses idempotent insert/delete on the unique (admin_id, task_id, period_start)
- * key — clicking again undoes the previous click.
+ * Toggle a rhythm task's completion for the current admin in the period
+ * containing `referenceDate` (defaults to today). Lets users mark completion
+ * for past weeks while reviewing history.
  */
-export async function toggleRhythmTaskAction(taskId: string): Promise<void> {
+export async function toggleRhythmTaskAction(
+  taskId: string,
+  referenceDate?: string
+): Promise<void> {
   const admin = await requireAdmin()
-  const task = findTask(taskId)
+
+  const [task] = await db
+    .select({ cadence: rhythmTasks.cadence, orgId: rhythmTasks.orgId })
+    .from(rhythmTasks)
+    .where(eq(rhythmTasks.id, taskId))
+    .limit(1)
   if (!task) throw new Error('Unknown task')
 
-  const periodStart = periodStartFor(task)
+  const periodStart = computePeriodStart(task.cadence, referenceDate)
 
   const existing = await db
     .select({ id: rhythmCompletions.id })
@@ -48,4 +54,21 @@ export async function toggleRhythmTaskAction(taskId: string): Promise<void> {
   }
 
   revalidatePath('/admin')
+}
+
+function computePeriodStart(
+  cadence: 'daily' | 'weekly',
+  referenceDate: string | undefined
+): string {
+  if (cadence === 'daily') {
+    if (referenceDate && /^\d{4}-\d{2}-\d{2}$/.test(referenceDate)) {
+      return referenceDate
+    }
+    return todayDateStr()
+  }
+  // weekly: snap reference to its Monday
+  const ref = referenceDate && /^\d{4}-\d{2}-\d{2}$/.test(referenceDate)
+    ? new Date(`${referenceDate}T00:00:00`)
+    : new Date()
+  return toDateStr(isoWeekStart(ref))
 }

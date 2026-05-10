@@ -6,9 +6,12 @@ import { toggleRhythmTaskAction } from '@/server/actions/rhythm'
 export function RhythmCheckbox({
   taskId,
   done,
+  referenceDate,
 }: {
   taskId: string
   done: boolean
+  /** YYYY-MM-DD — toggle completion for the period containing this date */
+  referenceDate?: string
 }) {
   const [pending, startTransition] = useTransition()
 
@@ -18,7 +21,7 @@ export function RhythmCheckbox({
       disabled={pending}
       onClick={() =>
         startTransition(async () => {
-          await toggleRhythmTaskAction(taskId)
+          await toggleRhythmTaskAction(taskId, referenceDate)
         })
       }
       aria-label={done ? '取消完成' : '標記完成'}

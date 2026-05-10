@@ -36,6 +36,7 @@ const LOW_STOCK_THRESHOLD = 3
 
 interface SearchParams {
   rhythm?: string
+  week?: string
 }
 
 export default async function AdminDashboardPage({
@@ -44,7 +45,7 @@ export default async function AdminDashboardPage({
   searchParams: Promise<SearchParams>
 }) {
   const admin = await requireAdmin()
-  const { rhythm } = await searchParams
+  const { rhythm, week } = await searchParams
 
   const now = new Date()
   const weekStart = new Date(now)
@@ -204,7 +205,7 @@ export default async function AdminDashboardPage({
       {/* Row 2 — Weekly rhythm + Monthly KPI */}
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <WeeklyRhythm admin={admin} selectedRole={rhythm} />
+          <WeeklyRhythm admin={admin} selectedRole={rhythm} weekParam={week} />
         </div>
         <div className="lg:col-span-1">
           <MonthlyKpi />

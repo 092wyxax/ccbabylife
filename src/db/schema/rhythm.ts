@@ -2,6 +2,8 @@ import {
   pgTable,
   uuid,
   text,
+  integer,
+  boolean,
   timestamp,
   date,
   uniqueIndex,
@@ -10,16 +12,56 @@ import {
 import { organizations } from './organizations'
 import { adminUsers } from './admin_users'
 
+export const rhythmRoleEnum = ['content', 'system', 'sourcing'] as const
+export type RhythmRole = (typeof rhythmRoleEnum)[number]
+
+export const rhythmCadenceEnum = ['daily', 'weekly'] as const
+export type RhythmCadence = (typeof rhythmCadenceEnum)[number]
+
 /**
- * Per-period completion log for the Weekly Operating Rhythm.
+ * Per-team weekly tasks. Hardcoded constants previously; now editable via
+ * /admin/rhythm-tasks. Soft-delete via isActive=false so historical
+ * completions stay queryable.
+ */
+export const rhythmTasks = pgTable(
+  'rhythm_tasks',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => organizations.id),
+    role: text('role', { enum: rhythmRoleEnum }).notNull(),
+    cadence: text('cadence', { enum: rhythmCadenceEnum }).notNull(),
+    /** ISO weekday 1=Mon … 7=Sun. Required when cadence='weekly'. */
+    weekday: integer('weekday'),
+    sort: integer('sort').notNull().default(0),
+    label: text('label').notNull(),
+    hint: text('hint'),
+    timeHint: text('time_hint'),
+    isActive: boolean('is_active').notNull().default(true),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index('rhythm_tasks_org_role_idx').on(t.orgId, t.role, t.isActive),
+  ]
+)
+
+export type RhythmTask = typeof rhythmTasks.$inferSelect
+export type NewRhythmTask = typeof rhythmTasks.$inferInsert
+
+/**
+ * Per-period completion log.
  *
- * `taskId` references RHYTHM_TASKS in src/lib/weekly-rhythm.ts (string keys, not FK).
  * `periodStart`:
  *   - daily tasks → that day's date (YYYY-MM-DD)
  *   - weekly tasks → the ISO Monday of that week (YYYY-MM-DD)
  *
- * Unique on (adminId, taskId, periodStart) so the same admin marking the
- * same task in the same period is idempotent.
+ * Unique on (adminId, taskId, periodStart) so toggling is idempotent.
  */
 export const rhythmCompletions = pgTable(
   'rhythm_completions',
@@ -31,7 +73,9 @@ export const rhythmCompletions = pgTable(
     adminId: uuid('admin_id')
       .notNull()
       .references(() => adminUsers.id),
-    taskId: text('task_id').notNull(),
+    taskId: uuid('task_id')
+      .notNull()
+      .references(() => rhythmTasks.id, { onDelete: 'cascade' }),
     periodStart: date('period_start').notNull(),
     completedAt: timestamp('completed_at', { withTimezone: true })
       .notNull()

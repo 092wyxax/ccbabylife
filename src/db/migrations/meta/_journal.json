@@ -225,6 +225,13 @@
       "when": 1778500001000,
       "tag": "0031_drop_todos",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1778500002000,
+      "tag": "0032_rhythm_tasks",
+      "breakpoints": true
     }
   ]
 }
