@@ -7,6 +7,7 @@ import { NewsletterForm } from '@/components/shared/NewsletterForm'
 import { SectionDivider } from '@/components/shared/SectionDivider'
 import { CategoryShowcase } from '@/components/shared/CategoryShowcase'
 import { imageUrl } from '@/lib/image'
+import { LINE_OA_URL } from '@/lib/line-oa'
 
 const KANJI_NUM = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
 
@@ -101,10 +102,7 @@ export default async function HomePage() {
                     🎁 訂閱電子報領折扣
                   </Link>
                   <a
-                    href={
-                      process.env.NEXT_PUBLIC_LINE_OA_URL ??
-                      'https://line.me/R/ti/p/@ccbabylife'
-                    }
+                    href={LINE_OA_URL}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="font-jp bg-[#06C755] text-white text-xs px-3 py-2 rounded-md tracking-[0.15em] hover:opacity-90 transition-opacity"

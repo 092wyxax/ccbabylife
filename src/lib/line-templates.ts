@@ -37,7 +37,7 @@ export const SAMPLE_VARS: Record<string, string> = {
   quote_id: 'q-987',
   about_url: 'https://ccbabylife.com/about',
   site_url: 'https://ccbabylife.com',
-  line_official_id: '@ccbabylife',
+  line_official_id: '@708zsvtj',
   phone: '02-1234-5678',
   referral_code: 'XIAO-FANG',
 }

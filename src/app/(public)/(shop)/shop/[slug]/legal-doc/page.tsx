@@ -176,7 +176,7 @@ export default async function ProductLegalDocPage({ params }: Props) {
               我們將協助處理（含全額退費 + 退貨運費由本店負擔）。
             </p>
             <p className="text-[11px] text-ink-soft mt-2">
-              熙熙初日｜日系選物店 · 統一編號 60766849 · LINE @ccbabylife · hello@ccbabylife.com
+              熙熙初日｜日系選物店 · 統一編號 60766849 · LINE @708zsvtj · hello@ccbabylife.com
             </p>
           </section>
         </div>

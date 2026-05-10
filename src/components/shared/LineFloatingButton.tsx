@@ -1,8 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-
-const LINE_OA_URL = process.env.NEXT_PUBLIC_LINE_OA_URL ?? 'https://line.me/R/ti/p/@ccbabylife'
+import { LINE_OA_URL } from '@/lib/line-oa'
 
 export function LineFloatingButton() {
   const pathname = usePathname()

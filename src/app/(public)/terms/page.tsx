@@ -181,7 +181,7 @@ export default function TermsPage() {
           熙熙初日｜日系選物店<br />
           統一編號：60766849<br />
           Email：<a href="mailto:hello@ccbabylife.com">hello@ccbabylife.com</a><br />
-          LINE 官方帳號：@ccbabylife（待認證）
+          LINE 官方帳號：@708zsvtj
         </p>
       </div>
 
