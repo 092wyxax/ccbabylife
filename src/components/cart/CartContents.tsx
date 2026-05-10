@@ -19,17 +19,22 @@ export function CartContents() {
   const remove = useCartStore((s) => s.remove)
   const clear = useCartStore((s) => s.clear)
   const totals = useCartStore((s) => s.totals)
-  const saveForLater = useWishlistStore((s) => {
-    return (item: {
-      productId: string
-      slug: string
-      nameZh: string
-      priceTwd: number
-      imagePath: string | null
-    }) => {
-      if (!s.has(item.productId)) s.toggle(item)
-    }
-  })
+
+  // Don't subscribe via a selector that returns a fresh closure every
+  // render — that produces a new reference each call which makes
+  // useSyncExternalStore think the snapshot changed, triggering an
+  // infinite render loop under React 19. Read the store imperatively
+  // inside the handler instead.
+  const saveForLater = (item: {
+    productId: string
+    slug: string
+    nameZh: string
+    priceTwd: number
+    imagePath: string | null
+  }) => {
+    const s = useWishlistStore.getState()
+    if (!s.has(item.productId)) s.toggle(item)
+  }
 
   useEffect(() => setMounted(true), [])
 
