@@ -19,7 +19,7 @@ export function organizationLd() {
     name: ORG.name,
     url: ORG.url,
     logo: `${ORG.url}/favicon.ico`,
-    description: '1 歲娃媽親身試用、嚴選日系好物、不賣需查驗登記商品',
+    description: '1 歲寶寶的媽媽親身試用、嚴選日系好物、不賣需查驗登記商品',
   }
 }
 

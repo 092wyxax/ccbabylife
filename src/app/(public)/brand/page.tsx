@@ -41,7 +41,7 @@ export default async function BrandsPage() {
           我們選的品牌
         </h1>
         <p className="text-ink-soft text-sm sm:text-base leading-relaxed max-w-2xl">
-          每一個出現在這裡的品牌，都是我家娃實際在用的、或日本婦產科出院贈品內的常駐名單。
+          每一個出現在這裡的品牌，都是我家寶寶實際在用的、或日本婦產科出院贈品內的常駐名單。
           不是「日本品牌就好」，而是「**這個品牌的這個產品，比台灣本地能買到的版本更好**」。
         </p>
       </header>

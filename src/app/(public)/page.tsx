@@ -14,8 +14,8 @@ const KANJI_NUM = ['一', '二', '三', '四', '五', '六', '七', '八', '九'
 
 const VALUE_PROPS = [
   {
-    title: '娃媽親身試用',
-    desc: '我家娃日常用著的東西，才會出現在這裡。每件商品的「使用心得」是真實感受，含優缺點。',
+    title: '媽媽親身試用',
+    desc: '我家寶寶日常用著的東西，才會出現在這裡。每件商品的「使用心得」是真實感受，含優缺點。',
   },
   {
     title: '預購制 · 不囤貨',
@@ -142,7 +142,7 @@ export default async function HomePage() {
           <div>
             <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-2">FEATURED · 今週のおすすめ</p>
             <h2 className="font-serif text-2xl sm:text-3xl tracking-wide">本週嚴選</h2>
-            <p className="text-ink-soft text-sm mt-2">娃媽用過 / 朋友親自挑回</p>
+            <p className="text-ink-soft text-sm mt-2">媽媽用過 / 朋友親自挑回</p>
           </div>
           <Link href="/shop" className="text-sm text-ink-soft hover:text-accent">
             看全部 →

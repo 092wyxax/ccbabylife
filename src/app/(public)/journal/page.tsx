@@ -4,7 +4,7 @@ import { imageUrl } from '@/lib/image'
 
 export const metadata = {
   title: '日系選物筆記',
-  description: '日系選物觀點、品牌觀察、娃媽真實使用心得。',
+  description: '日系選物觀點、品牌觀察、媽媽真實使用心得。',
 }
 
 export default async function JournalPage() {

@@ -364,7 +364,7 @@ function TrialNotesSection({
     return (
       <section className="mt-8 p-6 bg-cream-100 rounded-md border border-line">
         <h2 className="font-serif text-lg mb-3">
-          {product.minAgeMonths != null ? '我家娃使用心得' : '使用心得'}
+          {product.minAgeMonths != null ? '我家寶寶使用心得' : '使用心得'}
         </h2>
         <p className="text-sm leading-relaxed text-ink/90 whitespace-pre-wrap">
           {product.useExperience}
@@ -380,7 +380,7 @@ function TrialNotesSection({
     <section className="mt-8 p-6 bg-cream-100 rounded-md border border-line">
       <header className="flex items-baseline justify-between mb-4 flex-wrap gap-2">
         <h2 className="font-serif text-lg">
-          📝 {product.minAgeMonths != null ? '娃媽 14 天試用筆記' : '14 天試用筆記'}
+          📝 {product.minAgeMonths != null ? '媽媽 14 天試用筆記' : '14 天試用筆記'}
         </h2>
         {ratingDisplay && (
           <p className="text-sm">

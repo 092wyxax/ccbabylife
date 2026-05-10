@@ -59,7 +59,7 @@ const SAMPLE_PRODUCTS: SampleProduct[] = [
     stockType: 'preorder',
     stockQuantity: 0,
     description: '日本貝親經典純棉紗布巾，吸水性佳、洗多次不變形。一組 10 入適合新生兒到幼兒期使用。',
-    useExperience: '我家娃從新生兒用到 1 歲半。\n優點是吸水快、洗多次不變形。\n缺點是純白色易染色，要分洗。\n適合：新生兒、純棉敏感肌寶寶。',
+    useExperience: '我家寶寶從新生兒用到 1 歲半。\n優點是吸水快、洗多次不變形。\n缺點是純白色易染色，要分洗。\n適合：新生兒、純棉敏感肌寶寶。',
     imageUrl: 'https://images.unsplash.com/photo-1522771930-78848d9293e8?w=800&h=800&fit=crop',
   },
   {
@@ -77,7 +77,7 @@ const SAMPLE_PRODUCTS: SampleProduct[] = [
     stockType: 'preorder',
     stockQuantity: 0,
     description: '矽膠軟硬適中，表面有起伏紋路設計。日本 Combi 出品，符合 BSMI 標準。',
-    useExperience: '我家娃從 4 個月開始用。\n優點：軟硬剛好、香蕉造型好抓握、可冷藏舒緩牙齦。\n缺點：吊環設計繫在推車上會稍鬆，需自加束帶。\n適合：4–18 個月開始長牙的寶寶。',
+    useExperience: '我家寶寶從 4 個月開始用。\n優點：軟硬剛好、香蕉造型好抓握、可冷藏舒緩牙齦。\n缺點：吊環設計繫在推車上會稍鬆，需自加束帶。\n適合：4–18 個月開始長牙的寶寶。',
     imageUrl: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=800&h=800&fit=crop',
   },
   {
@@ -95,7 +95,7 @@ const SAMPLE_PRODUCTS: SampleProduct[] = [
     stockType: 'in_stock',
     stockQuantity: 8,
     description: '從吸管杯到直飲杯三階段轉換，適合 6 個月以上寶寶練習自主喝水。耐摔、可拆洗。',
-    useExperience: '我家娃 7 個月開始用，1 歲多還在用。\n優點：杯底防滑、漏水機率低、零件好洗。\n缺點：吸管偶爾會被咬扁，要備換管。\n推薦給戒奶瓶過渡期的寶寶。',
+    useExperience: '我家寶寶 7 個月開始用，1 歲多還在用。\n優點：杯底防滑、漏水機率低、零件好洗。\n缺點：吸管偶爾會被咬扁，要備換管。\n推薦給戒奶瓶過渡期的寶寶。',
     imageUrl: 'https://images.unsplash.com/photo-1591561954555-607968c989ab?w=800&h=800&fit=crop',
   },
   {
@@ -113,7 +113,7 @@ const SAMPLE_PRODUCTS: SampleProduct[] = [
     stockType: 'preorder',
     stockQuantity: 0,
     description: '弱酸性、無香料、無酒精。新生兒可用，泡沫綿密。日本本土版包裝。',
-    useExperience: '我家娃用了一年多，沒過敏。\n泡沫好沖、不澀眼。\n大瓶補充裝比小瓶划算。',
+    useExperience: '我家寶寶用了一年多，沒過敏。\n泡沫好沖、不澀眼。\n大瓶補充裝比小瓶划算。',
     imageUrl: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800&h=800&fit=crop',
   },
   {
@@ -131,7 +131,7 @@ const SAMPLE_PRODUCTS: SampleProduct[] = [
     stockType: 'preorder',
     stockQuantity: 0,
     description: '可夾、可立、可掛三用。3 段風速，靜音設計不嚇到寶寶。',
-    useExperience: '夏天救星。我家娃推車外出必備。\n注意：扇葉是矽膠材質，娃手伸進去也不會傷。\n但充電線單獨買比較好。',
+    useExperience: '夏天救星。我家寶寶推車外出必備。\n注意：扇葉是矽膠材質，寶寶手伸進去也不會傷。\n但充電線單獨買比較好。',
     imageUrl: 'https://images.unsplash.com/photo-1517256064527-09c73fc73e38?w=800&h=800&fit=crop',
   },
   {
@@ -149,7 +149,7 @@ const SAMPLE_PRODUCTS: SampleProduct[] = [
     stockType: 'preorder',
     stockQuantity: 0,
     description: '雙層分隔設計，上層放餅乾、下層放葡萄乾。耐摔不易破。',
-    useExperience: '出門必帶。\n我家娃會自己抓著吃。\n小提醒：洗碗機可以洗，但建議手洗保色。',
+    useExperience: '出門必帶。\n我家寶寶會自己抓著吃。\n小提醒：洗碗機可以洗，但建議手洗保色。',
     imageUrl: 'https://images.unsplash.com/photo-1519824145371-296894a0daa9?w=800&h=800&fit=crop',
   },
   {
@@ -185,7 +185,7 @@ const SAMPLE_PRODUCTS: SampleProduct[] = [
     stockType: 'preorder',
     stockQuantity: 0,
     description: '99% 純水、無香料、無酒精。蓋子設計不漏水，柔軟厚實。',
-    useExperience: '我家娃從新生兒用到現在。\n比台灣藥局版本厚、不容易破。\n包裝蓋偶爾會卡住，是小缺點。',
+    useExperience: '我家寶寶從新生兒用到現在。\n比台灣藥局版本厚、不容易破。\n包裝蓋偶爾會卡住，是小缺點。',
     imageUrl: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=800&h=800&fit=crop',
   },
 ]
