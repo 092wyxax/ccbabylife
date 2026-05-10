@@ -3,8 +3,8 @@ import { listPublishedPosts } from '@/server/services/JournalService'
 import { imageUrl } from '@/lib/image'
 
 export const metadata = {
-  title: '部落格',
-  description: '娃媽真心話 + 日系選物觀點',
+  title: '日系選物筆記',
+  description: '日系選物觀點、品牌觀察、娃媽真實使用心得。',
 }
 
 export default async function JournalPage() {
@@ -14,7 +14,7 @@ export default async function JournalPage() {
     <div className="mx-auto max-w-4xl px-4 sm:px-6 py-12">
       <header className="mb-12">
         <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-3">JOURNAL · 雑記帖</p>
-        <h1 className="font-serif text-3xl sm:text-4xl mb-3 tracking-wide">娃媽真心話</h1>
+        <h1 className="font-serif text-3xl sm:text-4xl mb-3 tracking-wide">日系選物筆記</h1>
         <p className="text-ink-soft max-w-2xl leading-relaxed">
           選物觀點、日系品牌觀察、實際使用心得。不寫業配感重的文章。
         </p>

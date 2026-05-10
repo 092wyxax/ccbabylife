@@ -320,7 +320,7 @@ export function CheckoutForm({ prefill, savedAddresses, activeCouponCode }: Prop
             <span>{(t.totalWeightG / 1000).toFixed(2)} kg</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-ink-soft">國際運費（估算）</span>
+            <span className="text-ink-soft">運費（估算）</span>
             <span>
               {overweight ? (
                 '個案'

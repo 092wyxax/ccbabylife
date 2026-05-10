@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { href: '/recommend', label: '月齡推薦' },
   { href: '/brand', label: '品牌' },
   { href: '/trending', label: '日本熱賣榜' },
-  { href: '/journal', label: '部落格' },
+  { href: '/journal', label: '日系選物筆記' },
   { href: '/about', label: '關於我們' },
 ]
 

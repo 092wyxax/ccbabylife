@@ -277,7 +277,7 @@ export default async function HomePage() {
           <div className="flex items-end justify-between mb-10">
             <div>
               <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-2">JOURNAL · 雑記帖</p>
-              <h2 className="font-serif text-2xl sm:text-3xl tracking-wide">娃媽真心話</h2>
+              <h2 className="font-serif text-2xl sm:text-3xl tracking-wide">日系選物筆記</h2>
               <p className="text-ink-soft text-sm mt-2">選物觀點 · 真實使用心得</p>
             </div>
             <Link href="/journal" className="text-sm text-ink-soft hover:text-accent">

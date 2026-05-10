@@ -33,7 +33,7 @@ export default async function JournalDetailPage({ params }: Props) {
   })
   const crumbs = breadcrumbLd([
     { name: '首頁', href: '/' },
-    { name: '部落格', href: '/journal' },
+    { name: '日系選物筆記', href: '/journal' },
     { name: post.title, href: `/journal/${post.slug}` },
   ])
 
@@ -48,7 +48,7 @@ export default async function JournalDetailPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: jsonLdScript(crumbs) }}
       />
       <nav className="text-xs text-ink-soft mb-6">
-        <Link href="/journal" className="hover:text-ink">娃媽真心話</Link>
+        <Link href="/journal" className="hover:text-ink">日系選物筆記</Link>
       </nav>
 
       <header className="mb-8">
@@ -87,7 +87,7 @@ export default async function JournalDetailPage({ params }: Props) {
 
       <div className="mt-16 pt-8 border-t border-line text-sm text-ink-soft">
         <Link href="/journal" className="hover:text-accent font-jp">
-          ← 一覧へ戻る · 回部落格
+          ← 一覧へ戻る · 回筆記列表
         </Link>
       </div>
     </article>

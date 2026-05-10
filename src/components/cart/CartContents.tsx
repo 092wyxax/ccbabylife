@@ -183,7 +183,7 @@ export function CartContents() {
         <CrossSell />
 
         <p className="text-xs text-ink-soft mb-4 leading-relaxed">
-          結帳時將計算實際國際運費（依重量），並寄送 LINE 通知。預購商品依當週批次出貨，
+          結帳時將計算實際運費（依重量），並寄送 LINE 通知。預購商品依當週批次出貨，
           約 10–14 天到貨。
         </p>
 
