@@ -62,7 +62,23 @@ export const products = pgTable(
     sourceUrl: text('source_url'),
     sourcePlatform: text('source_platform', { enum: sourcePlatformEnum }),
     legalCheckPassed: boolean('legal_check_passed').notNull().default(false),
+    /** Legacy single-text legal notes; new fields below take priority for display. */
     legalNotes: text('legal_notes'),
+    legalChineseLabel: text('legal_chinese_label'),
+    legalCategory: text('legal_category'),
+    legalShopPromise: text('legal_shop_promise'),
+    legalShopLimits: text('legal_shop_limits'),
+    legalReturnNote: text('legal_return_note'),
+    /** 14-day trial notes — replaces single-text useExperience for new entries. */
+    trialDay1: text('trial_day_1'),
+    trialDay7: text('trial_day_7'),
+    trialDay14: text('trial_day_14'),
+    trialPros: text('trial_pros').array(),
+    trialCons: text('trial_cons').array(),
+    /** 0–50 representing 0.0–5.0 stars in 0.1 steps. NULL = no rating. */
+    trialRating: integer('trial_rating'),
+    /** "不適合誰用" reverse-recommendation list (PDF1 §2.2). */
+    notSuitableFor: text('not_suitable_for').array(),
     tags: text('tags').array(),
     seoTitle: text('seo_title'),
     seoDescription: text('seo_description'),

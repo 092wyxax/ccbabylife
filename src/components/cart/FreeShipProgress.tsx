@@ -41,6 +41,9 @@ export function FreeShipProgress({ thresholdTwd, className = '' }: Props) {
           style={{ width: `${pct}%` }}
         />
       </div>
+      <p className="text-[11px] text-ink-soft mt-2 leading-relaxed">
+        🍼 母嬰 ＋ 🐾 寵物 同車合併計算，一次寄到家。
+      </p>
     </div>
   )
 }

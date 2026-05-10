@@ -20,6 +20,7 @@ const AUTO_ISSUE_LABEL: Record<CouponAutoIssue, string> = {
   birthday: '生日',
   restock_filled: '補貨完成',
   referral_complete: '推薦成功',
+  line_follow: 'LINE 加好友',
 }
 
 function describeDiscount(c: Coupon): string {

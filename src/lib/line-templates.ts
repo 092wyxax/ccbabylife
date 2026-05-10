@@ -103,6 +103,42 @@ export const LINE_TEMPLATES: LineTemplate[] = [
 預計 {{date_received_jp}} 收到貨。`,
   },
   {
+    id: 'L3-received-jp',
+    triggerLabel: 'L3 訂單狀態：商品到日本倉',
+    channel: 'push',
+    pricedAt: '計費',
+    body: `[訂單 #{{order_number}}]
+
+朋友確認商品已到日本集運倉 ✅
+接下來會集運到台灣，預計 {{date_shipping_intl}} 出口、{{date_arrived_tw}} 抵台。
+
+訂單追蹤：{{tracking_url}}`,
+  },
+  {
+    id: 'L4-shipping-intl',
+    triggerLabel: 'L4 訂單狀態：國際集運中',
+    channel: 'push',
+    pricedAt: '計費',
+    body: `[訂單 #{{order_number}}]
+
+商品已從日本出口、進入國際集運 ✈️
+預計 {{date_arrived_tw}} 抵達基隆港。
+
+跨國運輸期間無法即時追蹤，請耐心等候，到港後會立即通知。`,
+  },
+  {
+    id: 'L4b-arrived-tw',
+    triggerLabel: 'L4b 訂單狀態：台灣到港',
+    channel: 'push',
+    pricedAt: '計費',
+    body: `[訂單 #{{order_number}}]
+
+商品已抵達台灣 🇹🇼
+正在清關 + 入庫整理中，預計 1–2 工作日內安排出貨。
+
+訂單追蹤：{{tracking_url}}`,
+  },
+  {
     id: 'L7-shipped',
     triggerLabel: 'L7 訂單狀態：已出貨',
     channel: 'push',
@@ -114,6 +150,19 @@ export const LINE_TEMPLATES: LineTemplate[] = [
 預計 {{date_arrival}} 送達。請保持手機暢通，宅配會直接聯繫妳。
 
 簽收後若有任何問題，7 天內請告知，我們協助處理。`,
+  },
+  {
+    id: 'L7b-delivered',
+    triggerLabel: 'L7b 訂單狀態：預估到貨 / 完成',
+    channel: 'push',
+    pricedAt: '計費',
+    body: `[訂單 #{{order_number}}]
+
+商品應該已經送達囉 📦
+若有任何問題或想分享開箱心得，歡迎直接回覆這則訊息。
+
+謝謝妳信任熙熙初日 :)
+有空可以給我們留 5 顆星評價：{{tracking_url}}`,
   },
   {
     id: 'L6-payment-reminder',

@@ -10,6 +10,7 @@ export const couponAutoIssueEnum = [
   'birthday',
   'restock_filled',
   'referral_complete',
+  'line_follow',
 ] as const
 export type CouponAutoIssue = (typeof couponAutoIssueEnum)[number]
 

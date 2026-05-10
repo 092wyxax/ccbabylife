@@ -14,7 +14,6 @@ export type ProductFormDefaults = Partial<
     | 'brandId'
     | 'categoryId'
     | 'description'
-    | 'useExperience'
     | 'minAgeMonths'
     | 'maxAgeMonths'
     | 'priceJpy'
@@ -26,7 +25,18 @@ export type ProductFormDefaults = Partial<
     | 'status'
     | 'sourceUrl'
     | 'legalCheckPassed'
-    | 'legalNotes'
+    | 'legalChineseLabel'
+    | 'legalCategory'
+    | 'legalShopPromise'
+    | 'legalShopLimits'
+    | 'legalReturnNote'
+    | 'trialDay1'
+    | 'trialDay7'
+    | 'trialDay14'
+    | 'trialPros'
+    | 'trialCons'
+    | 'trialRating'
+    | 'notSuitableFor'
   >
 >
 
@@ -199,13 +209,69 @@ export function ProductForm({
           defaultValue={initial.description ?? ''}
           error={errs.description}
         />
+      </Section>
+
+      <Section title="14 天試用筆記（差異化武器）">
+        <p className="text-xs text-ink-soft -mt-2">
+          PLAYBOOK 核心：誠實寫日記式試用 + Pros/Cons + 評分。轉換率提升 30-50%、退貨率降 15%。
+        </p>
         <Textarea
-          label="使用心得"
-          name="useExperience"
-          rows={5}
-          defaultValue={initial.useExperience ?? ''}
-          hint="差異化武器：誠實寫缺點 + 適合誰 + 不適合誰。母嬰商品建議以娃媽角度撰寫；寵物 / 一般商品以實際使用者角度。"
-          error={errs.useExperience}
+          label="Day 1 第一次使用印象"
+          name="trialDay1"
+          rows={3}
+          defaultValue={initial.trialDay1 ?? ''}
+          hint="約 200 字，描述開箱 + 第一印象。"
+        />
+        <Textarea
+          label="Day 7 一週後的觀察"
+          name="trialDay7"
+          rows={3}
+          defaultValue={initial.trialDay7 ?? ''}
+        />
+        <Textarea
+          label="Day 14 兩週後的結論"
+          name="trialDay14"
+          rows={3}
+          defaultValue={initial.trialDay14 ?? ''}
+        />
+        <Row>
+          <Textarea
+            label="優點 Pros（一行一項，建議 3 點）"
+            name="trialPros"
+            rows={3}
+            defaultValue={(initial.trialPros ?? []).join('\n')}
+            hint="例：洗 50 次仍不變形"
+          />
+          <Textarea
+            label="缺點 Cons（一行一項，建議 3 點）"
+            name="trialCons"
+            rows={3}
+            defaultValue={(initial.trialCons ?? []).join('\n')}
+            hint="誠實寫，反而提升信任。"
+          />
+        </Row>
+        <Field
+          label="評分（0.0–5.0，可空白）"
+          name="trialRating"
+          type="number"
+          defaultValue={
+            initial.trialRating != null
+              ? (initial.trialRating / 10).toFixed(1)
+              : ''
+          }
+          hint="例：4.0 / 3.5。0.1 為一階。"
+        />
+      </Section>
+
+      <Section title="不適合誰用（反向清單）">
+        <Textarea
+          label="一行一項"
+          name="notSuitableFor"
+          rows={4}
+          defaultValue={(initial.notSuitableFor ?? []).join('\n')}
+          hint={
+            '例：\n寶寶超過 18 個月（建議改買 OOO）\n預算低於 NT$500\n急用（預購 14 天到，急用買台灣現貨）'
+          }
         />
       </Section>
 
@@ -222,18 +288,45 @@ export function ProductForm({
             className="mt-1"
           />
           <span className="text-sm">
-            <span className="font-medium">已對照 docs/LEGAL_GUIDE.md，確認非紅燈品項，可上架販售。</span>
+            <span className="font-medium">已對照 HANDBOOK §4 法規地雷，確認非紅燈品項，可上架販售。</span>
             <span className="block text-ink-soft text-xs mt-0.5">
               紅燈品項一律不上架。狀態設為「上架中」必須勾此選項。
             </span>
           </span>
         </label>
+        <Textarea
+          label="中文標示說明"
+          name="legalChineseLabel"
+          rows={3}
+          defaultValue={initial.legalChineseLabel ?? ''}
+          hint="成分 / 淨重 / 製造商 / 進口商 / 效期。建議搭配實拍照片放在商品圖中。"
+        />
         <Field
-          label="法規備註"
-          name="legalNotes"
-          defaultValue={initial.legalNotes ?? ''}
-          hint="例：純棉、無染料、無 BSMI 必要"
-          error={errs.legalNotes}
+          label="法規分類"
+          name="legalCategory"
+          defaultValue={initial.legalCategory ?? ''}
+          hint="例：非應施檢驗品 / 應施檢驗已通過 BSMI:R12345 / 食藥署備查"
+        />
+        <Textarea
+          label="我們做了什麼"
+          name="legalShopPromise"
+          rows={2}
+          defaultValue={initial.legalShopPromise ?? ''}
+          hint="例：✓ 中文標示完整、✓ 原廠來源、✓ 有效期 6 個月以上"
+        />
+        <Textarea
+          label="我們做不到什麼（誠實揭露）"
+          name="legalShopLimits"
+          rows={2}
+          defaultValue={initial.legalShopLimits ?? ''}
+          hint="例：✗ 原廠保固（非台灣公司貨）"
+        />
+        <Textarea
+          label="退換貨說明"
+          name="legalReturnNote"
+          rows={2}
+          defaultValue={initial.legalReturnNote ?? ''}
+          hint="例：本品為日本平行輸入，售後不適用原廠保固，但本店提供 6 個月換新承諾。"
         />
         <Field
           label="日本來源 URL"

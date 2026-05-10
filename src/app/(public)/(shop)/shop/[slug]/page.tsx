@@ -241,16 +241,13 @@ export default async function ProductDetailPage({ params }: Props) {
             </section>
           )}
 
-          {product.useExperience && (
-            <section className="mt-8 p-6 bg-cream-100 rounded-md border border-line">
-              <h2 className="font-serif text-lg mb-3">
-                {product.minAgeMonths != null ? '我家娃使用心得' : '使用心得'}
-              </h2>
-              <p className="text-sm leading-relaxed text-ink/90 whitespace-pre-wrap">
-                {product.useExperience}
-              </p>
-            </section>
-          )}
+          <TrialNotesSection product={product} />
+
+          <NotSuitableForSection items={product.notSuitableFor} />
+
+          {product.stockType === 'preorder' && <DelayCompensationBlock />}
+
+          <LegalLabelSection product={product} />
 
           <p className="mt-10 text-xs text-ink-soft leading-relaxed">
             本商品為日本平行輸入個人選物。
@@ -337,6 +334,225 @@ export default async function ProductDetailPage({ params }: Props) {
         }}
         outOfStock={!inStock && product.stockType === 'in_stock'}
       />
+    </div>
+  )
+}
+
+function TrialNotesSection({
+  product,
+}: {
+  product: {
+    trialDay1: string | null
+    trialDay7: string | null
+    trialDay14: string | null
+    trialPros: string[] | null
+    trialCons: string[] | null
+    trialRating: number | null
+    useExperience: string | null
+    minAgeMonths: number | null
+  }
+}) {
+  const hasStructured =
+    product.trialDay1 ||
+    product.trialDay7 ||
+    product.trialDay14 ||
+    (product.trialPros && product.trialPros.length > 0) ||
+    (product.trialCons && product.trialCons.length > 0)
+
+  if (!hasStructured) {
+    if (!product.useExperience) return null
+    return (
+      <section className="mt-8 p-6 bg-cream-100 rounded-md border border-line">
+        <h2 className="font-serif text-lg mb-3">
+          {product.minAgeMonths != null ? '我家娃使用心得' : '使用心得'}
+        </h2>
+        <p className="text-sm leading-relaxed text-ink/90 whitespace-pre-wrap">
+          {product.useExperience}
+        </p>
+      </section>
+    )
+  }
+
+  const ratingDisplay =
+    product.trialRating != null ? (product.trialRating / 10).toFixed(1) : null
+
+  return (
+    <section className="mt-8 p-6 bg-cream-100 rounded-md border border-line">
+      <header className="flex items-baseline justify-between mb-4 flex-wrap gap-2">
+        <h2 className="font-serif text-lg">
+          📝 {product.minAgeMonths != null ? '娃媽 14 天試用筆記' : '14 天試用筆記'}
+        </h2>
+        {ratingDisplay && (
+          <p className="text-sm">
+            ⭐ {ratingDisplay} / 5.0
+          </p>
+        )}
+      </header>
+
+      <div className="space-y-4">
+        {product.trialDay1 && (
+          <div>
+            <p className="text-xs text-ink-soft mb-1 font-medium tracking-wider">
+              DAY 1 · 第一次使用印象
+            </p>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap">
+              {product.trialDay1}
+            </p>
+          </div>
+        )}
+        {product.trialDay7 && (
+          <div>
+            <p className="text-xs text-ink-soft mb-1 font-medium tracking-wider">
+              DAY 7 · 一週後的觀察
+            </p>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap">
+              {product.trialDay7}
+            </p>
+          </div>
+        )}
+        {product.trialDay14 && (
+          <div>
+            <p className="text-xs text-ink-soft mb-1 font-medium tracking-wider">
+              DAY 14 · 兩週後的結論
+            </p>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap">
+              {product.trialDay14}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {(product.trialPros?.length || product.trialCons?.length) && (
+        <div className="grid sm:grid-cols-2 gap-4 mt-5 pt-4 border-t border-line/60">
+          {product.trialPros && product.trialPros.length > 0 && (
+            <div>
+              <p className="text-xs text-sage font-medium mb-2 tracking-wider">
+                ✓ PROS
+              </p>
+              <ul className="space-y-1.5 text-sm">
+                {product.trialPros.map((p, i) => (
+                  <li key={i} className="leading-snug">
+                    <span className="text-sage mr-1">✓</span>
+                    {p}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {product.trialCons && product.trialCons.length > 0 && (
+            <div>
+              <p className="text-xs text-warning font-medium mb-2 tracking-wider">
+                ✗ CONS
+              </p>
+              <ul className="space-y-1.5 text-sm">
+                {product.trialCons.map((c, i) => (
+                  <li key={i} className="leading-snug">
+                    <span className="text-warning mr-1">✗</span>
+                    {c}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  )
+}
+
+function NotSuitableForSection({ items }: { items: string[] | null }) {
+  if (!items || items.length === 0) return null
+  return (
+    <section className="mt-6 p-5 rounded-md border border-warning/30 bg-warning/5">
+      <h2 className="font-serif text-base mb-3">🚫 這個產品不適合：</h2>
+      <ul className="space-y-1.5 text-sm">
+        {items.map((item, i) => (
+          <li key={i} className="leading-snug">
+            <span className="text-warning mr-1">✗</span>
+            {item}
+          </li>
+        ))}
+      </ul>
+      <p className="text-[11px] text-ink-soft mt-3 leading-relaxed">
+        我們把不適合的情況寫出來，讓你買得放心。如果不確定適不適合你，
+        歡迎私訊 LINE 詢問。
+      </p>
+    </section>
+  )
+}
+
+function DelayCompensationBlock() {
+  return (
+    <section className="mt-6 p-5 rounded-md border border-line bg-blush-soft/30">
+      <h2 className="font-serif text-base mb-2">⏱ 預購延遲承諾</h2>
+      <ul className="space-y-1 text-sm">
+        <li>
+          ・預計 <strong>10–14 天</strong>到貨
+        </li>
+        <li>
+          ・若延遲超過 <strong>14 天</strong>：每延 1 日全單 <strong>1% 折扣</strong>
+        </li>
+        <li>
+          ・若延遲超過 <strong>21 天</strong>：<strong>100% 退費</strong>
+        </li>
+      </ul>
+      <p className="text-[11px] text-ink-soft mt-3 leading-relaxed">
+        我們把延遲補償寫出來，是因為對自己的時程有信心。
+      </p>
+    </section>
+  )
+}
+
+function LegalLabelSection({
+  product,
+}: {
+  product: {
+    legalChineseLabel: string | null
+    legalCategory: string | null
+    legalShopPromise: string | null
+    legalShopLimits: string | null
+    legalReturnNote: string | null
+  }
+}) {
+  const hasAny =
+    product.legalChineseLabel ||
+    product.legalCategory ||
+    product.legalShopPromise ||
+    product.legalShopLimits ||
+    product.legalReturnNote
+  if (!hasAny) return null
+
+  return (
+    <section className="mt-8 p-6 rounded-md border border-line bg-white">
+      <h2 className="font-serif text-lg mb-4">📋 法規說明</h2>
+      <div className="space-y-4 text-sm">
+        {product.legalChineseLabel && (
+          <Block label="中文標示">{product.legalChineseLabel}</Block>
+        )}
+        {product.legalCategory && (
+          <Block label="法規分類">{product.legalCategory}</Block>
+        )}
+        {product.legalShopPromise && (
+          <Block label="熙熙初日的承諾">{product.legalShopPromise}</Block>
+        )}
+        {product.legalShopLimits && (
+          <Block label="誠實揭露 — 我們做不到">{product.legalShopLimits}</Block>
+        )}
+        {product.legalReturnNote && (
+          <Block label="退換貨">{product.legalReturnNote}</Block>
+        )}
+      </div>
+    </section>
+  )
+}
+
+function Block({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="text-xs text-ink-soft tracking-wider mb-1 font-medium">
+        【{label}】
+      </p>
+      <p className="leading-relaxed whitespace-pre-wrap">{children}</p>
     </div>
   )
 }

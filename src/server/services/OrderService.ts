@@ -27,7 +27,11 @@ import { queueAndSendLine } from '@/server/services/NotificationService'
 const STATUS_TO_TEMPLATE: Partial<Record<OrderStatus, string>> = {
   paid: 'L2-paid',
   sourcing_jp: 'L2-sourcing',
+  received_jp: 'L3-received-jp',
+  shipping_intl: 'L4-shipping-intl',
+  arrived_tw: 'L4b-arrived-tw',
   shipped: 'L7-shipped',
+  completed: 'L7b-delivered',
 }
 
 function formatDateForTemplate(d: Date): string {
@@ -139,6 +143,14 @@ export async function changeStatus(
         received_jp: {
           title: '日本到貨',
           body: `訂單 ${order.orderNumber} 商品已收到，準備寄回台灣。`,
+        },
+        shipping_intl: {
+          title: '國際集運中 ✈️',
+          body: `訂單 ${order.orderNumber} 已從日本出口，預計幾天內抵台。`,
+        },
+        arrived_tw: {
+          title: '台灣到港 🇹🇼',
+          body: `訂單 ${order.orderNumber} 已抵達台灣，整理中。`,
         },
         shipped: {
           title: '已出貨 📦',

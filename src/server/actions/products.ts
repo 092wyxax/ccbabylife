@@ -22,7 +22,6 @@ const productInputSchema = z.object({
   brandId: z.string().uuid().optional().or(z.literal('')),
   categoryId: z.string().uuid().optional().or(z.literal('')),
   description: z.string().optional().or(z.literal('')),
-  useExperience: z.string().optional().or(z.literal('')),
   minAgeMonths: z.coerce.number().int().min(0).max(240).optional(),
   maxAgeMonths: z.coerce.number().int().min(0).max(240).optional(),
   priceJpy: z.coerce.number().int().nonnegative(),
@@ -34,8 +33,37 @@ const productInputSchema = z.object({
   status: z.enum(productStatusEnum),
   sourceUrl: z.string().url().optional().or(z.literal('')),
   legalCheckPassed: z.coerce.boolean(),
-  legalNotes: z.string().optional().or(z.literal('')),
+  // 5-section legal labels (PDF1 §2.2)
+  legalChineseLabel: z.string().optional().or(z.literal('')),
+  legalCategory: z.string().optional().or(z.literal('')),
+  legalShopPromise: z.string().optional().or(z.literal('')),
+  legalShopLimits: z.string().optional().or(z.literal('')),
+  legalReturnNote: z.string().optional().or(z.literal('')),
+  // 14-day trial structure (PDF1 §2.2)
+  trialDay1: z.string().optional().or(z.literal('')),
+  trialDay7: z.string().optional().or(z.literal('')),
+  trialDay14: z.string().optional().or(z.literal('')),
+  trialPros: z.string().optional().or(z.literal('')), // newline-separated, parsed below
+  trialCons: z.string().optional().or(z.literal('')),
+  trialRating: z.string().optional().or(z.literal('')), // "0.0"-"5.0", parsed to 0-50
+  notSuitableFor: z.string().optional().or(z.literal('')),
 })
+
+function splitLines(s: string): string[] | null {
+  const arr = s
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean)
+  return arr.length > 0 ? arr : null
+}
+
+function parseRating(s: string): number | null {
+  if (!s) return null
+  const n = parseFloat(s)
+  if (!Number.isFinite(n)) return null
+  const clamped = Math.max(0, Math.min(5, n))
+  return Math.round(clamped * 10)
+}
 
 function getKeptImagePaths(formData: FormData): string[] {
   return formData.getAll('keepImagePath').map(String).filter(Boolean)
@@ -55,11 +83,16 @@ export type ProductFormState = {
 function parseFormData(formData: FormData) {
   const fields = [
     'slug', 'nameZh', 'nameJp', 'brandId', 'categoryId',
-    'description', 'useExperience',
+    'description',
     'minAgeMonths', 'maxAgeMonths',
     'priceJpy', 'priceTwd', 'costJpy', 'weightG',
     'stockType', 'stockQuantity', 'status',
-    'sourceUrl', 'legalNotes',
+    'sourceUrl',
+    'legalChineseLabel', 'legalCategory', 'legalShopPromise',
+    'legalShopLimits', 'legalReturnNote',
+    'trialDay1', 'trialDay7', 'trialDay14',
+    'trialPros', 'trialCons', 'trialRating',
+    'notSuitableFor',
   ]
   const obj: Record<string, string> = {}
   for (const f of fields) {
@@ -78,7 +111,6 @@ function normalize(input: z.infer<typeof productInputSchema>) {
     brandId: input.brandId || null,
     categoryId: input.categoryId || null,
     description: input.description || null,
-    useExperience: input.useExperience || null,
     minAgeMonths: input.minAgeMonths ?? null,
     maxAgeMonths: input.maxAgeMonths ?? null,
     priceJpy: input.priceJpy,
@@ -90,7 +122,18 @@ function normalize(input: z.infer<typeof productInputSchema>) {
     status: input.status,
     sourceUrl: input.sourceUrl || null,
     legalCheckPassed: input.legalCheckPassed,
-    legalNotes: input.legalNotes || null,
+    legalChineseLabel: input.legalChineseLabel || null,
+    legalCategory: input.legalCategory || null,
+    legalShopPromise: input.legalShopPromise || null,
+    legalShopLimits: input.legalShopLimits || null,
+    legalReturnNote: input.legalReturnNote || null,
+    trialDay1: input.trialDay1 || null,
+    trialDay7: input.trialDay7 || null,
+    trialDay14: input.trialDay14 || null,
+    trialPros: input.trialPros ? splitLines(input.trialPros) : null,
+    trialCons: input.trialCons ? splitLines(input.trialCons) : null,
+    trialRating: input.trialRating ? parseRating(input.trialRating) : null,
+    notSuitableFor: input.notSuitableFor ? splitLines(input.notSuitableFor) : null,
   }
 }
 
