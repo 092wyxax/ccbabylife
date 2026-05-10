@@ -1,5 +1,6 @@
 import 'server-only'
 import { and, asc, eq, gt, isNull, lte, or } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/pg-core'
 import { db } from '@/db/client'
 import {
   thresholdGifts,
@@ -166,17 +167,20 @@ export async function listAddonsForMain(mainProductId: string): Promise<
 export async function listAllAddons(): Promise<
   Array<{ addon: ProductAddon; main: Product | null; sub: Product | null }>
 > {
-  const main = products
-  const sub = products
+  // Self-join the products table twice — must use drizzle alias() so
+  // each join gets a distinct SQL identifier, otherwise Postgres errors
+  // with "table name 'products' specified more than once".
+  const mainProducts = alias(products, 'main_products')
+  const subProducts = alias(products, 'sub_products')
   const rows = await db
     .select({
       addon: productAddons,
-      main,
-      sub,
+      main: mainProducts,
+      sub: subProducts,
     })
     .from(productAddons)
-    .leftJoin(main, eq(main.id, productAddons.mainProductId))
-    .leftJoin(sub, eq(sub.id, productAddons.addonProductId))
+    .leftJoin(mainProducts, eq(mainProducts.id, productAddons.mainProductId))
+    .leftJoin(subProducts, eq(subProducts.id, productAddons.addonProductId))
     .where(eq(productAddons.orgId, DEFAULT_ORG_ID))
     .orderBy(asc(productAddons.sortOrder))
   return rows.map((r) => ({ addon: r.addon, main: r.main, sub: r.sub }))
