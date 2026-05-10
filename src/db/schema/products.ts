@@ -79,6 +79,12 @@ export const products = pgTable(
     trialRating: integer('trial_rating'),
     /** "不適合誰用" reverse-recommendation list (PDF1 §2.2). */
     notSuitableFor: text('not_suitable_for').array(),
+    /** BSMI certification number for applicable goods (e.g., "R12345"). */
+    bsmiCode: text('bsmi_code'),
+    /** SGS / TFDA inspection report reference number. */
+    sgsReportNo: text('sgs_report_no'),
+    /** Supabase storage paths for uploaded inspection PDFs / photos. */
+    inspectionDocPaths: text('inspection_doc_paths').array(),
     tags: text('tags').array(),
     seoTitle: text('seo_title'),
     seoDescription: text('seo_description'),

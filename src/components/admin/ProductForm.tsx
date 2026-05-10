@@ -37,6 +37,8 @@ export type ProductFormDefaults = Partial<
     | 'trialCons'
     | 'trialRating'
     | 'notSuitableFor'
+    | 'bsmiCode'
+    | 'sgsReportNo'
   >
 >
 
@@ -305,8 +307,22 @@ export function ProductForm({
           label="法規分類"
           name="legalCategory"
           defaultValue={initial.legalCategory ?? ''}
-          hint="例：非應施檢驗品 / 應施檢驗已通過 BSMI:R12345 / 食藥署備查"
+          hint="例：非應施檢驗品 / 應施檢驗 / 食藥署備查"
         />
+        <Row>
+          <Field
+            label="BSMI 字號（如有）"
+            name="bsmiCode"
+            defaultValue={initial.bsmiCode ?? ''}
+            hint="例：R12345（會在商品頁顯示連結到標檢局查詢）"
+          />
+          <Field
+            label="SGS / TFDA 報告編號（如有）"
+            name="sgsReportNo"
+            defaultValue={initial.sgsReportNo ?? ''}
+            hint="第三方檢驗報告編號"
+          />
+        </Row>
         <Textarea
           label="我們做了什麼"
           name="legalShopPromise"

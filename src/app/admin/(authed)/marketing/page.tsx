@@ -18,10 +18,15 @@ export default function AdminMarketingPage() {
           </p>
         </Link>
 
-        <div className="bg-cream-100 border border-line rounded-lg p-5 opacity-70 cursor-not-allowed">
-          <h2 className="font-medium mb-1">LINE 群發（Phase 2）</h2>
-          <p className="text-xs text-ink-soft">需 LINE Messaging API channel 已設定</p>
-        </div>
+        <Link
+          href="/admin/marketing/broadcast"
+          className="bg-white border border-line rounded-lg p-5 hover:border-ink transition-colors"
+        >
+          <h2 className="font-medium mb-1">LINE 群發</h2>
+          <p className="text-xs text-ink-soft leading-relaxed">
+            一次寄給所有 OA 粉絲。建議每週 1–2 則，過量會被封鎖。
+          </p>
+        </Link>
 
         <Link
           href="/admin/marketing/coupons"
@@ -33,10 +38,15 @@ export default function AdminMarketingPage() {
           </p>
         </Link>
 
-        <div className="bg-cream-100 border border-line rounded-lg p-5 opacity-70 cursor-not-allowed">
-          <h2 className="font-medium mb-1">Email 群發（Phase 1b 後）</h2>
-          <p className="text-xs text-ink-soft">需 Resend domain 設定完成</p>
-        </div>
+        <Link
+          href="/admin/newsletter/broadcast"
+          className="bg-white border border-line rounded-lg p-5 hover:border-ink transition-colors"
+        >
+          <h2 className="font-medium mb-1">Email 群發</h2>
+          <p className="text-xs text-ink-soft leading-relaxed">
+            寄給所有訂閱者。建議每月 2–3 則，自動附取消訂閱連結。
+          </p>
+        </Link>
       </div>
     </div>
   )

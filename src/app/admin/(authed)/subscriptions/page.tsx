@@ -1,8 +1,8 @@
-import Link from 'next/link'
 import { desc, eq } from 'drizzle-orm'
 import { db } from '@/db/client'
 import { subscriptions, customers } from '@/db/schema'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
+import { adminRunSubscriptionNowAction } from '@/server/actions/subscriptions'
 
 const FREQ_LABEL = {
   monthly: '每月',
@@ -32,8 +32,9 @@ export default async function SubscriptionsAdminPage() {
       <header className="mb-6">
         <h1 className="font-serif text-2xl mb-1">訂閱定期購</h1>
         <p className="text-ink-soft text-sm">
-          客戶可訂閱固定週期的商品（紗布巾、寵物乾糧等）。Cron 在每張訂閱的 nextRunAt
-          自動建單；目前 schema + 後台一覽完備，自動建單邏輯等綠界結帳上線後再開。
+          客戶可訂閱固定週期的商品（紗布巾、寵物乾糧等）。
+          <span className="text-sage">cron 每 10 分鐘檢查一次 nextRunAt</span>，到期時自動建立
+          pending_payment 訂單並通知客戶付款。需要立即試跑可用「立即執行」按鈕。
         </p>
       </header>
 
@@ -54,6 +55,7 @@ export default async function SubscriptionsAdminPage() {
                 <th className="text-left px-4 py-3 font-normal">下次出單</th>
                 <th className="text-right px-4 py-3 font-normal">已執行次數</th>
                 <th className="text-left px-4 py-3 font-normal">狀態</th>
+                <th className="text-right px-4 py-3 font-normal">動作</th>
               </tr>
             </thead>
             <tbody>
@@ -79,6 +81,20 @@ export default async function SubscriptionsAdminPage() {
                       {STATUS_LABEL[sub.status]}
                     </span>
                   </td>
+                  <td className="px-4 py-3 text-right">
+                    {sub.status === 'active' && (
+                      <form action={adminRunSubscriptionNowAction}>
+                        <input type="hidden" name="id" value={sub.id} />
+                        <button
+                          type="submit"
+                          className="text-xs text-ink-soft hover:text-accent"
+                          title="把 nextRunAt 設為現在並立即觸發 dispatcher"
+                        >
+                          立即執行
+                        </button>
+                      </form>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -87,13 +103,14 @@ export default async function SubscriptionsAdminPage() {
       )}
 
       <section className="mt-8 bg-cream-100 border border-line rounded-lg p-6 text-sm leading-relaxed">
-        <p className="font-medium mb-3">下一步開放路線</p>
+        <p className="font-medium mb-3">運作流程</p>
         <ol className="list-decimal list-inside text-ink-soft space-y-1">
-          <li>客戶在商品頁勾「訂閱」並選頻率（每月 / 每兩月 / 每季）</li>
-          <li>結帳通過綠界後寫入 subscriptions（lines = 該訂單品項）</li>
-          <li>Cron 每天檢查 nextRunAt，到期時用 customer.line_user_id /
-            預設地址自動建立新訂單，狀態 pending_payment 等扣款（如使用記帳卡 / token）</li>
-          <li>客戶端 /account/subscriptions 可暫停 / 跳過下個週期 / 取消</li>
+          <li>客戶從商品頁建立訂閱（每月 / 每兩月 / 每季）</li>
+          <li>系統依頻率設定 nextRunAt（30 / 60 / 90 天後）</li>
+          <li>Cron <code className="text-xs bg-white px-1">/api/cron/dispatch-pushes</code>{' '}
+            每 10 分鐘檢查一次到期訂閱</li>
+          <li>到期 → 用當下商品價建立 pending_payment 訂單 + LINE/Email 通知客戶付款</li>
+          <li>客戶端 /account/subscriptions 可暫停 / 還原 / 取消</li>
         </ol>
       </section>
     </div>

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { desc, eq, sql } from 'drizzle-orm'
 import { db } from '@/db/client'
 import { newsletterSubscribers } from '@/db/schema'
@@ -22,11 +23,19 @@ export default async function NewsletterAdminPage() {
 
   return (
     <div className="p-8 max-w-4xl">
-      <header className="mb-6">
-        <h1 className="font-serif text-2xl mb-1">電子報訂閱者</h1>
-        <p className="text-ink-soft text-sm">
-          總計 {agg[0].total} 人 · 目前訂閱中 {agg[0].active} 人
-        </p>
+      <header className="mb-6 flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="font-serif text-2xl mb-1">電子報訂閱者</h1>
+          <p className="text-ink-soft text-sm">
+            總計 {agg[0].total} 人 · 目前訂閱中 {agg[0].active} 人
+          </p>
+        </div>
+        <Link
+          href="/admin/newsletter/broadcast"
+          className="bg-ink text-cream px-4 py-2 rounded-md text-sm hover:bg-accent transition-colors whitespace-nowrap"
+        >
+          + 群發電子報
+        </Link>
       </header>
 
       {rows.length === 0 ? (

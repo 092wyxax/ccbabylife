@@ -2,13 +2,19 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
+import { and, eq } from 'drizzle-orm'
+import { db } from '@/db/client'
+import { subscriptions } from '@/db/schema/subscriptions'
+import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { getCustomerSession } from '@/lib/customer-session'
 import {
   createSubscription,
   pauseSubscription,
   resumeSubscription,
   cancelSubscription,
+  processDueSubscriptions,
 } from '@/server/services/SubscriptionService'
+import { requireRole } from '@/server/services/AdminAuthService'
 
 export type SubscriptionState = { error?: string; success?: string }
 
@@ -67,4 +73,25 @@ export async function cancelSubscriptionAction(formData: FormData): Promise<void
   if (!id) return
   await cancelSubscription(id, session.customerId)
   revalidatePath('/account/subscriptions')
+}
+
+/**
+ * Admin-only: force a subscription to run immediately by setting nextRunAt
+ * to now and invoking the dispatcher. Useful for testing or when a customer
+ * asks for an early run.
+ */
+export async function adminRunSubscriptionNowAction(
+  formData: FormData
+): Promise<void> {
+  await requireRole(['owner', 'manager'])
+  const id = String(formData.get('id') ?? '')
+  if (!id) return
+  await db
+    .update(subscriptions)
+    .set({ nextRunAt: new Date(), updatedAt: new Date() })
+    .where(
+      and(eq(subscriptions.id, id), eq(subscriptions.orgId, DEFAULT_ORG_ID))
+    )
+  await processDueSubscriptions()
+  revalidatePath('/admin/subscriptions')
 }

@@ -512,6 +512,8 @@ function LegalLabelSection({
     legalShopPromise: string | null
     legalShopLimits: string | null
     legalReturnNote: string | null
+    bsmiCode: string | null
+    sgsReportNo: string | null
   }
 }) {
   const hasAny =
@@ -519,7 +521,9 @@ function LegalLabelSection({
     product.legalCategory ||
     product.legalShopPromise ||
     product.legalShopLimits ||
-    product.legalReturnNote
+    product.legalReturnNote ||
+    product.bsmiCode ||
+    product.sgsReportNo
   if (!hasAny) return null
 
   return (
@@ -531,6 +535,35 @@ function LegalLabelSection({
         )}
         {product.legalCategory && (
           <Block label="法規分類">{product.legalCategory}</Block>
+        )}
+        {(product.bsmiCode || product.sgsReportNo) && (
+          <div>
+            <p className="text-xs text-ink-soft tracking-wider mb-1 font-medium">
+              【檢驗證明】
+            </p>
+            <div className="space-y-1">
+              {product.bsmiCode && (
+                <p className="leading-relaxed">
+                  BSMI 字號：
+                  <a
+                    href={`https://www.bsmi.gov.tw/wSite/sp?xdUrl=/wMonitor/site/wMonitor_search.jsp&keyword=${encodeURIComponent(product.bsmiCode)}`}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="font-mono text-accent hover:underline ml-1"
+                  >
+                    {product.bsmiCode}
+                  </a>
+                  <span className="text-ink-soft text-xs ml-2">→ 點擊到標檢局查驗</span>
+                </p>
+              )}
+              {product.sgsReportNo && (
+                <p className="leading-relaxed">
+                  SGS / TFDA 報告編號：
+                  <span className="font-mono ml-1">{product.sgsReportNo}</span>
+                </p>
+              )}
+            </div>
+          </div>
         )}
         {product.legalShopPromise && (
           <Block label="熙熙初日的承諾">{product.legalShopPromise}</Block>

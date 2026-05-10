@@ -92,9 +92,27 @@ export default function AboutPage() {
         <p className="font-jp text-xs tracking-[0.3em] text-accent mb-3">
           法令誠信 · COMPLIANCE
         </p>
-        <h2 className="font-serif text-2xl mb-5 tracking-wide">不販售需查驗登記商品</h2>
+        <h2 className="font-serif text-2xl mb-5 tracking-wide">
+          為什麼熙熙初日不賣奶粉、不賣藥、不賣需要查驗登記的食品？
+        </h2>
 
         <div className="space-y-4 text-sm leading-relaxed">
+          <p>
+            因為《食品安全衛生管理法》第 21 條規定，嬰兒與較大嬰兒配方食品必須經
+            <strong>衛福部查驗登記、核發許可後</strong>才能輸入販售。一張許可證的審查時間是
+            <strong>6 個月</strong>、申請費用是 <strong>3,000 元</strong>，每個品項都要一張。
+          </p>
+          <p>
+            代購、跨境、夾帶 —— 這些字眼背後，是拿你的寶寶當實驗品。
+          </p>
+          <p>
+            我是娃媽。每一樣我們上架的東西，<strong>我家先用 14 天</strong>，
+            然後找來中文標示與第三方檢驗報告，再決定要不要賣給你。
+            我們不會更快、不會更便宜，但你買的每一筆都查得到來歷。
+          </p>
+        </div>
+
+        <div className="space-y-4 text-sm leading-relaxed mt-8 pt-6 border-t border-accent/20">
           <p>我們堅持只販售可合法平行輸入的綠燈品項。我們<strong>不代購</strong>以下商品：</p>
 
           <ul className="list-disc list-inside space-y-1 text-ink-soft">
@@ -106,14 +124,36 @@ export default function AboutPage() {
             <li>武器、刀械、仿冒品、未送審成人用品</li>
           </ul>
 
-          <p>
-            即使客戶私訊詢問，我們會婉拒並說明原因。
-          </p>
+          <p>即使客戶私訊詢問，我們會婉拒並說明原因。</p>
+        </div>
 
-          <p>
-            這是我們與其他日本代購最大的差異 —— 我們選擇<strong>難走但合法</strong>的路。
-            因為我們相信：在母嬰、寵物這類「進到口、貼到身上」的品類，
-            誠信是品牌唯一能長久的根基。
+        <div className="mt-8 pt-6 border-t border-accent/20 bg-white/60 -mx-8 -mb-8 px-8 py-6 rounded-b-lg">
+          <p className="font-medium mb-3">每件商品上架前，我們會核對 3 件事：</p>
+          <ul className="space-y-2 text-sm">
+            <li className="flex gap-2">
+              <span className="text-sage flex-shrink-0">✓</span>
+              <span>
+                <strong>中文標示完整</strong> —
+                成分、淨重、製造商、進口商、效期，全部找得到，並拍照存證。
+              </span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-sage flex-shrink-0">✓</span>
+              <span>
+                <strong>原廠來源、平行輸入</strong> —
+                朋友親自到日本實體 / 官網下單，不是水貨倉、不是黑市。
+              </span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-sage flex-shrink-0">✓</span>
+              <span>
+                <strong>應施檢驗品項</strong>有 BSMI 字號，<strong>食品 / 化妝品</strong>確認非須查驗登記。
+              </span>
+            </li>
+          </ul>
+          <p className="text-xs text-ink-soft mt-4 leading-relaxed">
+            這是我們與其他日本代購最大的差異 —— 選擇<strong>難走但合法</strong>的路。
+            母嬰、寵物這類「進到口、貼到身上」的品類，誠信是品牌唯一能長久的根基。
           </p>
         </div>
       </section>

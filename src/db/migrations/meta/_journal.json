@@ -239,6 +239,13 @@
       "when": 1778500003000,
       "tag": "0033_product_trust_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1778500004000,
+      "tag": "0034_product_inspection_codes",
+      "breakpoints": true
     }
   ]
 }

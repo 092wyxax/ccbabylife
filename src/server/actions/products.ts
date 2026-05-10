@@ -47,6 +47,8 @@ const productInputSchema = z.object({
   trialCons: z.string().optional().or(z.literal('')),
   trialRating: z.string().optional().or(z.literal('')), // "0.0"-"5.0", parsed to 0-50
   notSuitableFor: z.string().optional().or(z.literal('')),
+  bsmiCode: z.string().optional().or(z.literal('')),
+  sgsReportNo: z.string().optional().or(z.literal('')),
 })
 
 function splitLines(s: string): string[] | null {
@@ -93,6 +95,7 @@ function parseFormData(formData: FormData) {
     'trialDay1', 'trialDay7', 'trialDay14',
     'trialPros', 'trialCons', 'trialRating',
     'notSuitableFor',
+    'bsmiCode', 'sgsReportNo',
   ]
   const obj: Record<string, string> = {}
   for (const f of fields) {
@@ -134,6 +137,8 @@ function normalize(input: z.infer<typeof productInputSchema>) {
     trialCons: input.trialCons ? splitLines(input.trialCons) : null,
     trialRating: input.trialRating ? parseRating(input.trialRating) : null,
     notSuitableFor: input.notSuitableFor ? splitLines(input.notSuitableFor) : null,
+    bsmiCode: input.bsmiCode || null,
+    sgsReportNo: input.sgsReportNo || null,
   }
 }
 
