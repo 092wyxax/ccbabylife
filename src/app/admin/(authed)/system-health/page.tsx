@@ -11,7 +11,6 @@ import {
 } from '@/db/schema'
 import { coupons } from '@/db/schema/coupons'
 import { purchases } from '@/db/schema/purchases'
-import { todos } from '@/db/schema/todos'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { requireRole } from '@/server/services/AdminAuthService'
 
@@ -80,7 +79,6 @@ export default async function SystemHealthPage() {
     [postCount],
     [couponCount],
     [purchaseCount],
-    [todoOpen],
     [pushStats],
   ] = await Promise.all([
     db
@@ -99,10 +97,6 @@ export default async function SystemHealthPage() {
     db.select({ value: count() }).from(posts).where(eq(posts.orgId, DEFAULT_ORG_ID)),
     db.select({ value: count() }).from(coupons).where(eq(coupons.orgId, DEFAULT_ORG_ID)),
     db.select({ value: count() }).from(purchases).where(eq(purchases.orgId, DEFAULT_ORG_ID)),
-    db
-      .select({ value: count() })
-      .from(todos)
-      .where(eq(todos.orgId, DEFAULT_ORG_ID)),
     db
       .select({
         queued: sql<number>`count(*) filter (where ${pushLogs.status} = 'queued')::int`,
@@ -152,7 +146,6 @@ export default async function SystemHealthPage() {
           <Stat label="優惠券" value={String(couponCount.value)} />
           <Stat label="進貨單" value={String(purchaseCount.value)} />
           <Stat label="管理員" value={String(adminCount.value)} />
-          <Stat label="待辦中代辦" value={String(todoOpen.value)} />
           <Stat label="待付款訂單" value={String(orderCounts.pending ?? 0)} />
         </div>
       </section>

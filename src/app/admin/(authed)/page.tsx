@@ -17,6 +17,10 @@ import {
   purchaseStatusBadge,
 } from '@/lib/purchase-status'
 import { formatTwd, formatJpy } from '@/lib/format'
+import { requireAdmin } from '@/server/services/AdminAuthService'
+import { WeeklyRhythm } from './_components/WeeklyRhythm'
+import { MonthlyKpi } from './_components/MonthlyKpi'
+import { BoardPanel } from './_components/BoardPanel'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,11 +34,22 @@ const PENDING_SHIP_STATUSES = [
 const ACTIVE_PURCHASE_STATUSES = ['planning', 'submitted', 'received_jp'] as const
 const LOW_STOCK_THRESHOLD = 3
 
-export default async function AdminDashboardPage() {
+interface SearchParams {
+  rhythm?: string
+}
+
+export default async function AdminDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>
+}) {
+  const admin = await requireAdmin()
+  const { rhythm } = await searchParams
+
   const now = new Date()
   const weekStart = new Date(now)
   weekStart.setHours(0, 0, 0, 0)
-  weekStart.setDate(now.getDate() - now.getDay()) // Sunday-start; adjust to ISO week if needed
+  weekStart.setDate(now.getDate() - now.getDay())
 
   const orgWhere = eq(orders.orgId, DEFAULT_ORG_ID)
 
@@ -161,13 +176,16 @@ export default async function AdminDashboardPage() {
   ]
 
   return (
-    <div className="p-8 max-w-6xl">
-      <h1 className="font-serif text-2xl mb-1">儀表板</h1>
-      <p className="text-ink-soft text-sm mb-8">
-        本週起算自週日 {weekStart.toLocaleDateString('zh-TW')}
-      </p>
+    <div className="p-6 sm:p-8 max-w-7xl space-y-8">
+      <header>
+        <h1 className="font-serif text-2xl mb-1">儀表板</h1>
+        <p className="text-ink-soft text-sm">
+          {admin.name} · 本週起算 {weekStart.toLocaleDateString('zh-TW')}
+        </p>
+      </header>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      {/* Row 1 — operational quick stats */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((s) => (
           <Link
             key={s.label}
@@ -177,13 +195,24 @@ export default async function AdminDashboardPage() {
             <p className="text-xs uppercase tracking-widest text-ink-soft mb-2">
               {s.label}
             </p>
-            <p className="text-3xl font-medium">{s.value}</p>
+            <p className="text-3xl font-medium tabular-nums">{s.value}</p>
             <p className="text-xs text-ink-soft mt-2">{s.sub}</p>
           </Link>
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6 mb-8">
+      {/* Row 2 — Weekly rhythm + Monthly KPI */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <WeeklyRhythm admin={admin} selectedRole={rhythm} />
+        </div>
+        <div className="lg:col-span-1">
+          <MonthlyKpi />
+        </div>
+      </div>
+
+      {/* Row 3 — operational lists (待出貨 / 進貨 / 低庫存 / 近5訂單) */}
+      <div className="grid lg:grid-cols-2 gap-6">
         <DashboardCard
           title="待出貨訂單"
           count={pendingShipRows.length}
@@ -205,20 +234,20 @@ export default async function AdminDashboardPage() {
         >
           <ul className="text-sm divide-y divide-line">
             {activePurchaseRows.map((p) => (
-                <li key={p.id} className="py-2 flex items-center justify-between">
-                  <Link href={`/admin/purchases/${p.id}`} className="hover:text-accent">
-                    {p.batchLabel}
-                  </Link>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-ink-soft">
-                      {formatJpy(p.expectedJpyTotal)}
-                    </span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${purchaseStatusBadge(p.status)}`}>
-                      {PURCHASE_STATUS_LABEL[p.status]}
-                    </span>
-                  </div>
-                </li>
-              ))}
+              <li key={p.id} className="py-2 flex items-center justify-between">
+                <Link href={`/admin/purchases/${p.id}`} className="hover:text-accent">
+                  {p.batchLabel}
+                </Link>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-ink-soft">
+                    {formatJpy(p.expectedJpyTotal)}
+                  </span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${purchaseStatusBadge(p.status)}`}>
+                    {PURCHASE_STATUS_LABEL[p.status]}
+                  </span>
+                </div>
+              </li>
+            ))}
           </ul>
         </DashboardCard>
 
@@ -230,25 +259,25 @@ export default async function AdminDashboardPage() {
         >
           <ul className="text-sm divide-y divide-line">
             {lowStockRows.map(({ product, brand }) => (
-                <li key={product.id} className="py-2 flex items-center justify-between">
-                  <div>
-                    <Link href={`/admin/products/${product.id}`} className="hover:text-accent">
-                      {product.nameZh}
-                    </Link>
-                    {brand && <span className="text-xs text-ink-soft ml-2">{brand.nameZh}</span>}
-                  </div>
-                  <span
-                    className={
-                      'text-xs px-2 py-0.5 rounded-full ' +
-                      (product.stockQuantity <= 0
-                        ? 'bg-danger/15 text-danger'
-                        : 'bg-warning/20 text-ink')
-                    }
-                  >
-                    剩 {product.stockQuantity} 件
-                  </span>
-                </li>
-              ))}
+              <li key={product.id} className="py-2 flex items-center justify-between">
+                <div>
+                  <Link href={`/admin/products/${product.id}`} className="hover:text-accent">
+                    {product.nameZh}
+                  </Link>
+                  {brand && <span className="text-xs text-ink-soft ml-2">{brand.nameZh}</span>}
+                </div>
+                <span
+                  className={
+                    'text-xs px-2 py-0.5 rounded-full ' +
+                    (product.stockQuantity <= 0
+                      ? 'bg-danger/15 text-danger'
+                      : 'bg-warning/20 text-ink')
+                  }
+                >
+                  剩 {product.stockQuantity} 件
+                </span>
+              </li>
+            ))}
           </ul>
         </DashboardCard>
 
@@ -260,38 +289,44 @@ export default async function AdminDashboardPage() {
         >
           <ul className="text-sm divide-y divide-line">
             {recentOrders.map(({ order, customer }) => (
-                <li key={order.id} className="py-2 flex items-center justify-between">
-                  <div>
-                    <Link href={`/admin/orders/${order.id}`} className="hover:text-accent font-mono text-xs">
-                      {order.orderNumber}
-                    </Link>
-                    <p className="text-xs text-ink-soft mt-0.5">
-                      {customer?.name ?? customer?.email ?? '—'}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs">{formatTwd(order.total)}</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${statusBadgeClass(order.status)}`}>
-                      {STATUS_LABEL[order.status]}
-                    </span>
-                  </div>
-                </li>
-              ))}
+              <li key={order.id} className="py-2 flex items-center justify-between">
+                <div>
+                  <Link href={`/admin/orders/${order.id}`} className="hover:text-accent font-mono text-xs">
+                    {order.orderNumber}
+                  </Link>
+                  <p className="text-xs text-ink-soft mt-0.5">
+                    {customer?.name ?? customer?.email ?? '—'}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs">{formatTwd(order.total)}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${statusBadgeClass(order.status)}`}>
+                    {STATUS_LABEL[order.status]}
+                  </span>
+                </div>
+              </li>
+            ))}
           </ul>
         </DashboardCard>
       </div>
 
-      <div className="grid sm:grid-cols-3 gap-4">
-        {totals.map((t) => (
-          <div
-            key={t.label}
-            className="bg-cream-100 border border-line rounded-lg p-4 text-center"
-          >
-            <p className="text-xs text-ink-soft mb-1">{t.label}</p>
-            <p className="text-2xl font-medium">{t.value}</p>
-            <p className="text-xs text-ink-soft mt-1">{t.sub}</p>
-          </div>
-        ))}
+      {/* Row 4 — Board + totals */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <BoardPanel admin={admin} />
+        </div>
+        <div className="lg:col-span-1 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3 self-start">
+          {totals.map((t) => (
+            <div
+              key={t.label}
+              className="bg-cream-100 border border-line rounded-lg p-4"
+            >
+              <p className="text-xs text-ink-soft mb-1">{t.label}</p>
+              <p className="text-2xl font-medium tabular-nums">{t.value}</p>
+              <p className="text-xs text-ink-soft mt-1">{t.sub}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )
@@ -352,4 +387,3 @@ function PendingOrderRow({
     </li>
   )
 }
-
