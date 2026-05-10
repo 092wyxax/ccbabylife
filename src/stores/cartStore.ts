@@ -14,6 +14,29 @@ interface CartState {
   totals: () => CartTotals
 }
 
+/**
+ * Validate a single persisted item. Returns null when any required field
+ * is missing or wrong type — callers should drop the item.
+ */
+function isValidCartItem(x: unknown): x is CartItem {
+  if (!x || typeof x !== 'object') return false
+  const it = x as Record<string, unknown>
+  return (
+    typeof it.productId === 'string' &&
+    typeof it.slug === 'string' &&
+    typeof it.nameZh === 'string' &&
+    typeof it.priceTwd === 'number' &&
+    typeof it.weightG === 'number' &&
+    typeof it.quantity === 'number' &&
+    Number.isFinite(it.priceTwd) &&
+    Number.isFinite(it.weightG) &&
+    Number.isFinite(it.quantity) &&
+    it.quantity > 0 &&
+    (it.imagePath === null || typeof it.imagePath === 'string') &&
+    (it.stockType === 'preorder' || it.stockType === 'in_stock')
+  )
+}
+
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
@@ -62,8 +85,32 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: 'nihon-select-cart',
+      version: 2,
+      // Drop persisted state when shape is corrupted or version differs;
+      // start fresh rather than crash the cart page.
+      migrate: (persisted) => {
+        if (!persisted || typeof persisted !== 'object') {
+          return { items: [], hasHydrated: false }
+        }
+        const p = persisted as { items?: unknown }
+        const arr = Array.isArray(p.items) ? p.items : []
+        return {
+          items: arr.filter(isValidCartItem),
+          hasHydrated: false,
+        }
+      },
+      // Belt + suspenders: also re-validate on every merge in case a future
+      // shape change slips through.
+      merge: (persisted, current) => {
+        if (!persisted || typeof persisted !== 'object') return current
+        const p = persisted as { items?: unknown }
+        const arr = Array.isArray(p.items) ? p.items : []
+        return {
+          ...current,
+          items: arr.filter(isValidCartItem),
+        }
+      },
       onRehydrateStorage: () => (state) => {
-        state?.hasHydrated && (state.hasHydrated = true)
         if (state) state.hasHydrated = true
       },
     }

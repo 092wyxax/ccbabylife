@@ -21,6 +21,20 @@ interface WishlistState {
   clear: () => void
 }
 
+function isValidWishlistItem(x: unknown): x is WishlistItem {
+  if (!x || typeof x !== 'object') return false
+  const it = x as Record<string, unknown>
+  return (
+    typeof it.productId === 'string' &&
+    typeof it.slug === 'string' &&
+    typeof it.nameZh === 'string' &&
+    typeof it.priceTwd === 'number' &&
+    Number.isFinite(it.priceTwd) &&
+    typeof it.addedAt === 'number' &&
+    (it.imagePath === null || typeof it.imagePath === 'string')
+  )
+}
+
 export const useWishlistStore = create<WishlistState>()(
   persist(
     (set, get) => ({
@@ -52,6 +66,27 @@ export const useWishlistStore = create<WishlistState>()(
     }),
     {
       name: 'nihon-select-wishlist',
+      version: 2,
+      migrate: (persisted) => {
+        if (!persisted || typeof persisted !== 'object') {
+          return { items: [], hasHydrated: false }
+        }
+        const p = persisted as { items?: unknown }
+        const arr = Array.isArray(p.items) ? p.items : []
+        return {
+          items: arr.filter(isValidWishlistItem),
+          hasHydrated: false,
+        }
+      },
+      merge: (persisted, current) => {
+        if (!persisted || typeof persisted !== 'object') return current
+        const p = persisted as { items?: unknown }
+        const arr = Array.isArray(p.items) ? p.items : []
+        return {
+          ...current,
+          items: arr.filter(isValidWishlistItem),
+        }
+      },
       onRehydrateStorage: () => (state) => {
         if (state) state.hasHydrated = true
       },
