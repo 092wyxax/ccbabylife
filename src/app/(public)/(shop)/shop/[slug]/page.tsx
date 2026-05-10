@@ -247,7 +247,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
           {product.stockType === 'preorder' && <DelayCompensationBlock />}
 
-          <LegalLabelSection product={product} />
+          <LegalLabelSection product={product} slug={product.slug} />
 
           <p className="mt-10 text-xs text-ink-soft leading-relaxed">
             本商品為日本平行輸入個人選物。
@@ -505,6 +505,7 @@ function DelayCompensationBlock() {
 
 function LegalLabelSection({
   product,
+  slug,
 }: {
   product: {
     legalChineseLabel: string | null
@@ -515,6 +516,7 @@ function LegalLabelSection({
     bsmiCode: string | null
     sgsReportNo: string | null
   }
+  slug: string
 }) {
   const hasAny =
     product.legalChineseLabel ||
@@ -528,7 +530,17 @@ function LegalLabelSection({
 
   return (
     <section className="mt-8 p-6 rounded-md border border-line bg-white">
-      <h2 className="font-serif text-lg mb-4">📋 法規說明</h2>
+      <header className="flex items-baseline justify-between gap-3 mb-4 flex-wrap">
+        <h2 className="font-serif text-lg">📋 法規說明</h2>
+        <Link
+          href={`/shop/${slug}/legal-doc`}
+          target="_blank"
+          rel="noopener"
+          className="text-xs text-ink-soft hover:text-accent underline-offset-2 hover:underline"
+        >
+          下載 PDF →
+        </Link>
+      </header>
       <div className="space-y-4 text-sm">
         {product.legalChineseLabel && (
           <Block label="中文標示">{product.legalChineseLabel}</Block>

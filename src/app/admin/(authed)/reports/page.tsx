@@ -3,6 +3,7 @@ import { sql, eq, desc } from 'drizzle-orm'
 import { db } from '@/db/client'
 import { orders, customers } from '@/db/schema'
 import { purchases } from '@/db/schema/purchases'
+import { pushLogs } from '@/db/schema/push_logs'
 import { paymentMethods } from '@/db/schema/procurement_settings'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { formatTwd } from '@/lib/format'
@@ -81,6 +82,53 @@ export default async function AdminReportsPage() {
 
   const maxRevenue = Math.max(1, ...monthly.map((m) => m.revenue))
 
+  // ─── Customer cohort distribution by lifetime purchase count ───
+  const cohortRows = (await db.execute(sql`
+    WITH per_customer AS (
+      SELECT customer_id,
+             count(*)::int AS order_count,
+             sum(total)::int AS spent
+      FROM ${orders}
+      WHERE org_id = ${DEFAULT_ORG_ID}
+        AND status NOT IN ('cancelled', 'refunded', 'pending_payment')
+        AND customer_id IS NOT NULL
+      GROUP BY customer_id
+    )
+    SELECT
+      CASE
+        WHEN order_count = 1 THEN '1'
+        WHEN order_count = 2 THEN '2'
+        WHEN order_count BETWEEN 3 AND 5 THEN '3-5'
+        ELSE '6+'
+      END AS bucket,
+      count(*)::int AS customers,
+      sum(spent)::int AS revenue
+    FROM per_customer
+    GROUP BY bucket
+    ORDER BY bucket
+  `)) as Array<{ bucket: string; customers: number; revenue: number }>
+
+  const totalLtvCustomers = cohortRows.reduce((s, c) => s + c.customers, 0)
+  const totalLtvRevenue = cohortRows.reduce((s, c) => s + c.revenue, 0)
+  const avgLtv =
+    totalLtvCustomers > 0
+      ? Math.round(totalLtvRevenue / totalLtvCustomers)
+      : 0
+
+  // ─── Push notification stats (last 30 days) ───
+  const pushStats = await db
+    .select({
+      channel: pushLogs.channel,
+      sent: sql<number>`count(*) filter (where ${pushLogs.status} = 'sent')::int`,
+      failed: sql<number>`count(*) filter (where ${pushLogs.status} = 'failed')::int`,
+      total: sql<number>`count(*)::int`,
+    })
+    .from(pushLogs)
+    .where(
+      sql`${pushLogs.orgId} = ${DEFAULT_ORG_ID} AND ${pushLogs.createdAt} > (now() - interval '30 days')`
+    )
+    .groupBy(pushLogs.channel)
+
   // ─────── Procurement reports ───────
   const purchaseMonthlyRows = (await db.execute(sql`
     SELECT
@@ -153,11 +201,12 @@ export default async function AdminReportsPage() {
         </p>
       </header>
 
-      <section className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-8">
+      <section className="grid sm:grid-cols-2 lg:grid-cols-6 gap-3 mb-8">
         <Stat label="總訂單數" value={String(o.totalOrders)} />
         <Stat label="累積營收" value={formatTwd(o.revenue)} />
         <Stat label="近 30 天營收" value={formatTwd(o.last30Revenue)} />
         <Stat label="平均客單價" value={formatTwd(o.avgOrderValue)} />
+        <Stat label="平均 LTV" value={formatTwd(avgLtv)} />
         <Stat label="取消率" value={`${o.cancelRate}%`} />
       </section>
 
@@ -184,6 +233,116 @@ export default async function AdminReportsPage() {
             ))}
           </ul>
         )}
+      </section>
+
+      {/* ─── Customer cohort distribution ─── */}
+      <section className="bg-white border border-line rounded-lg p-5 mb-8">
+        <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-3">
+          客戶複購分群（依累計訂單數）
+        </h2>
+        {cohortRows.length === 0 ? (
+          <p className="text-sm text-ink-soft py-4 text-center">尚無客戶資料</p>
+        ) : (
+          <>
+            <table className="w-full text-sm">
+              <thead className="text-ink-soft">
+                <tr>
+                  <th className="text-left font-normal py-2">購買次數</th>
+                  <th className="text-right font-normal py-2">客戶數</th>
+                  <th className="text-right font-normal py-2">客戶佔比</th>
+                  <th className="text-right font-normal py-2">營收貢獻</th>
+                  <th className="text-right font-normal py-2">營收佔比</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cohortRows.map((c) => {
+                  const custPct =
+                    totalLtvCustomers > 0
+                      ? Math.round((100 * c.customers) / totalLtvCustomers)
+                      : 0
+                  const revPct =
+                    totalLtvRevenue > 0
+                      ? Math.round((100 * c.revenue) / totalLtvRevenue)
+                      : 0
+                  return (
+                    <tr key={c.bucket} className="border-t border-line">
+                      <td className="py-2">{c.bucket} 次</td>
+                      <td className="py-2 text-right tabular-nums">
+                        {c.customers}
+                      </td>
+                      <td className="py-2 text-right tabular-nums text-ink-soft">
+                        {custPct}%
+                      </td>
+                      <td className="py-2 text-right tabular-nums">
+                        {formatTwd(c.revenue)}
+                      </td>
+                      <td className="py-2 text-right tabular-nums text-ink-soft">
+                        {revPct}%
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+            <p className="text-[11px] text-ink-soft mt-3 leading-relaxed">
+              健康值：3+ 次客戶應貢獻 &gt; 50% 營收。若 1 次客戶 &gt; 70% 表示沒有黏性。
+              PLAYBOOK 目標 M6 LTV/CAC ≥ 8。
+            </p>
+          </>
+        )}
+      </section>
+
+      {/* ─── Push notifications (last 30d) ─── */}
+      <section className="bg-white border border-line rounded-lg p-5 mb-8">
+        <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-3">
+          推播效能（近 30 天）
+        </h2>
+        {pushStats.length === 0 ? (
+          <p className="text-sm text-ink-soft py-4 text-center">
+            近 30 天無推播紀錄
+          </p>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="text-ink-soft">
+              <tr>
+                <th className="text-left font-normal py-2">渠道</th>
+                <th className="text-right font-normal py-2">總則數</th>
+                <th className="text-right font-normal py-2">成功</th>
+                <th className="text-right font-normal py-2">失敗</th>
+                <th className="text-right font-normal py-2">成功率</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pushStats.map((s) => {
+                const successRate =
+                  s.total > 0 ? Math.round((100 * s.sent) / s.total) : 0
+                return (
+                  <tr key={s.channel} className="border-t border-line">
+                    <td className="py-2">{s.channel.toUpperCase()}</td>
+                    <td className="py-2 text-right tabular-nums">{s.total}</td>
+                    <td className="py-2 text-right tabular-nums text-sage">
+                      {s.sent}
+                    </td>
+                    <td
+                      className={`py-2 text-right tabular-nums ${
+                        s.failed > 0 ? 'text-danger' : 'text-ink-soft'
+                      }`}
+                    >
+                      {s.failed}
+                    </td>
+                    <td className="py-2 text-right tabular-nums">
+                      {successRate}%
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        )}
+        <p className="text-[11px] text-ink-soft mt-3 leading-relaxed">
+          目前只計失敗 / 成功（API 回應）。
+          LINE 點擊率 / 封鎖率須到 LINE Official Account Manager 看官方統計。
+        </p>
       </section>
 
       <section className="grid lg:grid-cols-2 gap-6">
