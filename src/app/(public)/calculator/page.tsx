@@ -1,8 +1,9 @@
 import { CalculatorForm } from './CalculatorForm'
 
 export const metadata = {
-  title: '透明定價試算',
-  description: '輸入日幣售價、重量、品類，即時看到我們的成本、運費、服務費、毛利。',
+  title: '透明定價試算機 — 日幣轉台幣、運費、服務費、利潤公開',
+  description:
+    '輸入日幣售價、重量、品類，即時看到熙熙初日的完整成本拆解：日方價金、國際運費、服務費、利潤率。不藏一毛錢，誠信透明是品牌核心。',
 }
 
 export default function CalculatorPage() {

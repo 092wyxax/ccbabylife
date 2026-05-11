@@ -140,6 +140,25 @@ export function articleLd(p: ArticleLdInput) {
   }
 }
 
+/**
+ * FAQPage schema — helps Google show rich results with collapsible Q/A
+ * and helps AI engines (Perplexity / ChatGPT / Claude) cite the page.
+ */
+export function faqPageLd(items: Array<{ question: string; answer: string }>) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.map((it) => ({
+      '@type': 'Question',
+      name: it.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: it.answer,
+      },
+    })),
+  }
+}
+
 export function breadcrumbLd(items: Array<{ name: string; href: string }>) {
   return {
     '@context': 'https://schema.org',

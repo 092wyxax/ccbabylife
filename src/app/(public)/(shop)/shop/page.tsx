@@ -9,8 +9,9 @@ import { MobileFilterSheet } from '@/components/shop/MobileFilterSheet'
 import { LiveSearchBar } from '@/components/shop/LiveSearchBar'
 
 export const metadata = {
-  title: '所有選物',
-  description: '日本母嬰、寵物選物，每週預購批次',
+  title: '所有選物 — 日本母嬰用品 + 寵物精選',
+  description:
+    '熙熙初日全部日系選物：日本品牌嬰幼用品（包屁衣、奶瓶、紗布巾、固齒器、副食品工具）+ 寵物精選用品。每週日截單、10–14 天到貨，附中文標示與檢驗證明。',
 }
 
 const PAGE_SIZE = 24

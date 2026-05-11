@@ -6,9 +6,9 @@ import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { BRAND_STORIES } from '@/lib/japan-content'
 
 export const metadata = {
-  title: '品牌',
+  title: '日本嬰幼品牌精選 — Pigeon、Combi、Richell、MikiHouse',
   description:
-    '我們嚴選的日本嬰幼用品品牌：Pigeon、Combi、Richell、Doggy Man — 每個品牌的故事與選擇理由。',
+    '熙熙初日嚴選的日本嬰幼用品品牌：Pigeon（貝親）、Combi、Richell（利其爾）、MikiHouse、Doggy Man — 每個品牌的故事、招牌商品、媽媽試用心得與選擇理由。',
 }
 
 export const dynamic = 'force-dynamic'

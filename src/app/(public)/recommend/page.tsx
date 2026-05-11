@@ -3,8 +3,9 @@ import { listProductsByAge } from '@/server/services/ProductService'
 import { ProductGrid } from '@/components/shop/ProductGrid'
 
 export const metadata = {
-  title: '寶寶月齡選物器',
-  description: '輸入寶寶月齡，自動推薦適合的日系選物。',
+  title: '寶寶月齡選物器 — 0–24 個月日系母嬰用品推薦',
+  description:
+    '輸入寶寶月齡（0–24 個月），自動推薦適合的日本品牌母嬰用品：包屁衣、奶瓶、副食品工具、固齒器、紗布巾、安撫玩具。每件商品都有娃媽 14 天試用筆記與不適合誰用的反向清單。',
 }
 
 export const dynamic = 'force-dynamic'

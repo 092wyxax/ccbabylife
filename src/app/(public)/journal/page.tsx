@@ -3,8 +3,9 @@ import { listPublishedPosts } from '@/server/services/JournalService'
 import { imageUrl } from '@/lib/image'
 
 export const metadata = {
-  title: '日系選物筆記',
-  description: '日系選物觀點、品牌觀察、媽媽真實使用心得。',
+  title: '日系選物筆記 — 媽媽真實試用心得、品牌觀察、選購指南',
+  description:
+    '熙熙初日的選物筆記：日本母嬰品牌觀察、紗布巾／奶瓶／副食品工具實測、彌月禮選購指南、寶寶月齡推薦。誠實寫優缺點，不業配、不誇大。',
 }
 
 export default async function JournalPage() {

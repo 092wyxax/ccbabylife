@@ -5,10 +5,12 @@ import {
   FaqReturnsIllustration,
   FaqRegulationsIllustration,
 } from '@/components/shared/BrandIllustrations'
+import { faqPageLd, jsonLdScript } from '@/lib/jsonld'
 
 export const metadata = {
-  title: '常見問題',
-  description: '預購流程、付款、退換貨、法規限制等常見問題',
+  title: '常見問題 — 預購到貨、付款、退換貨、法規',
+  description:
+    '熙熙初日日系選物店常見問題：截單時間、付款方式、退換貨流程、不販售品項（嬰兒奶粉、藥品、處方寵物食品）等法規說明。',
 }
 
 const SECTION_ICON: Record<string, { Icon: React.ComponentType<{ className?: string }>; tone: string }> = {
@@ -90,8 +92,17 @@ const FAQS = [
 ]
 
 export default function FaqPage() {
+  // Flatten all sections into FAQPage JSON-LD
+  const faqLd = faqPageLd(
+    FAQS.flatMap((s) => s.items.map((it) => ({ question: it.q, answer: it.a })))
+  )
+
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(faqLd) }}
+      />
       <p className="font-jp text-xs tracking-[0.3em] text-ink-soft mb-3">FAQ · よくある質問</p>
       <h1 className="font-serif text-4xl mb-8 tracking-wide">常見問題</h1>
 

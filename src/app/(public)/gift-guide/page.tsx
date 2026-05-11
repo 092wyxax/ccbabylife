@@ -3,8 +3,9 @@ import { listGiftProducts, GIFT_TIERS } from '@/server/services/ProductService'
 import { ProductGrid } from '@/components/shop/ProductGrid'
 
 export const metadata = {
-  title: '彌月禮指南',
-  description: '依預算分級選購日系彌月禮，從紗布巾、固齒器到精選玩具。',
+  title: '日系彌月禮指南 — 依預算分級選不撞單的好禮',
+  description:
+    '選彌月禮兩個重點：實用（媽媽真的會用）+ 不撞（避免重複）。從 NT$500 日本紗布巾、NT$1,000 包巾、NT$2,000 固齒器、到 NT$3,000+ 精選玩具，依預算分 4 級。每件商品附中文標示、檢驗報告、媽媽 14 天試用筆記。',
 }
 
 interface Props {
