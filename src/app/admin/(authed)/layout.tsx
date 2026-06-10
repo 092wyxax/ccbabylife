@@ -3,6 +3,11 @@ import { getCurrentAdmin } from '@/server/services/AdminAuthService'
 import type { AdminRole } from '@/db/schema'
 import { AdminShell } from './AdminShell'
 
+// Every authed admin page is per-request (auth + live data), never static.
+// Inherited by all nested routes, so the build never prerenders these pages
+// (and never needs DB connectivity for them at build time).
+export const dynamic = 'force-dynamic'
+
 type NavItem = { href: string; label: string; roles?: AdminRole[] }
 type NavGroup = { label: string; items: NavItem[] }
 
