@@ -13,11 +13,11 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.vercel-scripts.com https://*.vercel-insights.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https:",
       "font-src 'self' https://fonts.gstatic.com data:",
-      "connect-src 'self' https://*.supabase.co https://*.supabase.io wss://*.supabase.co https://*.vercel-insights.com https://access.line.me https://accounts.google.com",
+      "connect-src 'self' https://*.supabase.co https://*.supabase.io wss://*.supabase.co https://access.line.me https://accounts.google.com",
       "frame-src 'self' https://access.line.me https://accounts.google.com",
       "form-action 'self' https://access.line.me https://accounts.google.com https://payment.ecpay.com.tw https://payment-stage.ecpay.com.tw",
       "frame-ancestors 'self'",
@@ -28,6 +28,9 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+  // Standalone output: produces .next/standalone with a minimal server.js so the
+  // Docker image carries only the traced runtime files (deployed on Zeabur).
+  output: 'standalone',
   allowedDevOrigins: ['192.168.0.125', '192.168.*.*', '10.0.*.*'],
   experimental: {
     serverActions: {

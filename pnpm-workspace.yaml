@@ -1,3 +1,10 @@
+# Build-script decisions must be explicit, or pnpm fails CI/Docker installs
+# with ERR_PNPM_IGNORED_BUILDS. Every dependency that ships a build script must
+# be listed in exactly one of the two lists below.
+onlyBuiltDependencies:
+  # sentry-cli binary — needed for source-map upload during `next build`.
+  - '@sentry/cli'
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
+  - esbuild
