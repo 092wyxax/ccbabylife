@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { cookies } from 'next/headers'
+import { redirectToPath } from '@/lib/http-redirect'
 
 /**
  * ECPay's store map POSTs back here with CVSStoreID/CVSStoreName/CVSAddress.
@@ -24,10 +25,10 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  return NextResponse.redirect(new URL('/checkout', req.url))
+  return redirectToPath('/checkout')
 }
 
 // Some ECPay flows GET this URL after picking
-export async function GET(req: NextRequest) {
-  return NextResponse.redirect(new URL('/checkout', req.url))
+export async function GET() {
+  return redirectToPath('/checkout')
 }

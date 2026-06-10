@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { findActiveCouponByCode } from '@/server/services/CouponService'
 import { setActiveCouponCookie } from '@/lib/active-coupon'
+import { redirectToPath } from '@/lib/http-redirect'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,22 +10,22 @@ export async function GET(req: NextRequest) {
   const next = req.nextUrl.searchParams.get('next') || '/shop'
 
   if (!code) {
-    return NextResponse.redirect(new URL('/?coupon-error=missing', req.url))
+    return redirectToPath('/?coupon-error=missing')
   }
 
   const coupon = await findActiveCouponByCode(code)
   if (!coupon) {
-    return NextResponse.redirect(new URL(`/?coupon-error=notfound`, req.url))
+    return redirectToPath(`/?coupon-error=notfound`)
   }
   if (coupon.expiresAt && new Date() > new Date(coupon.expiresAt)) {
-    return NextResponse.redirect(new URL(`/?coupon-error=expired`, req.url))
+    return redirectToPath(`/?coupon-error=expired`)
   }
   if (coupon.maxUses != null && coupon.usedCount >= coupon.maxUses) {
-    return NextResponse.redirect(new URL(`/?coupon-error=used-up`, req.url))
+    return redirectToPath(`/?coupon-error=used-up`)
   }
 
   await setActiveCouponCookie(code)
 
   const target = next.startsWith('/') ? next : '/shop'
-  return NextResponse.redirect(new URL(`${target}?coupon-applied=${code}`, req.url))
+  return redirectToPath(`${target}?coupon-applied=${code}`)
 }

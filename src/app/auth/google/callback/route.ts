@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { and, eq } from 'drizzle-orm'
 import { db } from '@/db/client'
 import { customers } from '@/db/schema'
@@ -6,9 +6,10 @@ import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { setCustomerSession } from '@/lib/customer-session'
 import { issueAutoCoupons } from '@/server/services/AutoCouponService'
+import { redirectToPath } from '@/lib/http-redirect'
 
-function err(req: NextRequest, code: string) {
-  return NextResponse.redirect(new URL(`/account?err=${code}`, req.url))
+function err(_req: NextRequest, code: string) {
+  return redirectToPath(`/account?err=${code}`)
 }
 
 export async function GET(request: NextRequest) {
@@ -65,5 +66,5 @@ export async function GET(request: NextRequest) {
   // We use our own customer-session JWT, not Supabase session, for customers.
   await supabase.auth.signOut()
 
-  return NextResponse.redirect(new URL('/account', request.url))
+  return redirectToPath('/account')
 }

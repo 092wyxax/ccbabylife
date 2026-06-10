@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { cookies } from 'next/headers'
 import { and, eq, or } from 'drizzle-orm'
 import { jwtVerify } from 'jose'
@@ -7,9 +7,10 @@ import { customers } from '@/db/schema'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { setCustomerSession } from '@/lib/customer-session'
 import { issueAutoCoupons } from '@/server/services/AutoCouponService'
+import { redirectToPath } from '@/lib/http-redirect'
 
-function err(req: NextRequest, code: string) {
-  return NextResponse.redirect(new URL(`/account?err=${code}`, req.url))
+function err(_req: NextRequest, code: string) {
+  return redirectToPath(`/account?err=${code}`)
 }
 
 export async function GET(request: NextRequest) {
@@ -132,5 +133,5 @@ export async function GET(request: NextRequest) {
   const next = cookieStore.get('line_oauth_next')?.value
   cookieStore.delete('line_oauth_next')
   const dest = next && next.startsWith('/') ? next : '/account'
-  return NextResponse.redirect(new URL(dest, request.url))
+  return redirectToPath(dest)
 }

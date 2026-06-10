@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import { redirectToPath } from '@/lib/http-redirect'
 
 export async function GET(request: NextRequest) {
   const channelId = process.env.LINE_LOGIN_CHANNEL_ID
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
   if (!channelId || !siteUrl) {
-    return NextResponse.redirect(
-      new URL('/account?err=line-not-configured', request.url)
-    )
+    return redirectToPath('/account?err=line-not-configured')
   }
 
   const state =
