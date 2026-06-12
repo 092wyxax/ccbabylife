@@ -3,13 +3,16 @@ import { generateText, tool, stepCountIs } from 'ai'
 import { z } from 'zod'
 import { and, desc, eq, gte, ilike, inArray, lte, or, sql } from 'drizzle-orm'
 import { db } from '@/db/client'
-import { orders, orderItems, customers, products } from '@/db/schema'
+import { orders, orderItems, customers, products, orderStatusEnum, type OrderStatus } from '@/db/schema'
 import { aiUsageLogs } from '@/db/schema/ai_usage'
 import { lineMessages } from '@/db/schema/line_messages'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { STATUS_LABEL } from '@/lib/order-progress'
+import { canTransition } from '@/lib/order-state-machine'
 import { deepseekChat, isDeepSeekConfigured } from '@/lib/deepseek'
 import { getStoreSettings } from './StoreSettingsService'
+import { listValidNextStatuses } from './OrderService'
+import { findActiveCouponByCode, describeCoupon } from './CouponService'
 
 export class DeepSeekKeyMissingError extends Error {
   constructor() {
@@ -289,13 +292,134 @@ const SYSTEM_PROMPT = `你是「熙熙初日」（預購制日系母嬰選物店
 - 使用者問「怎麼用後台 / 某功能在哪 / 流程怎麼走」時，依下方〈後台功能地圖〉一步一步教學，講清楚要點哪個選單、哪個按鈕。地圖裡沒有的功能就老實說目前沒有，不要發明。
 - 金額一律用 NT$ 格式呈現。
 - 幫忙寫文案（IG 貼文、LINE 群發、商品文）時：品牌調性是「日本媽媽親身試用、誠實不誇大、溫柔專業」，避免浮誇促銷感嘆號連發。
-- 你只有唯讀查詢能力。若使用者要你執行操作（改訂單狀態、發券、出貨），請說明你不能直接操作，並依功能地圖告訴她在哪裡可以做、怎麼做。
+- 你可以「提案」兩種操作：①訂單狀態變更（含出貨流程）用 proposeOrderStatusChange、②發既有優惠券給客戶用 proposeCouponGrant。提案只會產生確認卡片，必須由使用者按卡片上的「執行」才真的生效——你永遠不能自己執行，也絕不可宣稱「已完成/已執行」。提案前先查資料確認對象正確；一次出貨多筆就建立多個提案。
+- 其他操作（退款、改金額、群發、刪除）不能提案，依功能地圖告訴她在後台哪裡操作。
 - 回答盡量短：先講重點數字/結論，需要時再列細節。
 ${ADMIN_GUIDE}`
 
 export interface ChatTurn {
   role: 'user' | 'assistant'
   content: string
+}
+
+/* ---------- Level 2：AI 提案（不執行，產生確認卡片由人按「執行」） ---------- */
+
+export type AiProposal =
+  | {
+      kind: 'order_status'
+      orderId: string
+      orderNumber: string
+      customerName: string | null
+      fromStatus: OrderStatus
+      fromLabel: string
+      toStatus: OrderStatus
+      toLabel: string
+    }
+  | {
+      kind: 'coupon_grant'
+      couponId: string
+      couponCode: string
+      couponDesc: string
+      customers: Array<{ id: string; name: string | null; email: string }>
+    }
+
+/** 提案 tools 用 closure 收集 proposals，與回覆文字一起回給前端渲染確認卡片 */
+function buildProposalTools(proposals: AiProposal[]) {
+  return {
+    proposeOrderStatusChange: tool({
+      description:
+        '提案變更一筆訂單的狀態（出貨流程的每一步都用這個）。不會直接執行——會在對話中產生一張確認卡片，使用者按「執行」才生效。提案前請先用 searchOrders 或 getOrderDetail 確認是哪一筆訂單。',
+      inputSchema: z.object({
+        orderNumber: z.string().min(1).max(60).describe('完整訂單編號'),
+        toStatus: z.enum(orderStatusEnum).describe('目標狀態'),
+      }),
+      execute: async ({ orderNumber, toStatus }) => {
+        const [row] = await db
+          .select({
+            id: orders.id,
+            orderNumber: orders.orderNumber,
+            status: orders.status,
+            customerName: customers.name,
+          })
+          .from(orders)
+          .leftJoin(customers, eq(orders.customerId, customers.id))
+          .where(and(eq(orders.orgId, DEFAULT_ORG_ID), eq(orders.orderNumber, orderNumber)))
+          .limit(1)
+        if (!row) return { ok: false, error: '找不到此訂單編號' }
+        if (!canTransition(row.status, toStatus)) {
+          return {
+            ok: false,
+            error: `狀態不能從「${STATUS_LABEL[row.status]}」直接轉成「${STATUS_LABEL[toStatus]}」`,
+            validNext: listValidNextStatuses(row.status).map((s) => ({
+              status: s,
+              label: STATUS_LABEL[s],
+            })),
+          }
+        }
+        proposals.push({
+          kind: 'order_status',
+          orderId: row.id,
+          orderNumber: row.orderNumber,
+          customerName: row.customerName,
+          fromStatus: row.status,
+          fromLabel: STATUS_LABEL[row.status],
+          toStatus,
+          toLabel: STATUS_LABEL[toStatus],
+        })
+        return {
+          ok: true,
+          summary: `已建立提案：${row.orderNumber}（${row.customerName ?? '未知客戶'}）${STATUS_LABEL[row.status]} → ${STATUS_LABEL[toStatus]}`,
+          note: '請使用者按對話中卡片上的「執行」按鈕確認；執行後系統會自動 LINE 通知客人。',
+        }
+      },
+    }),
+
+    proposeCouponGrant: tool({
+      description:
+        '提案把一張「既有的」優惠券發給客戶。不會直接執行——會產生確認卡片由使用者按「執行」。需要優惠券代碼與客戶關鍵字（姓名或 email）。若要先確認有哪些券或客戶，可先查詢再提案。',
+      inputSchema: z.object({
+        couponCode: z.string().min(1).max(40).describe('既有優惠券的代碼'),
+        customerQuery: z
+          .string()
+          .min(1)
+          .max(100)
+          .describe('客戶姓名或 email 關鍵字（會模糊比對，最多匹配 10 位）'),
+      }),
+      execute: async ({ couponCode, customerQuery }) => {
+        const coupon = await findActiveCouponByCode(couponCode)
+        if (!coupon) {
+          return { ok: false, error: `找不到有效的優惠券「${couponCode}」（可能不存在、已停用或過期）` }
+        }
+        const kw = `%${customerQuery}%`
+        const matched = await db
+          .select({ id: customers.id, name: customers.name, email: customers.email })
+          .from(customers)
+          .where(
+            and(
+              eq(customers.orgId, DEFAULT_ORG_ID),
+              or(ilike(customers.name, kw), ilike(customers.email, kw))
+            )
+          )
+          .limit(10)
+        if (matched.length === 0) {
+          return { ok: false, error: `找不到符合「${customerQuery}」的客戶` }
+        }
+        proposals.push({
+          kind: 'coupon_grant',
+          couponId: coupon.id,
+          couponCode: coupon.code,
+          couponDesc: describeCoupon(coupon),
+          customers: matched,
+        })
+        return {
+          ok: true,
+          summary: `已建立提案：發「${coupon.code}」（${describeCoupon(coupon)}）給 ${matched.length} 位客戶`,
+          matchedCustomers: matched.map((m) => m.name ?? m.email),
+          note: '請使用者核對卡片上的客戶名單後按「執行」；發放後會自動 LINE/Email 通知。',
+        }
+      },
+    }),
+  }
 }
 
 /** 記錄一次呼叫的 token 用量（失敗不影響主流程） */
@@ -322,17 +446,26 @@ async function storeNotesBlock(): Promise<string> {
   return `\n\n店家補充資訊（店主在後台「AI 設定」維護，視為最新且可信）：\n${aiNotes}`
 }
 
-export async function runAdminAssistant(history: ChatTurn[]): Promise<string> {
+export interface AssistantResult {
+  text: string
+  proposals: AiProposal[]
+}
+
+export async function runAdminAssistant(history: ChatTurn[]): Promise<AssistantResult> {
   if (!isDeepSeekConfigured()) throw new DeepSeekKeyMissingError()
+  const proposals: AiProposal[] = []
   const result = await generateText({
     model: deepseekChat(),
     system: SYSTEM_PROMPT + (await storeNotesBlock()),
     messages: history,
-    tools,
+    tools: { ...tools, ...buildProposalTools(proposals) },
     stopWhen: stepCountIs(6),
   })
   await logUsage('chat', result.totalUsage)
-  return result.text || '（沒有產生回覆，請換個方式問問看）'
+  return {
+    text: result.text || '（沒有產生回覆，請換個方式問問看）',
+    proposals,
+  }
 }
 
 /* ---------- 收件匣：AI 草擬客服回覆 ---------- */

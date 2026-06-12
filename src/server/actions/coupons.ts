@@ -13,6 +13,7 @@ import {
   findActiveCouponByCode,
   toggleCouponActive,
   validateCoupon,
+  grantCouponToCustomers,
   type CouponInput,
 } from '@/server/services/CouponService'
 import { couponTypeEnum, couponAutoIssueEnum } from '@/db/schema/coupons'
@@ -246,50 +247,11 @@ export async function grantCouponAction(
     return { error: '單次最多 200 位' }
   }
 
-  // Verify the customers belong to this org
-  const verified = await db
-    .select({ id: customers.id })
-    .from(customers)
-    .where(
-      and(
-        eq(customers.orgId, DEFAULT_ORG_ID),
-        inArray(customers.id, parsed.data.customerIds)
-      )
-    )
-  const verifiedIds = verified.map((v) => v.id)
-
-  // Skip already-granted
-  const existing = await db
-    .select({ customerId: customerCoupons.customerId })
-    .from(customerCoupons)
-    .where(
-      and(
-        eq(customerCoupons.couponId, couponId),
-        inArray(customerCoupons.customerId, verifiedIds)
-      )
-    )
-  const existingSet = new Set(existing.map((e) => e.customerId))
-
-  const toInsert = verifiedIds.filter((id) => !existingSet.has(id))
-  if (toInsert.length > 0) {
-    await db.insert(customerCoupons).values(
-      toInsert.map((id) => ({
-        orgId: DEFAULT_ORG_ID,
-        customerId: id,
-        couponId,
-      }))
-    )
-
-    await notifyCouponGranted(couponId, toInsert).catch((err) => {
-      console.error('[grantCouponAction] notification queue failed:', err)
-    })
-  }
+  // 共用核心：驗證歸屬、去重、寫入、通知（也供 AI 提案執行路徑使用）
+  const result = await grantCouponToCustomers(couponId, parsed.data.customerIds)
 
   revalidatePath(`/admin/marketing/coupons/${couponId}`)
-  return {
-    granted: toInsert.length,
-    alreadyHad: existingSet.size,
-  }
+  return result
 }
 
 function describeCouponInline(c: NonNullable<Awaited<ReturnType<typeof getCouponById>>>): string {
@@ -297,57 +259,6 @@ function describeCouponInline(c: NonNullable<Awaited<ReturnType<typeof getCoupon
   if (c.type === 'percent') return `${c.value}% 折扣`
   if (c.type === 'tiered') return `滿 ${formatTwd(c.minOrderTwd)} 折 ${formatTwd(c.value)}`
   return `折抵 ${formatTwd(c.value)}`
-}
-
-async function notifyCouponGranted(couponId: string, customerIds: string[]) {
-  const coupon = await getCouponById(couponId)
-  if (!coupon) return
-
-  const recipients = await db
-    .select({
-      id: customers.id,
-      name: customers.name,
-      email: customers.email,
-      lineUserId: customers.lineUserId,
-      notificationPrefs: customers.notificationPrefs,
-    })
-    .from(customers)
-    .where(
-      and(
-        eq(customers.orgId, DEFAULT_ORG_ID),
-        inArray(customers.id, customerIds)
-      )
-    )
-
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ccbabylife.com'
-  const desc = describeCouponInline(coupon)
-  const expiresLine = coupon.expiresAt
-    ? `\n有效期限：${new Date(coupon.expiresAt).toLocaleDateString('zh-Hant')}`
-    : ''
-
-  for (const r of recipients) {
-    const body = `你收到一張新優惠券 🎁\n\n代碼：${coupon.code}\n優惠：${desc}${expiresLine}\n\n到會員中心查看：${siteUrl}/account/coupons`
-    const prefs = r.notificationPrefs ?? { line: true, email: true }
-
-    if (prefs.line && r.lineUserId) {
-      await queueAndSendLine({
-        customerId: r.id,
-        templateId: 'coupon.granted',
-        body,
-        payload: { couponId, code: coupon.code },
-      }).catch(() => {})
-    }
-    if (prefs.email) {
-      await enqueuePush({
-        customerId: r.id,
-        channel: 'email',
-        templateId: 'coupon.granted',
-        subject: `你收到一張新優惠券：${coupon.code}`,
-        body,
-        payload: { couponId, code: coupon.code },
-      }).catch(() => {})
-    }
-  }
 }
 
 export async function revokeCouponGrantAction(

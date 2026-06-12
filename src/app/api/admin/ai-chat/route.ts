@@ -30,8 +30,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const text = await runAdminAssistant(parsed.data.messages)
-    return NextResponse.json({ text })
+    const { text, proposals } = await runAdminAssistant(parsed.data.messages)
+    return NextResponse.json({ text, proposals })
   } catch (e) {
     if (e instanceof DeepSeekKeyMissingError) {
       return NextResponse.json({ error: e.message }, { status: 503 })

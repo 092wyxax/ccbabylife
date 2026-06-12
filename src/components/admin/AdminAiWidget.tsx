@@ -1,12 +1,21 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Sparkles, X, Send } from 'lucide-react'
+import { Sparkles, X, Send, ArrowRight, Ticket } from 'lucide-react'
+import type { AiProposal } from '@/server/services/AdminAiService'
 
 interface Turn {
   role: 'user' | 'assistant'
   content: string
+  proposals?: AiProposal[]
 }
+
+type ProposalRunState =
+  | { status: 'idle' }
+  | { status: 'running' }
+  | { status: 'done'; message: string }
+  | { status: 'error'; message: string }
+  | { status: 'dismissed' }
 
 const SUGGESTIONS = [
   '今天有什麼待辦？',
@@ -22,11 +31,13 @@ export function AdminAiWidget() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // key: `${msgIndex}:${proposalIndex}`
+  const [runs, setRuns] = useState<Record<string, ProposalRunState>>({})
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight })
-  }, [messages, loading])
+  }, [messages, loading, runs])
 
   async function send(text: string) {
     const content = text.trim()
@@ -40,14 +51,23 @@ export function AdminAiWidget() {
       const res = await fetch('/api/admin/ai-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // 只送最近 20 輪，避免 payload 無限長大
-        body: JSON.stringify({ messages: next.slice(-20) }),
+        // 只送最近 20 輪文字（提案卡片不需回送）
+        body: JSON.stringify({
+          messages: next.slice(-20).map(({ role, content }) => ({ role, content })),
+        }),
       })
-      const data = (await res.json()) as { text?: string; error?: string }
+      const data = (await res.json()) as {
+        text?: string
+        proposals?: AiProposal[]
+        error?: string
+      }
       if (!res.ok || !data.text) {
         setError(data.error ?? 'AI 回覆失敗，請稍後再試')
       } else {
-        setMessages([...next, { role: 'assistant', content: data.text }])
+        setMessages([
+          ...next,
+          { role: 'assistant', content: data.text, proposals: data.proposals },
+        ])
       }
     } catch {
       setError('連線失敗，請檢查網路後再試')
@@ -56,9 +76,30 @@ export function AdminAiWidget() {
     }
   }
 
+  async function executeProposal(key: string, proposal: AiProposal) {
+    setRuns((r) => ({ ...r, [key]: { status: 'running' } }))
+    try {
+      const res = await fetch('/api/admin/ai-execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ proposal }),
+      })
+      const data = (await res.json()) as { message?: string; error?: string }
+      if (!res.ok || !data.message) {
+        setRuns((r) => ({
+          ...r,
+          [key]: { status: 'error', message: data.error ?? '執行失敗' },
+        }))
+      } else {
+        setRuns((r) => ({ ...r, [key]: { status: 'done', message: data.message! } }))
+      }
+    } catch {
+      setRuns((r) => ({ ...r, [key]: { status: 'error', message: '連線失敗' } }))
+    }
+  }
+
   return (
     <>
-      {/* 浮動按鈕 */}
       {!open && (
         <button
           onClick={() => setOpen(true)}
@@ -70,16 +111,12 @@ export function AdminAiWidget() {
         </button>
       )}
 
-      {/* 對話面板 */}
       {open && (
         <div className="fixed z-50 bg-white border border-line shadow-2xl flex flex-col inset-0 sm:inset-auto sm:bottom-5 sm:right-5 sm:w-[400px] sm:h-[560px] sm:rounded-xl overflow-hidden">
           <header className="flex items-center justify-between px-4 py-3 border-b border-line bg-cream-100 shrink-0">
             <div className="flex items-center gap-2">
               <Sparkles size={16} />
               <span className="text-sm font-medium">AI 小幫手</span>
-              <span className="text-[10px] text-ink-soft border border-line rounded-full px-1.5 py-0.5">
-                查詢版
-              </span>
             </div>
             <button
               onClick={() => setOpen(false)}
@@ -94,7 +131,8 @@ export function AdminAiWidget() {
             {messages.length === 0 && (
               <div className="space-y-3">
                 <p className="text-sm text-ink-soft leading-relaxed">
-                  我可以教妳怎麼用後台、查營收訂單庫存，也能幫忙想文案 ✨
+                  我可以教妳怎麼用後台、查營收訂單庫存、幫忙想文案；
+                  出貨和發券我會先擬好，妳按「執行」才會生效 ✨
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {SUGGESTIONS.map((s) => (
@@ -110,21 +148,39 @@ export function AdminAiWidget() {
               </div>
             )}
 
-            {messages.map((m, i) => (
-              <div
-                key={i}
-                className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
+            {messages.map((m, mi) => (
+              <div key={mi}>
                 <div
-                  className={
-                    'max-w-[85%] px-3.5 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ' +
-                    (m.role === 'user'
-                      ? 'bg-ink text-cream rounded-br-md'
-                      : 'bg-cream-100 text-ink rounded-bl-md')
-                  }
+                  className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  {m.content}
+                  <div
+                    className={
+                      'max-w-[85%] px-3.5 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ' +
+                      (m.role === 'user'
+                        ? 'bg-ink text-cream rounded-br-md'
+                        : 'bg-cream-100 text-ink rounded-bl-md')
+                    }
+                  >
+                    {m.content}
+                  </div>
                 </div>
+
+                {m.proposals?.map((p, pi) => {
+                  const key = `${mi}:${pi}`
+                  const run = runs[key] ?? { status: 'idle' }
+                  if (run.status === 'dismissed') return null
+                  return (
+                    <ProposalCard
+                      key={key}
+                      proposal={p}
+                      run={run}
+                      onExecute={() => executeProposal(key, p)}
+                      onDismiss={() =>
+                        setRuns((r) => ({ ...r, [key]: { status: 'dismissed' } }))
+                      }
+                    />
+                  )
+                })}
               </div>
             ))}
 
@@ -164,5 +220,82 @@ export function AdminAiWidget() {
         </div>
       )}
     </>
+  )
+}
+
+function ProposalCard({
+  proposal,
+  run,
+  onExecute,
+  onDismiss,
+}: {
+  proposal: AiProposal
+  run: ProposalRunState
+  onExecute: () => void
+  onDismiss: () => void
+}) {
+  return (
+    <div className="mt-2 ml-1 mr-6 border border-accent/40 bg-accent/5 rounded-xl p-3.5 text-sm space-y-2.5">
+      {proposal.kind === 'order_status' ? (
+        <>
+          <p className="text-xs text-ink-soft flex items-center gap-1.5">
+            <ArrowRight size={13} /> 訂單狀態變更提案
+          </p>
+          <p className="leading-relaxed">
+            <span className="font-mono text-xs">{proposal.orderNumber}</span>
+            {proposal.customerName && (
+              <span className="text-ink-soft">（{proposal.customerName}）</span>
+            )}
+            <br />
+            <span className="text-ink-soft">{proposal.fromLabel}</span>
+            <span className="mx-1.5">→</span>
+            <span className="font-medium">{proposal.toLabel}</span>
+          </p>
+          <p className="text-[11px] text-ink-soft">執行後系統會自動 LINE 通知客人</p>
+        </>
+      ) : (
+        <>
+          <p className="text-xs text-ink-soft flex items-center gap-1.5">
+            <Ticket size={13} /> 發放優惠券提案
+          </p>
+          <p className="leading-relaxed">
+            <span className="font-mono">{proposal.couponCode}</span>
+            <span className="text-ink-soft">（{proposal.couponDesc}）</span>
+            <br />
+            發給 {proposal.customers.length} 位：
+            {proposal.customers.map((c) => c.name ?? c.email).join('、')}
+          </p>
+          <p className="text-[11px] text-ink-soft">發放後會自動 LINE / Email 通知；已領過的會自動略過</p>
+        </>
+      )}
+
+      {run.status === 'done' ? (
+        <p className="text-xs text-success bg-white border border-line rounded-md px-2.5 py-1.5">
+          {run.message}
+        </p>
+      ) : (
+        <div className="space-y-1.5">
+          {run.status === 'error' && (
+            <p className="text-xs text-danger">{run.message}</p>
+          )}
+          <div className="flex gap-2">
+            <button
+              onClick={onExecute}
+              disabled={run.status === 'running'}
+              className="bg-ink text-cream text-xs px-4 py-1.5 rounded-md hover:bg-accent disabled:opacity-50"
+            >
+              {run.status === 'running' ? '執行中⋯' : '執行'}
+            </button>
+            <button
+              onClick={onDismiss}
+              disabled={run.status === 'running'}
+              className="border border-line text-xs px-3 py-1.5 rounded-md hover:border-ink text-ink-soft disabled:opacity-50"
+            >
+              略過
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
