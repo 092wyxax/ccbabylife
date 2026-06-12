@@ -8,6 +8,7 @@ import { lineMessages } from '@/db/schema/line_messages'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { STATUS_LABEL } from '@/lib/order-progress'
 import { deepseekChat, isDeepSeekConfigured } from '@/lib/deepseek'
+import { getStoreSettings } from './StoreSettingsService'
 
 export class DeepSeekKeyMissingError extends Error {
   constructor() {
@@ -271,11 +272,18 @@ export interface ChatTurn {
   content: string
 }
 
+/** 店家在「AI 設定」頁維護的備忘，附加到 system prompt */
+async function storeNotesBlock(): Promise<string> {
+  const { aiNotes } = await getStoreSettings()
+  if (!aiNotes) return ''
+  return `\n\n店家補充資訊（店主在後台「AI 設定」維護，視為最新且可信）：\n${aiNotes}`
+}
+
 export async function runAdminAssistant(history: ChatTurn[]): Promise<string> {
   if (!isDeepSeekConfigured()) throw new DeepSeekKeyMissingError()
   const result = await generateText({
     model: deepseekChat(),
-    system: SYSTEM_PROMPT,
+    system: SYSTEM_PROMPT + (await storeNotesBlock()),
     messages: history,
     tools,
     stopWhen: stepCountIs(6),
@@ -343,13 +351,14 @@ export async function draftInboxReply(lineUserId: string): Promise<string> {
 
   const result = await generateText({
     model: deepseekChat(),
-    system: `你是「熙熙初日」（預購制日系母嬰選物店）的 LINE 客服小編。根據對話脈絡與客戶訂單資料，草擬「下一句要回給客人的訊息」。
+    system:
+      `你是「熙熙初日」（預購制日系母嬰選物店）的 LINE 客服小編。根據對話脈絡與客戶訂單資料，草擬「下一句要回給客人的訊息」。
 
 要求：
 - 繁體中文（台灣用語）、親切溫柔、像真人小編，可以用 1-2 個適度的 emoji。
 - 直接輸出要傳送的訊息內容本身，不要加任何前綴、引號或說明。
 - 若客人在問訂單進度，引用下方訂單資料的實際狀態回答；資料裡沒有的事不要保證（如確切到貨日）。
-- 控制在 150 字內。`,
+- 控制在 150 字內。` + (await storeNotesBlock()),
     prompt: `客戶：${customer?.name ?? '（未綁定）'}
 近期訂單：
 ${orderContext}

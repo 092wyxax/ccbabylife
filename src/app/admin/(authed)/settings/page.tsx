@@ -74,6 +74,10 @@ export default async function AdminSettingsPage() {
           <Link href="/admin/system-health" className="underline hover:text-accent ml-1">
             系統健康
           </Link>
+          ；AI 小幫手的店家備忘請到
+          <Link href="/admin/settings/ai" className="underline hover:text-accent ml-1">
+            AI 設定
+          </Link>
           。
         </p>
       </section>

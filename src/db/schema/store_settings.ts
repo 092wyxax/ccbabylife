@@ -13,6 +13,8 @@ export const storeSettings = pgTable('store_settings', {
   botRate: numeric('bot_rate', { precision: 8, scale: 4 }).notNull().default('0.225'),
   /** 購物車滿額免運門檻（TWD） */
   freeShipThresholdTwd: integer('free_ship_threshold_twd').notNull().default(2000),
+  /** 店家寫給 AI 小幫手的備忘（公司資訊、政策、口吻偏好），每次對話帶入 */
+  aiNotes: text('ai_notes'),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   updatedByEmail: text('updated_by_email'),
 })
