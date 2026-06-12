@@ -6,6 +6,8 @@ import { useCartStore } from '@/stores/cartStore'
 import { imageUrl } from '@/lib/image'
 import { formatTwd } from '@/lib/format'
 import { shippingFee, FREE_SHIP_THRESHOLD_TWD } from '@/lib/pricing'
+// FREE_SHIP_THRESHOLD_TWD is only the fallback — the live value comes from
+// store settings via the freeShipThresholdTwd prop.
 import { checkoutAction, type CheckoutState } from '@/server/actions/checkout'
 import {
   applyCouponAction,
@@ -31,6 +33,7 @@ interface Props {
   prefill: Prefill
   savedAddresses: CustomerAddress[]
   activeCouponCode: string | null
+  freeShipThresholdTwd?: number
 }
 
 interface AddressFields {
@@ -53,7 +56,12 @@ function addrToFields(a: CustomerAddress): AddressFields {
 
 const couponInitial: ApplyCouponState = {}
 
-export function CheckoutForm({ prefill, savedAddresses, activeCouponCode }: Props) {
+export function CheckoutForm({
+  prefill,
+  savedAddresses,
+  activeCouponCode,
+  freeShipThresholdTwd,
+}: Props) {
   const [mounted, setMounted] = useState(false)
   const items = useCartStore((s) => s.items)
   const totals = useCartStore((s) => s.totals)
@@ -125,7 +133,8 @@ export function CheckoutForm({ prefill, savedAddresses, activeCouponCode }: Prop
         : activeCouponCode
   const couponDiscount = couponState.ok ? (couponState.discount ?? 0) : 0
   const couponFreeShipping = couponState.ok && Boolean(couponState.freeShipping)
-  const reachedFreeShipThreshold = t.subtotal >= FREE_SHIP_THRESHOLD_TWD
+  const reachedFreeShipThreshold =
+    t.subtotal >= (freeShipThresholdTwd ?? FREE_SHIP_THRESHOLD_TWD)
   const finalShip = couponFreeShipping || reachedFreeShipThreshold ? 0 : computedShip
   const total = Math.max(0, t.subtotal + finalShip - couponDiscount)
 

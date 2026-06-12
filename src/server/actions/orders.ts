@@ -353,3 +353,90 @@ export async function updateOrderNotesAction(
   revalidatePath(`/admin/orders/${parsed.data.orderId}`)
   return { success: '已儲存' }
 }
+
+export type AdjustAmountState = { error?: string; success?: string }
+
+const adjustAmountSchema = z.object({
+  orderId: z.string().uuid(),
+  shippingFee: z.coerce.number().int().min(0, '運費不可為負').max(100000),
+  manualAdjustment: z.coerce
+    .number()
+    .int()
+    .min(-100000, '調整金額異常')
+    .max(100000, '調整金額異常'),
+  reason: z.string().min(1, '請填調整原因（會記入稽核）').max(200),
+})
+
+/**
+ * 付款前調整訂單金額：可改運費、加收（超重補收）或折讓。
+ * total 由各組成重算，全程記稽核；付款後一律不可改。
+ */
+export async function adjustOrderAmountAction(
+  _prev: AdjustAmountState,
+  formData: FormData
+): Promise<AdjustAmountState> {
+  const admin = await requireAdmin()
+  const parsed = adjustAmountSchema.safeParse({
+    orderId: formData.get('orderId'),
+    shippingFee: formData.get('shippingFee'),
+    manualAdjustment: formData.get('manualAdjustment') || 0,
+    reason: formData.get('reason'),
+  })
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? '輸入錯誤' }
+
+  const [order] = await db
+    .select()
+    .from(orders)
+    .where(eq(orders.id, parsed.data.orderId))
+    .limit(1)
+  if (!order) return { error: '找不到訂單' }
+  if (order.status !== 'pending_payment' || order.paymentStatus !== 'pending') {
+    return { error: '僅待付款訂單可調整金額（已付款請改走退款／補收流程）' }
+  }
+
+  const newTotal = Math.max(
+    0,
+    order.subtotal +
+      parsed.data.shippingFee +
+      order.tax +
+      parsed.data.manualAdjustment -
+      order.couponDiscount -
+      order.storeCreditUsed
+  )
+
+  await db
+    .update(orders)
+    .set({
+      shippingFee: parsed.data.shippingFee,
+      manualAdjustment: parsed.data.manualAdjustment,
+      total: newTotal,
+      updatedAt: new Date(),
+    })
+    .where(eq(orders.id, order.id))
+
+  await recordAudit({
+    actorType: 'admin',
+    actorId: admin.id,
+    actorLabel: admin.name,
+    action: 'order.amount.adjust',
+    entityType: 'order',
+    entityId: order.id,
+    data: {
+      reason: parsed.data.reason,
+      before: {
+        shippingFee: order.shippingFee,
+        manualAdjustment: order.manualAdjustment,
+        total: order.total,
+      },
+      after: {
+        shippingFee: parsed.data.shippingFee,
+        manualAdjustment: parsed.data.manualAdjustment,
+        total: newTotal,
+      },
+    },
+  })
+
+  revalidatePath(`/admin/orders/${order.id}`)
+  revalidatePath('/admin/orders')
+  return { success: `金額已更新（新總計 NT$${newTotal.toLocaleString()}）` }
+}

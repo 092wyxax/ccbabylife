@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { logoutAction } from '@/server/actions/auth'
 import type { AdminRole } from '@/db/schema'
+import { AdminAiWidget } from '@/components/admin/AdminAiWidget'
 
 type NavItem = { href: string; label: string }
 type NavGroup = { label: string; items: NavItem[] }
@@ -144,6 +145,7 @@ export function AdminShell({ admin, roleLabel, navGroups, children }: Props) {
         </div>
         {children}
       </div>
+      <AdminAiWidget />
     </div>
   )
 }

@@ -6,6 +6,7 @@ import { getCustomerSession } from '@/lib/customer-session'
 import { listAddressesForCustomer } from '@/server/services/AddressService'
 import { getActiveCouponCode } from '@/lib/active-coupon'
 import { findActiveCouponByCode } from '@/server/services/CouponService'
+import { getStoreSettings } from '@/server/services/StoreSettingsService'
 
 export const metadata = {
   title: '結帳',
@@ -40,6 +41,7 @@ export default async function CheckoutPage() {
     }
   }
 
+  const { freeShipThresholdTwd } = await getStoreSettings()
   const cookieCode = await getActiveCouponCode()
   let activeCouponCode: string | null = null
   if (cookieCode) {
@@ -58,6 +60,7 @@ export default async function CheckoutPage() {
         prefill={prefill}
         savedAddresses={savedAddresses}
         activeCouponCode={activeCouponCode}
+        freeShipThresholdTwd={freeShipThresholdTwd}
       />
     </div>
   )

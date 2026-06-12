@@ -9,6 +9,7 @@ import { StatusChangeForm } from '@/components/order/StatusChangeForm'
 import { ResendPaymentLinkButton } from '@/components/order/ResendPaymentLinkButton'
 import { CancelRefundForms } from '@/components/order/CancelRefundForms'
 import { TrackingForm } from '@/components/order/TrackingForm'
+import { AmountAdjustForm } from '@/components/order/AmountAdjustForm'
 import { OrderNotesForm } from '@/components/order/OrderNotesForm'
 import { canTransition } from '@/lib/order-state-machine'
 import { STATUS_LABEL, statusBadgeClass } from '@/lib/order-progress'
@@ -279,6 +280,16 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                 value={`−${formatTwd(order.couponDiscount)}`}
               />
             )}
+            {order.manualAdjustment !== 0 && (
+              <Row
+                label={order.manualAdjustment > 0 ? '加收' : '折讓'}
+                value={
+                  order.manualAdjustment > 0
+                    ? formatTwd(order.manualAdjustment)
+                    : `−${formatTwd(-order.manualAdjustment)}`
+                }
+              />
+            )}
             <div className="pt-2 border-t border-line">
               <Row label="總計" value={formatTwd(order.total)} bold />
             </div>
@@ -288,6 +299,19 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               </p>
             )}
           </section>
+
+          {order.status === 'pending_payment' && order.paymentStatus === 'pending' && (
+            <section className="bg-white border border-line rounded-lg p-5">
+              <h2 className="text-xs uppercase tracking-widest text-ink-soft mb-3">
+                金額調整（付款前）
+              </h2>
+              <AmountAdjustForm
+                orderId={order.id}
+                shippingFee={order.shippingFee}
+                manualAdjustment={order.manualAdjustment}
+              />
+            </section>
+          )}
         </aside>
       </div>
     </div>

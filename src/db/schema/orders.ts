@@ -37,6 +37,8 @@ export const orders = pgTable(
     storeCreditUsed: integer('store_credit_used').notNull().default(0),
     couponCode: text('coupon_code'),
     couponDiscount: integer('coupon_discount').notNull().default(0),
+    /** 後台手動調整（正=加收如超重運費、負=折讓），僅限付款前修改 */
+    manualAdjustment: integer('manual_adjustment').notNull().default(0),
     total: integer('total').notNull(),
     ecpayTradeNo: text('ecpay_trade_no').unique(),
     shippingAddress: jsonb('shipping_address').$type<{

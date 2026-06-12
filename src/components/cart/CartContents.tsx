@@ -12,7 +12,11 @@ import { EmptyCartIllustration } from '@/components/shared/BrandIllustrations'
 import { FreeShipProgress } from './FreeShipProgress'
 import { CrossSell } from './CrossSell'
 
-export function CartContents() {
+export function CartContents({
+  freeShipThresholdTwd,
+}: {
+  freeShipThresholdTwd?: number
+}) {
   const [mounted, setMounted] = useState(false)
   const items = useCartStore((s) => s.items)
   const setQuantity = useCartStore((s) => s.setQuantity)
@@ -178,7 +182,7 @@ export function CartContents() {
           </div>
         </div>
 
-        <FreeShipProgress />
+        <FreeShipProgress thresholdTwd={freeShipThresholdTwd} />
         <GiftProgress />
         <CrossSell />
 

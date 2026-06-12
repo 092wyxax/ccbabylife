@@ -246,6 +246,20 @@
       "when": 1778500004000,
       "tag": "0034_product_inspection_codes",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1781281815420,
+      "tag": "0035_store_settings",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1781281816420,
+      "tag": "0036_order_manual_adjustment",
+      "breakpoints": true
     }
   ]
 }

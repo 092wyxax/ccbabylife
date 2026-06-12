@@ -34,7 +34,7 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
   }
 
   return (
-    <div className="p-8 max-w-7xl">
+    <div className="p-4 sm:p-8 max-w-7xl">
       <header className="mb-6">
         <h1 className="font-serif text-2xl mb-1">訂單管理</h1>
         <p className="text-ink-soft text-sm">共 {result.total} 筆</p>
@@ -75,7 +75,34 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
         </div>
       ) : (
         <>
-          <div className="bg-white border border-line rounded-lg overflow-hidden">
+          {/* 手機：卡片列表（整張可點），桌機：表格 */}
+          <div className="sm:hidden space-y-2">
+            {result.rows.map(({ order, customer }) => (
+              <Link
+                key={order.id}
+                href={`/admin/orders/${order.id}`}
+                className="block bg-white border border-line rounded-lg p-4 active:bg-cream-50"
+              >
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <span className="font-mono text-xs text-ink-soft">{order.orderNumber}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${statusBadgeClass(order.status)}`}>
+                    {STATUS_LABEL[order.status]}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm truncate">
+                    {customer?.name ?? customer?.email ?? '—'}
+                  </span>
+                  <span className="text-sm font-medium shrink-0">{formatTwd(order.total)}</span>
+                </div>
+                <p className="text-[11px] text-ink-soft mt-1">
+                  {new Date(order.createdAt).toLocaleDateString('zh-TW')}
+                </p>
+              </Link>
+            ))}
+          </div>
+
+          <div className="hidden sm:block bg-white border border-line rounded-lg overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-cream-100 text-ink-soft">
                 <tr>

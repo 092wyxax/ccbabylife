@@ -13,6 +13,7 @@ import {
   type ProductEnrichment,
 } from '@/server/services/AIAssistService'
 import { calculatePrice } from '@/lib/pricing'
+import { getStoreSettings } from '@/server/services/StoreSettingsService'
 
 interface Props {
   searchParams: Promise<{ fromUrl?: string }>
@@ -46,10 +47,12 @@ export default async function NewProductPage({ searchParams }: Props) {
       // Suggest TWD price using PRICING_FORMULA (default category 母嬰用品).
       let suggestedTwd: number | undefined
       if (result.weightG) {
+        const { botRate } = await getStoreSettings()
         const calc = calculatePrice({
           priceJpy: result.priceJpy,
           weightG: result.weightG,
           category: 'baby_essentials',
+          botRate,
         })
         if (!calc.needsManualQuote) {
           suggestedTwd = calc.finalTwd

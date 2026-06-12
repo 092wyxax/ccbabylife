@@ -36,3 +36,23 @@ export async function markReadAction(formData: FormData): Promise<void> {
   await markThreadRead(lineUserId)
   revalidatePath('/admin/inbox')
 }
+
+export async function draftReplyAction(
+  lineUserId: string
+): Promise<{ text?: string; error?: string }> {
+  await requireRole(['owner', 'manager', 'ops'])
+  if (!lineUserId) return { error: '缺少 LINE 用戶 ID' }
+  try {
+    const { draftInboxReply } = await import('@/server/services/AdminAiService')
+    const text = await draftInboxReply(lineUserId)
+    return { text }
+  } catch (e) {
+    console.error('[draftReplyAction] failed:', e)
+    return {
+      error:
+        e instanceof Error && e.name === 'DeepSeekKeyMissingError'
+          ? e.message
+          : 'AI 草擬失敗，請稍後再試',
+    }
+  }
+}

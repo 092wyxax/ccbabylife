@@ -5,8 +5,8 @@ import {
   markThreadRead,
   getCustomerByLineUserId,
 } from '@/server/services/LineInboxService'
-import { sendReplyAction } from '@/server/actions/line-inbox'
 import { requireRole } from '@/server/services/AdminAuthService'
+import { ReplyBox } from './ReplyBox'
 
 export const dynamic = 'force-dynamic'
 
@@ -84,26 +84,7 @@ export default async function InboxThreadPage({ params }: Props) {
         ))}
       </div>
 
-      <form
-        action={sendReplyAction}
-        className="bg-white border border-line rounded-lg p-3 flex gap-2"
-      >
-        <input type="hidden" name="lineUserId" value={lineUserId} />
-        <textarea
-          name="text"
-          required
-          rows={2}
-          maxLength={2000}
-          placeholder="輸入回覆訊息⋯"
-          className="flex-1 border border-line rounded-md px-3 py-2 text-sm focus:outline-none focus:border-ink resize-none"
-        />
-        <button
-          type="submit"
-          className="font-jp self-end bg-ink text-cream px-4 py-2.5 rounded-md hover:bg-accent text-sm tracking-wider"
-        >
-          送出
-        </button>
-      </form>
+      <ReplyBox lineUserId={lineUserId} />
 
       <p className="text-xs text-ink-soft mt-3">
         💡 LINE Push API 每個收件人 1 push 額度 / 訊息。免費方案每月 200 push 上限。

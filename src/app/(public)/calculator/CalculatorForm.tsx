@@ -10,7 +10,7 @@ import {
 const formatTwd = (n: number) => `NT$${Math.round(n).toLocaleString()}`
 const formatJpy = (n: number) => `¥${n.toLocaleString()}`
 
-export function CalculatorForm() {
+export function CalculatorForm({ botRate }: { botRate?: number }) {
   const [priceJpy, setPriceJpy] = useState<number>(2980)
   const [weightG, setWeightG] = useState<number>(450)
   const [category, setCategory] = useState<PriceCategory>('baby_essentials')
@@ -18,8 +18,8 @@ export function CalculatorForm() {
 
   const result = useMemo(() => {
     if (priceJpy <= 0 || weightG < 0) return null
-    return calculatePrice({ priceJpy, weightG, category, shippingMode })
-  }, [priceJpy, weightG, category, shippingMode])
+    return calculatePrice({ priceJpy, weightG, category, shippingMode, botRate })
+  }, [priceJpy, weightG, category, shippingMode, botRate])
 
   return (
     <div className="bg-white border border-line rounded-lg p-6 sm:p-8 space-y-5">

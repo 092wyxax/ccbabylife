@@ -4,7 +4,8 @@ import { db } from '@/db/client'
 import { subscriptions, type Subscription } from '@/db/schema/subscriptions'
 import { products, customers, orders, orderItems } from '@/db/schema'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
-import { shippingFee, FREE_SHIP_THRESHOLD_TWD } from '@/lib/pricing'
+import { shippingFee } from '@/lib/pricing'
+import { getStoreSettings } from './StoreSettingsService'
 
 export type Frequency = 'monthly' | 'bimonthly' | 'quarterly'
 
@@ -137,6 +138,7 @@ export async function processDueSubscriptions(): Promise<{
 
   if (dueRows.length === 0) return { matched: 0, ordered: 0, failed: 0 }
 
+  const { freeShipThresholdTwd } = await getStoreSettings()
   let ordered = 0
   let failed = 0
 
@@ -179,7 +181,7 @@ export async function processDueSubscriptions(): Promise<{
       const totalWeight = lineItems.reduce((s, l) => s + l.weight, 0)
       const ship = shippingFee(totalWeight)
       const computedShipBase = ship < 0 ? 0 : ship
-      const computedShip = subtotal >= FREE_SHIP_THRESHOLD_TWD ? 0 : computedShipBase
+      const computedShip = subtotal >= freeShipThresholdTwd ? 0 : computedShipBase
       const total = subtotal + computedShip
 
       const [customer] = await db

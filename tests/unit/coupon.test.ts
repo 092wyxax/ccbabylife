@@ -46,7 +46,8 @@ describe('validateCoupon', () => {
   it('rejects when subtotal below minOrderTwd', () => {
     const r = validateCoupon(mkCoupon({ minOrderTwd: 1000 }), 500)
     expect(r.ok).toBe(false)
-    expect(r.reason).toMatch(/1000/)
+    // message formats the amount with a thousands separator (NT$1,000)
+    expect(r.reason).toMatch(/1,?000/)
   })
 
   it('fixed amount discount', () => {

@@ -1,4 +1,5 @@
 import { CalculatorForm } from './CalculatorForm'
+import { getStoreSettings } from '@/server/services/StoreSettingsService'
 
 export const metadata = {
   title: '透明定價試算機 — 日幣轉台幣、運費、服務費、利潤公開',
@@ -6,7 +7,8 @@ export const metadata = {
     '輸入日幣售價、重量、品類，即時看到熙熙初日的完整成本拆解：日方價金、國際運費、服務費、利潤率。不藏一毛錢，誠信透明是品牌核心。',
 }
 
-export default function CalculatorPage() {
+export default async function CalculatorPage() {
+  const { botRate } = await getStoreSettings()
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 py-12 sm:py-16">
       <header className="text-center mb-10">
@@ -23,7 +25,7 @@ export default function CalculatorPage() {
         </p>
       </header>
 
-      <CalculatorForm />
+      <CalculatorForm botRate={botRate} />
 
       <section className="mt-12 bg-cream-100 border border-line rounded-lg p-6 text-sm">
         <h2 className="font-serif text-lg mb-3">公式說明</h2>
