@@ -10,8 +10,9 @@ interface Turn {
 
 const SUGGESTIONS = [
   '今天有什麼待辦？',
+  '要怎麼幫訂單出貨？',
+  '怎麼上架新商品？',
   '這個月營收多少？',
-  '最近 30 天哪些商品最熱賣？',
   '哪些現貨快沒庫存了？',
 ]
 
@@ -93,7 +94,7 @@ export function AdminAiWidget() {
             {messages.length === 0 && (
               <div className="space-y-3">
                 <p className="text-sm text-ink-soft leading-relaxed">
-                  我可以幫妳查營收、訂單、庫存、熱賣商品，也可以幫忙想文案 ✨
+                  我可以教妳怎麼用後台、查營收訂單庫存，也能幫忙想文案 ✨
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {SUGGESTIONS.map((s) => (
