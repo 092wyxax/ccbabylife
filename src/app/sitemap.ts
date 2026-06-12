@@ -4,6 +4,10 @@ import { listPublishedPosts } from '@/server/services/JournalService'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ccbabylife.com'
 
+// Without this the sitemap is frozen at build time — products/posts published
+// after a deploy would never appear until the next rebuild.
+export const revalidate = 3600
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [productResult, posts] = await Promise.all([
     listActiveProducts({ limit: 500 }),

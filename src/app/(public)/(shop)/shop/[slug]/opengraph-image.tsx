@@ -7,11 +7,13 @@ export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
 interface Props {
-  params: { slug: string }
+  // Next 16: params is a Promise and must be awaited.
+  params: Promise<{ slug: string }>
 }
 
 export default async function Image({ params }: Props) {
-  const detail = await getProductBySlug(params.slug)
+  const { slug } = await params
+  const detail = await getProductBySlug(slug)
   if (!detail) {
     return new ImageResponse(
       (
