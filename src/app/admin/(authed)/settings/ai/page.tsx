@@ -1,13 +1,21 @@
 import { requireRole } from '@/server/services/AdminAuthService'
 import { getStoreSettings } from '@/server/services/StoreSettingsService'
+import {
+  getAiUsageSummary,
+  getDeepSeekBalance,
+} from '@/server/services/AdminAiService'
 import { AiNotesForm } from './AiNotesForm'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AiSettingsPage() {
   await requireRole(['owner', 'manager'])
-  const settings = await getStoreSettings()
   const deepseekReady = Boolean(process.env.DEEPSEEK_API_KEY)
+  const [settings, usage, balance] = await Promise.all([
+    getStoreSettings(),
+    getAiUsageSummary(),
+    getDeepSeekBalance(),
+  ])
 
   return (
     <div className="p-6 sm:p-8 max-w-3xl space-y-8">
@@ -29,6 +37,40 @@ export default async function AiSettingsPage() {
         <span className="text-xs text-ink-soft">
           {deepseekReady ? '已連接，可在右下角 ✨ 對話' : '未設定 DEEPSEEK_API_KEY，AI 功能暫停'}
         </span>
+      </section>
+
+      <section className="bg-white border border-line rounded-lg p-6">
+        <h2 className="font-serif text-lg mb-4">本月用量與費用</h2>
+        <dl className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+          <div>
+            <dt className="text-xs text-ink-soft">本月對話次數</dt>
+            <dd className="mt-0.5 text-lg tabular-nums">{usage.monthCalls}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-ink-soft">本月 tokens</dt>
+            <dd className="mt-0.5 text-lg tabular-nums">
+              {((usage.monthInputTokens + usage.monthOutputTokens) / 1000).toFixed(1)}K
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs text-ink-soft">本月估算費用</dt>
+            <dd className="mt-0.5 text-lg tabular-nums">
+              {usage.monthCostTwd < 0.01
+                ? 'NT$0'
+                : `NT$${usage.monthCostTwd.toFixed(usage.monthCostTwd < 1 ? 2 : 0)}`}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs text-ink-soft">DeepSeek 帳戶餘額</dt>
+            <dd className="mt-0.5 text-lg tabular-nums">
+              {balance ? `${balance.totalBalance} ${balance.currency}` : '查無'}
+            </dd>
+          </div>
+        </dl>
+        <p className="text-[11px] text-ink-soft mt-4 leading-relaxed">
+          費用為依 DeepSeek 牌價的估算上限（未計快取折扣，實際通常更低）；
+          餘額為 DeepSeek 官方即時資料。累計總呼叫 {usage.totalCalls} 次。
+        </p>
       </section>
 
       <section className="bg-white border border-line rounded-lg p-6">

@@ -267,6 +267,13 @@
       "when": 1781281817420,
       "tag": "0037_store_settings_ai_notes",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1781281818420,
+      "tag": "0038_ai_usage_logs",
+      "breakpoints": true
     }
   ]
 }

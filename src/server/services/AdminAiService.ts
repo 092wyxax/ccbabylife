@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { and, desc, eq, gte, ilike, inArray, lte, or, sql } from 'drizzle-orm'
 import { db } from '@/db/client'
 import { orders, orderItems, customers, products } from '@/db/schema'
+import { aiUsageLogs } from '@/db/schema/ai_usage'
 import { lineMessages } from '@/db/schema/line_messages'
 import { DEFAULT_ORG_ID } from '@/db/schema/organizations'
 import { STATUS_LABEL } from '@/lib/order-progress'
@@ -272,6 +273,23 @@ export interface ChatTurn {
   content: string
 }
 
+/** 記錄一次呼叫的 token 用量（失敗不影響主流程） */
+async function logUsage(
+  feature: 'chat' | 'inbox_draft',
+  usage: { inputTokens: number | undefined; outputTokens: number | undefined }
+): Promise<void> {
+  try {
+    await db.insert(aiUsageLogs).values({
+      orgId: DEFAULT_ORG_ID,
+      feature,
+      inputTokens: usage.inputTokens ?? 0,
+      outputTokens: usage.outputTokens ?? 0,
+    })
+  } catch (e) {
+    console.error('[AdminAiService] logUsage failed:', e)
+  }
+}
+
 /** 店家在「AI 設定」頁維護的備忘，附加到 system prompt */
 async function storeNotesBlock(): Promise<string> {
   const { aiNotes } = await getStoreSettings()
@@ -288,6 +306,7 @@ export async function runAdminAssistant(history: ChatTurn[]): Promise<string> {
     tools,
     stopWhen: stepCountIs(6),
   })
+  await logUsage('chat', result.totalUsage)
   return result.text || '（沒有產生回覆，請換個方式問問看）'
 }
 
@@ -368,5 +387,79 @@ ${conversation}
 
 請草擬下一句回覆：`,
   })
+  await logUsage('inbox_draft', result.totalUsage)
   return result.text.trim()
+}
+
+/* ---------- AI 設定頁：用量統計與 DeepSeek 餘額 ---------- */
+
+/** deepseek-chat 牌價（USD / 百萬 tokens）。以 cache-miss 計 = 估算上限，實際常更低 */
+const PRICE_USD_PER_M = { input: 0.28, output: 0.42 }
+const USD_TO_TWD = 31
+
+export interface AiUsageSummary {
+  monthCalls: number
+  monthInputTokens: number
+  monthOutputTokens: number
+  /** 本月估算費用（TWD，cache-miss 上限價） */
+  monthCostTwd: number
+  totalCalls: number
+}
+
+export async function getAiUsageSummary(): Promise<AiUsageSummary> {
+  const monthStart = new Date()
+  monthStart.setDate(1)
+  monthStart.setHours(0, 0, 0, 0)
+
+  const [month] = await db
+    .select({
+      calls: sql<number>`count(*)::int`,
+      input: sql<number>`coalesce(sum(${aiUsageLogs.inputTokens}), 0)::int`,
+      output: sql<number>`coalesce(sum(${aiUsageLogs.outputTokens}), 0)::int`,
+    })
+    .from(aiUsageLogs)
+    .where(and(eq(aiUsageLogs.orgId, DEFAULT_ORG_ID), gte(aiUsageLogs.createdAt, monthStart)))
+
+  const [total] = await db
+    .select({ calls: sql<number>`count(*)::int` })
+    .from(aiUsageLogs)
+    .where(eq(aiUsageLogs.orgId, DEFAULT_ORG_ID))
+
+  const costUsd =
+    (month.input / 1_000_000) * PRICE_USD_PER_M.input +
+    (month.output / 1_000_000) * PRICE_USD_PER_M.output
+
+  return {
+    monthCalls: month.calls,
+    monthInputTokens: month.input,
+    monthOutputTokens: month.output,
+    monthCostTwd: costUsd * USD_TO_TWD,
+    totalCalls: total.calls,
+  }
+}
+
+export interface DeepSeekBalance {
+  currency: string
+  totalBalance: string
+}
+
+/** DeepSeek 官方餘額 API；查不到（網路/未設 key）回 null，頁面顯示「查無」 */
+export async function getDeepSeekBalance(): Promise<DeepSeekBalance | null> {
+  if (!isDeepSeekConfigured()) return null
+  try {
+    const res = await fetch('https://api.deepseek.com/user/balance', {
+      headers: { Authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}` },
+      signal: AbortSignal.timeout(8000),
+      cache: 'no-store',
+    })
+    if (!res.ok) return null
+    const data = (await res.json()) as {
+      balance_infos?: Array<{ currency: string; total_balance: string }>
+    }
+    const info = data.balance_infos?.[0]
+    if (!info) return null
+    return { currency: info.currency, totalBalance: info.total_balance }
+  } catch {
+    return null
+  }
 }
